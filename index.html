@@ -30,6 +30,7 @@
   --deutsch: #2847c9;
   --franz: #1d5fa8;
   --rzg: #2f7d3a;
+  --bv: #8a5a00;
   --expg: #2f7d3a;
   --expe: #b4531c;
   --polit: #c8102e;
@@ -60,13 +61,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12171d; --surface: #1b222a; --ink: #e8edf2; --muted: #9aa7b4; --line: #2e3843;
-    --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd;
+    --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd;
     --ok: #5cc492; --bad: #ff8a80; --okbg: #17332a; --badbg: #3a1f1d; --mid: #f0c060; --midbg: #3a2f14; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #12171d; --surface: #1b222a; --ink: #e8edf2; --muted: #9aa7b4; --line: #2e3843;
-  --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd;
+  --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd;
   --ok: #5cc492; --bad: #ff8a80; --okbg: #17332a; --badbg: #3a1f1d; --mid: #f0c060; --midbg: #3a2f14; color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -354,7 +355,8 @@ const THEMEN_RZG = [
 const FAECHER = [
   { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt und Biologie. Lesen: 38 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen. Jeweils mit Fragebogen. Sprache im Fokus: 12 Übungen zu Rechtschreibung und Grammatik.", kompetenzen: KOMPETENZEN },
   { key: "franz", name: "Französisch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: 10 einfache Videos zu Frankreich und zur Westschweiz. Lesen: 8 kurze Texte. Fragen auf Deutsch.", kompetenzen: KOMPETENZEN },
-  { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" }
+  { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" },
+  { key: "bv", name: "Berufliche Vorbereitung", untertitel: "Berufswahl · Bewerbung · Lehrstelle", kurz: "Hier entstehen bald Inhalte zur Berufswahl, zu Bewerbungen und zum Einstieg in die Lehre." }
 ];
 const RUBRIKEN = [
   { key: "sport", name: "Sport & Fussball" },
@@ -2333,7 +2335,7 @@ function renderLogin(mode = "login", email = "", msg = "") {
   const neu = mode === "register";
   app.innerHTML = `
     <div class="login">
-      <span class="eyebrow">Deutsch · Französisch · RZG</span>
+      <span class="eyebrow">Deutsch · Französisch · RZG · Berufliche Vorbereitung</span>
       <h1>Unterricht Egg</h1>
       <div class="filters" role="tablist" aria-label="Anmelden oder registrieren">
         <button class="chip" type="button" id="mode-login" aria-pressed="${!neu}">Anmelden</button>
