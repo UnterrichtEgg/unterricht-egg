@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ein Tag auf der Station</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@600&display=swap">
+<style>
+:root {
+  --bg: #f3efe8; --surface: #ffffff; --paper: #fbfaf6; --ink: #1d232a; --muted: #5d6670; --line: #e0dad1; --border: #2b3138;
+  --land: #ffffff; --land2: #ece7de; --lake: #bfdcef; --tape: rgba(222, 205, 160, .75);
+  --red: #c8102e; --redsoft: #fbe6e9; --gold: #b7791f; --goldsoft: #fdf3dc;
+  --ok: #1f7a4d; --okbg: #e3f3ea; --bad: #b42318; --badbg: #fbe7e5; --pick: #2847c9; --picksoft: #e6ebfb;
+  --de: #f2b134; --fr: #4f86c6; --it: #5bb36a; --mx: #b36bc4;
+  --p-svp: #1f8a3a; --p-sp: #d7263d; --p-fdp: #1f5fbf; --p-mitte: #f08a1c; --p-gruene: #b7c81e; --p-glp: #d63fa0; --p-and: #9aa3ad;
+  --font-d: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-b: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-h: "Caveat", "Segoe Print", cursive;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181d; --surface: #1d232a; --paper: #222930; --ink: #eef1f4; --muted: #a2adb8; --line: #333c46; --border: #c9d1da;
+    --land: #2a323b; --land2: #20272e; --lake: #2c5470; --tape: rgba(150, 135, 90, .55);
+    --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+    --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181d; --surface: #1d232a; --paper: #222930; --ink: #eef1f4; --muted: #a2adb8; --line: #333c46; --border: #c9d1da;
+  --land: #2a323b; --land2: #20272e; --lake: #2c5470; --tape: rgba(150, 135, 90, .55);
+  --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+  --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font-b); }
+#app { max-width: 1040px; margin: 0 auto; padding: 16px 16px 32px; }
+h1, h2, h3 { font-family: var(--font-d); line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); letter-spacing: -.01em; }
+h2 { font-size: clamp(1.25rem, 3.4vw, 1.6rem); }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 11px 20px; background: var(--red); color: #fff; font-weight: 700; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.small { padding: 7px 14px; font-size: .92rem; }
+button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outline-offset: 2px; }
+.eyebrow { display: inline-block; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 4px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.muted { color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.stack > * + * { margin-top: 14px; }
+.hand { font-family: var(--font-h); font-size: 1.6rem; line-height: 1; color: var(--ink); }
+/* Kopfzeile */
+.hud { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hud .t { font-family: var(--font-d); font-weight: 800; font-size: 1.1rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem; font-weight: 700; white-space: nowrap; }
+.pill.red { background: var(--redsoft); border-color: transparent; color: var(--red); }
+.pill.gold { background: var(--goldsoft); border-color: transparent; color: var(--gold); }
+/* Startseite */
+.hero { position: relative; overflow: hidden; }
+.niv { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.nivbtn { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.nivbtn[aria-pressed="true"] { border-color: var(--red); background: var(--redsoft); }
+.nivbtn strong { display: block; font-family: var(--font-d); font-size: 1.1rem; }
+/* Karte */
+.mapwrap { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 10px; box-shadow: 0 10px 30px -18px rgba(0,0,0,.35); }
+.mapwrap svg { display: block; width: 100%; height: auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.kt { fill: var(--land); stroke: var(--border); stroke-width: 1.1; stroke-linejoin: round; transition: fill .25s, opacity .25s; }
+.lake { fill: var(--lake); stroke: none; pointer-events: none; }
+.klick .kt { cursor: pointer; }
+.klick .kt:hover { fill: var(--picksoft); }
+.kt.dim { opacity: .28; }
+.kt.found { fill: var(--goldsoft); }
+.kt.ok { fill: var(--okbg); }
+.kt.bad { fill: var(--badbg); }
+.kt.ziel { fill: var(--red); }
+.kt.optA { fill: var(--picksoft); stroke: var(--pick); stroke-width: 2.4; }
+.kt.optB { fill: var(--goldsoft); stroke: var(--gold); stroke-width: 2.4; }
+.kt.l-d { fill: var(--de); } .kt.l-f { fill: var(--fr); } .kt.l-i { fill: var(--it); } .kt.l-m { fill: var(--mx); }
+.lbl { font: 700 13px var(--font-b); fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.lbl.sm { font-size: 10.5px; }
+.lbl.big { font-size: 17px; }
+.pin { pointer-events: none; }
+.pop { animation: pop .35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .pop, .shake, .pulse { animation: none !important; } }
+@keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+.shake { animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.pulse { animation: pulse 1s ease-in-out 3; }
+@keyframes pulse { 50% { opacity: .35; } }
+/* Auftrag oben */
+.auftrag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+.auftrag .ziel { font-family: var(--font-d); font-weight: 800; font-size: clamp(1.2rem, 3.6vw, 1.7rem); }
+.zeit { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-bottom: 10px; }
+.zeit span { display: block; height: 100%; width: 100%; background: var(--red); transform-origin: left; }
+.fb { border-radius: 12px; padding: 10px 14px; font-weight: 700; margin-top: 10px; }
+.fb.ok { background: var(--okbg); color: var(--ok); }
+.fb.bad { background: var(--badbg); color: var(--bad); }
+.fb small { display: block; font-weight: 400; color: var(--ink); margin-top: 2px; font-size: .95rem; }
+/* Zettel (Missionen) */
+.zettel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; margin-top: 18px; }
+.zettel { position: relative; text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 18px 16px 14px; box-shadow: 0 8px 18px -12px rgba(0,0,0,.4); transform: rotate(var(--rot, 0deg)); transition: transform .2s; }
+.zettel:hover { transform: rotate(0deg) translateY(-2px); }
+.zettel::before { content: ""; position: absolute; top: -9px; left: 50%; width: 70px; height: 18px; margin-left: -35px; background: var(--tape); transform: rotate(-3deg); }
+.zettel .info { font-family: var(--font-h); font-size: 1.5rem; line-height: 1; color: var(--muted); }
+.zettel h3 { font-size: 1.12rem; margin: 4px 0 4px; }
+.zettel .st { color: var(--gold); letter-spacing: 2px; font-size: 1.1rem; }
+.zettel.done { border-color: var(--gold); }
+.zettel .mini { margin-top: 8px; font-size: .86rem; color: var(--muted); }
+/* Sortierer */
+.sortkarte { font-family: var(--font-d); font-weight: 800; font-size: clamp(1.3rem, 4.5vw, 2rem); text-align: center; padding: 26px 16px; background: var(--paper); border: 2px dashed var(--line); border-radius: 16px; }
+.bins { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+.bin { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 8px; font-weight: 700; text-align: center; }
+.bin small { display: block; font-weight: 400; color: var(--muted); font-size: .8rem; }
+.bin.ok { border-color: var(--ok); background: var(--okbg); }
+.bin.bad { border-color: var(--bad); background: var(--badbg); }
+@media (max-width: 620px) { .bins { grid-template-columns: 1fr 1fr; } }
+/* Wahlabend */
+.parteien { display: grid; gap: 8px; }
+.prow { display: grid; grid-template-columns: 16px 1fr auto auto auto; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; }
+.prow .sw { width: 16px; height: 16px; border-radius: 4px; }
+.prow .n { font-weight: 700; }
+.prow .n small { font-weight: 400; color: var(--muted); }
+.prow .z { min-width: 3ch; text-align: center; font-family: var(--font-d); font-weight: 800; font-size: 1.2rem; }
+.step { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+/* Memory */
+.memo { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.mk { min-height: 92px; border-radius: 12px; border: 2px solid var(--line); background: var(--red); color: #fff; font-weight: 700; padding: 8px; text-align: center; line-height: 1.25; font-size: .9rem; }
+.mk.auf { background: var(--surface); color: var(--ink); }
+.mk.weg { background: var(--okbg); color: var(--ok); border-color: var(--ok); cursor: default; }
+.mk small { overflow-wrap: anywhere; hyphens: auto; }
+.mk .k { display: block; font-family: var(--font-d); font-size: 1.15rem; }
+.mk.zu .k::after { content: "?"; }
+/* Ergebnis */
+.big { font-family: var(--font-d); font-weight: 800; font-size: clamp(2.4rem, 9vw, 3.6rem); line-height: 1; }
+.sterne { font-size: 2rem; letter-spacing: 6px; color: var(--gold); }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .88rem; margin-top: 8px; }
+.legende span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.palette { display: flex; flex-wrap: wrap; gap: 8px; }
+.farbe { border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; background: var(--surface); font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+.farbe i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); display: inline-block; }
+.farbe[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--c); }
+/* Berufsspiele */
+.frage { font-family: var(--font-d); font-weight: 700; font-size: clamp(1.1rem, 3.2vw, 1.35rem); }
+.opts { display: grid; gap: 10px; }
+.opt { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.opt:hover:not(:disabled) { border-color: var(--muted); }
+.opt.right { border-color: var(--ok); background: var(--okbg); } .opt.wrong { border-color: var(--bad); background: var(--badbg); }
+.opt:disabled { cursor: default; }
+.reihe { display: grid; gap: 8px; }
+.reihe .opt .pos { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--picksoft); color: var(--pick); font-weight: 700; margin-right: 8px; font-size: .9rem; vertical-align: middle; }
+.reihe .opt.gewaehlt { border-color: var(--pick); }
+.resgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.resgrid div { background: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: .9rem; }
+.resgrid b { display: block; color: var(--gold); letter-spacing: 2px; }
+
+.uhr { font-family: var(--font-d); font-weight: 800; font-size: 1.05rem; color: var(--red); }
+.zeitstrahl { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; position: relative; }
+.zeitstrahl::before { content: ""; position: absolute; left: 44px; top: 16px; bottom: 16px; border-left: 3px solid var(--line); }
+.phase { position: relative; display: grid; grid-template-columns: 90px 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 12px 14px 12px 8px; }
+.phase .zeitp { position: relative; z-index: 1; justify-self: center; background: var(--bg); border: 2px solid var(--line); border-radius: 999px; padding: 4px 10px; font-weight: 800; font-family: var(--font-d); }
+.phase.done .zeitp { border-color: var(--gold); background: var(--goldsoft); }
+.phase .tt { font-family: var(--font-d); font-weight: 700; font-size: 1.08rem; }
+.phase .sub { font-size: .88rem; color: var(--muted); }
+.phase .st { color: var(--gold); letter-spacing: 2px; white-space: nowrap; }
+@media (max-width: 560px) { .phase { grid-template-columns: 70px 1fr; } .phase .st { grid-column: 2; } .zeitstrahl::before { left: 34px; } }
+.items { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.item { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.item .ic { font-size: 1.7rem; display: block; }
+.item b { display: block; }
+.item small { color: var(--muted); }
+.item[aria-pressed="true"] { border-color: var(--pick); background: var(--picksoft); }
+.item.right { border-color: var(--ok); background: var(--okbg); } .item.wrong { border-color: var(--bad); background: var(--badbg); }
+.beleg { background: var(--paper); border: 1px dashed var(--muted); border-radius: 10px; padding: 12px 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92rem; }
+.beleg table { border-collapse: collapse; width: 100%; } .beleg td, .beleg th { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.lager { display: grid; gap: 6px; }
+.gang { display: grid; grid-template-columns: 64px repeat(6, 1fr); gap: 6px; align-items: stretch; }
+.gang .gl { font-weight: 700; font-size: .85rem; color: var(--muted); align-self: center; }
+.fach { min-height: 46px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface); font-size: .78rem; padding: 4px; line-height: 1.15; }
+.fach[aria-pressed="true"] { background: var(--picksoft); border-color: var(--pick); }
+.fach.right { background: var(--okbg); border-color: var(--ok); } .fach.wrong { background: var(--badbg); border-color: var(--bad); }
+.wert { font-family: var(--font-d); font-weight: 800; font-size: 1.5rem; }
+.ghs { width: 64px; height: 64px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="spielbasis.js"></script>
+<script>
+// Berufsspiel FaGe: Ein Tag auf der Station
+function dienstbeginn() {
+  const pool = [
+    ["🧴", "Hände desinfizieren", true, "Vor dem ersten Kontakt mit Bewohnenden."], ["👕", "Saubere Berufskleidung", true, "Jeden Tag frisch."], ["✂️", "Kurze, unlackierte Fingernägel", true, "Unter langen Nägeln sammeln sich Keime."],
+    ["🎀", "Lange Haare zusammengebunden", true, "Hygienisch und sicher."], ["🪪", "Namensschild", true, "Bewohnende und Angehörige wissen, wer du bist."], ["💍", "Ringe an den Fingern", false, "Unter Ringen bleiben Keime, sie können verletzen."],
+    ["⌚", "Armbanduhr am Handgelenk", false, "Verhindert richtige Händedesinfektion."], ["💅", "Künstliche Fingernägel", false, "Nicht erlaubt: Keime und Verletzungsgefahr."], ["📱", "Handy in der Hosentasche für private Fotos", false, "Keine privaten Fotos: Schweigepflicht und Datenschutz."],
+    ["🧥", "Strassenjacke über der Berufskleidung", false, "Strassenkleidung gehört in die Garderobe."], ["👟", "Geschlossene, rutschfeste Schuhe", true, "Schützt vor Stürzen und Verletzungen."], ["🩴", "Offene Badeschuhe", false, "Rutsch- und Verletzungsgefahr."]
+  ];
+  const items = mische(pool).slice(0, E() ? 12 : 9);
+  zeigePhase("dienst", `<div class="auftrag"><div><span class="muted">Dienstbeginn</span><div class="ziel">Bist du bereit für die Arbeit?</div></div></div>
+    <p class="muted" style="margin-bottom:10px">Tippe alles an, was richtig und hygienisch ist. Lass weg, was nicht erlaubt ist.</p>
+    <div class="items">${items.map((it, i) => `<button class="item" data-i="${i}" aria-pressed="false"><span class="ic" aria-hidden="true">${it[0]}</span><b>${esc(it[1])}</b></button>`).join("")}</div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="pruef">Fertig</button></div><div id="fb" aria-live="polite"></div>`);
+  $$(".item").forEach(b => b.onclick = () => b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true")));
+  $("#pruef").onclick = () => {
+    let ok = 0;
+    $$(".item").forEach(b => { const it = items[+b.dataset.i], gew = b.getAttribute("aria-pressed") === "true", r = gew === it[2]; if (r) ok++; b.classList.add(r ? "right" : "wrong"); b.disabled = true; b.insertAdjacentHTML("beforeend", `<small>${esc(it[3])}</small>`); });
+    $("#pruef").disabled = true;
+    $("#fb").innerHTML = fb(ok === items.length, `${ok} von ${items.length} richtig entschieden.`) + `<div class="row" style="margin-top:10px"><button class="btn" id="weiter">Auswertung</button></div>`;
+    $("#weiter").onclick = () => phaseEnde("dienst", ok / items.length * 100); meldeHoehe();
+  };
+}
+
+function vitalzeichen() {
+  // [Name, Werttext, auffällig?, Erklärung]
+  const pool = [
+    ["Frau Ammann", "Puls 74 pro Minute", false, "Normal: etwa 60–100."], ["Herr Brunner", "Temperatur 39,1 °C", true, "Fieber ab 38 °C: melden."], ["Frau Costa", "Atmung 16 pro Minute", false, "Normal: etwa 12–20."],
+    ["Herr Dietrich", "Puls 132 pro Minute", true, "Viel zu schnell in Ruhe: melden."], ["Frau Egli", "Blutdruck 124/78 mmHg", false, "Im normalen Bereich."], ["Herr Frei", "Atmung 34 pro Minute, er ringt nach Luft", true, "Atemnot: sofort melden."],
+    ["Frau Gashi", "Temperatur 36,7 °C", false, "Normal."], ["Herr Huber", "Blutdruck 190/110 mmHg, Kopfschmerzen", true, "Stark erhöht: sofort melden."], ["Frau Imhof", "Puls 48 pro Minute, sie ist schwindlig", true, "Zu langsam und Beschwerden: melden."],
+    ["Herr Jovanovic", "Temperatur 37,2 °C", false, "Normal."], ["Frau Keller", "Puls 88 pro Minute", false, "Normal."], ["Herr Lang", "Temperatur 35,0 °C, er zittert", true, "Untertemperatur: melden."]
+  ];
+  const f = mische(pool).slice(0, E() ? 10 : 8).map(p => ({ q: `<span class="muted">${esc(p[0])}</span><br><span class="wert">${esc(p[1])}</span>`, o: p[2] ? ["Auffällig: sofort der Pflegefachperson melden", "Normal: nur dokumentieren"] : ["Normal: dokumentieren", "Auffällig: sofort melden"], x: p[3] }));
+  const extra = E() ? [{ q: "Du zählst in 30 Sekunden 41 Pulsschläge. Wie hoch ist der Puls pro Minute?", o: ["82 pro Minute", "41 pro Minute", "71 pro Minute"], x: "41 × 2 = 82" }, { q: "Du zählst in 15 Sekunden 5 Atemzüge. Wie viele sind es pro Minute?", o: ["20 pro Minute", "5 pro Minute", "15 pro Minute"], x: "5 × 4 = 20" }] : [];
+  fragenRunde("vital", [...f, ...extra], { titel: "Morgenrunde: Du misst die Vitalzeichen. Normalwerte Erwachsene in Ruhe: Puls 60–100 · Atmung 12–20 · Blutdruck um 120/80 · Temperatur etwa 36–37,5 °C.", zeit: E() ? 10000 : 0 });
+}
+
+function koerperpflege() {
+  reihenRunde("pflege", [
+    { q: "Frau Ammann braucht Hilfe bei der Körperwäsche im Bett. Wasche von sauber nach weniger sauber.", s: ["Gesicht", "Hals, Arme und Hände", "Brust und Bauch", "Beine und Füsse", "Rücken", "Intimbereich"] },
+    { q: "Wie bereitest du die Körperpflege vor?", s: ["Anklopfen, begrüssen und erklären, was du machst", "Hände desinfizieren", "Material bereitlegen und Fenster schliessen", "Bett auf Arbeitshöhe stellen", "Nur den Körperteil aufdecken, den du gerade wäschst"] }
+  ], pA => fragenRunde("pflege", [
+    { q: "Frau Ammann kann ihr Gesicht selbst waschen, braucht aber lange.", o: ["Ich lasse sie, gebe ihr Zeit und helfe nur bei Bedarf", "Ich mache es schnell selbst", "Wir lassen das Gesicht heute weg"], x: "Ressourcen fördern: Was sie kann, macht sie selbst." },
+    { q: "Am Steissbein von Herrn Brunner siehst du eine gerötete Stelle, die nach dem Drücken nicht weiss wird.", o: ["Melden und dokumentieren: Gefahr eines Dekubitus", "Fest einmassieren", "Nichts tun, das ist normal"], x: "Das kann ein beginnender Dekubitus sein." },
+    { q: "Während der Pflege klopft ein Besucher an.", o: ["Ich bitte ihn kurz zu warten, bis wir fertig sind", "Ich lasse ihn herein", "Ich ignoriere das Klopfen"], x: "Intimsphäre schützen." },
+    ...(E() ? [{ q: "Herr Dietrich will heute nicht gewaschen werden.", o: ["Nach dem Grund fragen, eine Lösung suchen und es dokumentieren", "Ihn trotzdem waschen", "Ins Protokoll schreiben, er sei gewaschen worden"] }, { q: "Wie oft hilft man bettlägerigen Menschen typischerweise beim Lagewechsel?", o: ["Regelmässig nach Plan, z. B. alle 2 bis 3 Stunden", "Einmal pro Woche", "Gar nicht, sie sollen schlafen"] }] : [])
+  ], { titel: "Teil 2: Situationen bei der Körperpflege", nach: pB => phaseEnde("pflege", (pA + pB) / 2, `<p>Reihenfolgen: ${Math.round(pA)} · Situationen: ${Math.round(pB)}</p>`) }));
+}
+
+function hygiene() {
+  const pool = [
+    ["Du betrittst das Zimmer und willst Frau Costa die Hand geben.", true, "Moment 1: vor dem Kontakt mit der Klientin."], ["Du hast die Urinflasche von Herrn Frei geleert.", true, "Moment 3: nach Kontakt mit Körperflüssigkeit."],
+    ["Du bereitest einen Verbandwechsel vor.", true, "Moment 2: vor einer aseptischen Tätigkeit."], ["Du hast Herrn Huber beim Aufstehen gestützt.", true, "Moment 4: nach dem Kontakt mit dem Klienten."],
+    ["Du hast den Nachttisch von Frau Gashi aufgeräumt.", true, "Moment 5: nach Kontakt mit der Umgebung."], ["Du sitzt allein im Pausenraum und liest den Dienstplan.", false, "Kein Klientenkontakt, keine Desinfektion nötig."],
+    ["Du gehst im Gang vom Lift zum Stationszimmer.", false, "Kein Kontakt mit Klienten oder ihrer Umgebung."], ["Du hast Handschuhe getragen und sie gerade ausgezogen.", true, "Handschuhe ersetzen die Händedesinfektion nicht."],
+    ["Du hast das Bett von Herrn Lang frisch bezogen.", true, "Moment 5: nach Kontakt mit der Umgebung."], ["Du telefonierst im Büro mit der Apotheke.", false, "Keine Desinfektion nötig."]
+  ];
+  const f = mische(pool).slice(0, E() ? 10 : 7).map(p => ({ q: esc(p[0]) + "<br><span class='muted'>Desinfizierst du jetzt die Hände?</span>", o: p[1] ? ["Ja, Hände desinfizieren", "Nein, nicht nötig"] : ["Nein, nicht nötig", "Ja, Hände desinfizieren"], x: p[2] }));
+  const wissen = [{ q: "Wie lange reibst du das Desinfektionsmittel mindestens ein?", o: ["30 Sekunden", "5 Sekunden", "2 Minuten unter Wasser"] }, { q: "Du hast dich an einer gebrauchten Nadel gestochen.", o: ["Bluten lassen, desinfizieren, sofort melden", "Pflaster drauf und schweigen", "Weiterarbeiten"] }];
+  fragenRunde("hygiene", [...f, ...wissen], { titel: "Die 5 Momente der Händedesinfektion. Entscheide bei jeder Situation.", zeit: E() ? 9000 : 0 });
+}
+
+function trinken() {
+  const getraenke = [["Tasse Tee", 200], ["Glas Wasser", 200], ["Teller Suppe", 250], ["Becher Kaffee", 150], ["Joghurt", 150], ["Glas Saft", 200], ["Flasche Wasser 0,5 l", 500]];
+  const RUNDEN = E() ? 3 : 2; let r = 0, summe = 0;
+  zeigePhase("trinken", `<div id="inhalt"></div><div id="fb" aria-live="polite"></div>`, `<span class="pill" id="runde"></span>`);
+  function runde() {
+    if (r >= RUNDEN) return wahlen();
+    const n = E() ? 5 : 3, liste = mische(getraenke).slice(0, n), ein = liste.reduce((s, g) => s + g[1], 0);
+    const aus = E() ? [900, 1100, 1300, 1500][Math.floor(Math.random() * 4)] : 0;
+    const soll = E() ? ein - aus : ein;
+    $("#runde").textContent = `${r + 1} / ${RUNDEN}`;
+    $("#inhalt").innerHTML = `<div class="card stack"><p class="frage">Trinkprotokoll von ${["Herrn Brunner", "Frau Egli", "Herrn Jovanovic"][r]}</p>
+      <div class="beleg"><table><tr><th>Einfuhr</th><th>Menge</th></tr>${liste.map(g => `<tr><td>${esc(g[0])}</td><td>${g[1]} ml</td></tr>`).join("")}${E() ? `<tr><th>Ausfuhr (Urin)</th><th>${aus} ml</th></tr>` : ""}</table></div>
+      <label for="erg"><b>${E() ? "Wie gross ist die Bilanz (Einfuhr minus Ausfuhr)? Mit Minus, wenn nötig." : "Wie viel hat er oder sie insgesamt eingenommen?"}</b></label>
+      <p><input id="erg" class="spin" inputmode="decimal" style="font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);width:9em"> ml</p>
+      <div class="row"><button class="btn" id="pruef">Prüfen</button></div></div>`;
+    $("#fb").innerHTML = "";
+    $("#pruef").onclick = () => {
+      const v = zahl($("#erg").value), ok = v === soll; if (ok) summe++;
+      $("#pruef").disabled = true;
+      $("#fb").innerHTML = fb(ok, ok ? "Richtig!" : `Leider nicht. Richtig: ${soll} ml.`, E() ? `Einfuhr ${ein} ml − Ausfuhr ${aus} ml = ${soll} ml` : liste.map(g => g[1]).join(" + ") + ` = ${ein} ml`) + `<div class="row" style="margin-top:10px"><button class="btn" id="weiter">Weiter</button></div>`;
+      $("#weiter").onclick = () => { r++; runde(); }; meldeHoehe();
+    };
+    meldeHoehe();
+  }
+  function wahlen() {
+    const pA = summe / RUNDEN * 100;
+    fragenRunde("trinken", [
+      { q: "Herr Ahmeti isst aus religiösen Gründen kein Schweinefleisch. Heute gibt es Schweinsbraten.", o: ["Ich organisiere eine passende andere Mahlzeit", "Er soll halt nur Beilagen essen", "Ich sage nichts"], x: "Kultur und Religion respektieren." },
+      { q: "Frau Imhof hat heute kaum getrunken.", o: ["Regelmässig Getränke anbieten, Lieblingsgetränk fragen, beobachten und melden", "Nichts tun, sie hat keinen Durst", "Ihr ein Glas hinstellen und gehen"] },
+      { q: "Frau Keller (Demenz) findet ihr Zimmer nicht und weint.", o: ["Ruhig sprechen, sie begleiten und Sicherheit geben", "Sagen: «Das haben wir doch schon geübt!»", "Sie allein suchen lassen"] }
+    ], { titel: "Teil 2: Mittagszeit", nach: pB => phaseEnde("trinken", (pA + pB) / 2, `<p>Trinkprotokoll: ${Math.round(pA)} · Situationen: ${Math.round(pB)}</p>`) });
+  }
+  runde();
+}
+
+function notfall() {
+  reihenRunde("notfall", [
+    { q: "Herr Lang liegt im Zimmer am Boden und reagiert nicht. Was tust du zuerst?", s: ["Auf eigene Sicherheit achten", "Ansprechen und leicht an den Schultern berühren", "Laut um Hilfe rufen und Alarm auslösen", "Atmung kontrollieren", "Nach Anweisung Erste Hilfe leisten, bis das Team übernimmt"] },
+    ...(E() ? [{ q: "Nach dem Notfall: Was ist noch wichtig?", s: ["Bei Herrn Lang bleiben, bis das Team übernimmt", "Angehörige werden durch die zuständige Person informiert", "Alles genau dokumentieren", "Mit dem Team über das Erlebte sprechen"] }] : [])
+  ], pA => fragenRunde("notfall", [
+    { q: "Welche Nummer ist die Sanität in der Schweiz?", o: ["144", "117", "118"] },
+    { q: "Ein Bewohner hat Putzmittel getrunken. Wen fragst du um Rat (zusätzlich zur Pflegefachperson)?", o: ["Tox Info 145", "Feuerwehr 118", "Polizei 117"] },
+    { q: "Eine Bewohnerin liegt im Sterben, ihre Tochter weint im Gang.", o: ["Ich spreche sie freundlich an, biete Ruhe und ein Getränk an und informiere das Team", "Ich gehe schnell vorbei", "Ich erkläre ihr medizinische Details"] },
+    { q: "Was bedeutet palliativ?", o: ["Lindern statt heilen, Lebensqualität", "Eine Operation", "Eine ansteckende Krankheit"] }
+  ], { titel: "Teil 2: Wissen im Ernstfall", nach: pB => phaseEnde("notfall", (pA + pB) / 2, `<p>Abläufe: ${Math.round(pA)} · Wissen: ${Math.round(pB)}</p>`) }));
+}
+
+starteSpiel({
+  titel: "Ein Tag auf der Station", ic: "🏥", beruf: "Fachfrau/Fachmann Gesundheit EFZ", speicher: "station-spiel-v1",
+  intro: "Du arbeitest heute deinen ersten Tag im Pflegeheim «Seeblick». Mach dich bereit, miss Vitalzeichen, hilf bei der Körperpflege, denk an die Hygiene, führe das Trinkprotokoll und bleib im Notfall ruhig.",
+  hubText: "Dein Dienst beginnt. Wähle eine Station – am besten der Reihe nach.",
+  titelFuer: p => p >= .9 ? "FaGe-Profi" : p >= .75 ? "Lernende/r im 3. Lehrjahr" : p >= .55 ? "Lernende/r im 2. Lehrjahr" : p >= .35 ? "Lernende/r im 1. Lehrjahr" : "Schnupperlernende/r",
+  phasen: [
+    { key: "dienst", uhr: "06:45", ic: "🧴", t: "Dienstbeginn", d: "Bereit für die Arbeit? Hygiene und Berufskleidung", run: dienstbeginn, merke: "Keine Ringe, keine Uhr, kurze Nägel. Händedesinfektion vor dem ersten Kontakt." },
+    { key: "vital", uhr: "07:00", ic: "🩺", t: "Vitalzeichen", d: "Werte einschätzen: normal oder melden?", run: vitalzeichen, merke: "Auffällige Werte sofort melden und alles dokumentieren." },
+    { key: "pflege", uhr: "08:00", ic: "🛁", t: "Körperpflege", d: "Reihenfolge, Intimsphäre und Ressourcen", run: koerperpflege, merke: "Von sauber nach weniger sauber waschen, Intimsphäre schützen, Ressourcen fördern." },
+    { key: "hygiene", uhr: "10:00", ic: "🙌", t: "Hygiene-Runde", d: "Die 5 Momente der Händedesinfektion", run: hygiene, merke: "Vor und nach Klientenkontakt, vor aseptischen Tätigkeiten, nach Körperflüssigkeiten und nach Kontakt mit der Umgebung." },
+    { key: "trinken", uhr: "12:00", ic: "🥤", t: "Mittag und Trinkprotokoll", d: "Flüssigkeit berechnen und Situationen lösen", run: trinken, merke: "Flüssigkeitsbilanz = Einfuhr minus Ausfuhr." },
+    { key: "notfall", uhr: "15:00", ic: "🚑", t: "Notfall", d: "Ruhig bleiben, Hilfe holen, richtig handeln", run: notfall, merke: "Eigene Sicherheit, ansprechen, Hilfe rufen, Atmung prüfen. Sanität 144." }
+  ]
+});
+</script>
+</body>
+</html>

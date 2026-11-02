@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schicht im Lager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@600&display=swap">
+<style>
+:root {
+  --bg: #f3efe8; --surface: #ffffff; --paper: #fbfaf6; --ink: #1d232a; --muted: #5d6670; --line: #e0dad1; --border: #2b3138;
+  --land: #ffffff; --land2: #ece7de; --lake: #bfdcef; --tape: rgba(222, 205, 160, .75);
+  --red: #c8102e; --redsoft: #fbe6e9; --gold: #b7791f; --goldsoft: #fdf3dc;
+  --ok: #1f7a4d; --okbg: #e3f3ea; --bad: #b42318; --badbg: #fbe7e5; --pick: #2847c9; --picksoft: #e6ebfb;
+  --de: #f2b134; --fr: #4f86c6; --it: #5bb36a; --mx: #b36bc4;
+  --p-svp: #1f8a3a; --p-sp: #d7263d; --p-fdp: #1f5fbf; --p-mitte: #f08a1c; --p-gruene: #b7c81e; --p-glp: #d63fa0; --p-and: #9aa3ad;
+  --font-d: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-b: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-h: "Caveat", "Segoe Print", cursive;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181d; --surface: #1d232a; --paper: #222930; --ink: #eef1f4; --muted: #a2adb8; --line: #333c46; --border: #c9d1da;
+    --land: #2a323b; --land2: #20272e; --lake: #2c5470; --tape: rgba(150, 135, 90, .55);
+    --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+    --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181d; --surface: #1d232a; --paper: #222930; --ink: #eef1f4; --muted: #a2adb8; --line: #333c46; --border: #c9d1da;
+  --land: #2a323b; --land2: #20272e; --lake: #2c5470; --tape: rgba(150, 135, 90, .55);
+  --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+  --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font-b); }
+#app { max-width: 1040px; margin: 0 auto; padding: 16px 16px 32px; }
+h1, h2, h3 { font-family: var(--font-d); line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); letter-spacing: -.01em; }
+h2 { font-size: clamp(1.25rem, 3.4vw, 1.6rem); }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 11px 20px; background: var(--red); color: #fff; font-weight: 700; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.small { padding: 7px 14px; font-size: .92rem; }
+button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outline-offset: 2px; }
+.eyebrow { display: inline-block; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 4px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.muted { color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.stack > * + * { margin-top: 14px; }
+.hand { font-family: var(--font-h); font-size: 1.6rem; line-height: 1; color: var(--ink); }
+/* Kopfzeile */
+.hud { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hud .t { font-family: var(--font-d); font-weight: 800; font-size: 1.1rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem; font-weight: 700; white-space: nowrap; }
+.pill.red { background: var(--redsoft); border-color: transparent; color: var(--red); }
+.pill.gold { background: var(--goldsoft); border-color: transparent; color: var(--gold); }
+/* Startseite */
+.hero { position: relative; overflow: hidden; }
+.niv { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.nivbtn { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.nivbtn[aria-pressed="true"] { border-color: var(--red); background: var(--redsoft); }
+.nivbtn strong { display: block; font-family: var(--font-d); font-size: 1.1rem; }
+/* Karte */
+.mapwrap { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 10px; box-shadow: 0 10px 30px -18px rgba(0,0,0,.35); }
+.mapwrap svg { display: block; width: 100%; height: auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.kt { fill: var(--land); stroke: var(--border); stroke-width: 1.1; stroke-linejoin: round; transition: fill .25s, opacity .25s; }
+.lake { fill: var(--lake); stroke: none; pointer-events: none; }
+.klick .kt { cursor: pointer; }
+.klick .kt:hover { fill: var(--picksoft); }
+.kt.dim { opacity: .28; }
+.kt.found { fill: var(--goldsoft); }
+.kt.ok { fill: var(--okbg); }
+.kt.bad { fill: var(--badbg); }
+.kt.ziel { fill: var(--red); }
+.kt.optA { fill: var(--picksoft); stroke: var(--pick); stroke-width: 2.4; }
+.kt.optB { fill: var(--goldsoft); stroke: var(--gold); stroke-width: 2.4; }
+.kt.l-d { fill: var(--de); } .kt.l-f { fill: var(--fr); } .kt.l-i { fill: var(--it); } .kt.l-m { fill: var(--mx); }
+.lbl { font: 700 13px var(--font-b); fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.lbl.sm { font-size: 10.5px; }
+.lbl.big { font-size: 17px; }
+.pin { pointer-events: none; }
+.pop { animation: pop .35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .pop, .shake, .pulse { animation: none !important; } }
+@keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+.shake { animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.pulse { animation: pulse 1s ease-in-out 3; }
+@keyframes pulse { 50% { opacity: .35; } }
+/* Auftrag oben */
+.auftrag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+.auftrag .ziel { font-family: var(--font-d); font-weight: 800; font-size: clamp(1.2rem, 3.6vw, 1.7rem); }
+.zeit { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-bottom: 10px; }
+.zeit span { display: block; height: 100%; width: 100%; background: var(--red); transform-origin: left; }
+.fb { border-radius: 12px; padding: 10px 14px; font-weight: 700; margin-top: 10px; }
+.fb.ok { background: var(--okbg); color: var(--ok); }
+.fb.bad { background: var(--badbg); color: var(--bad); }
+.fb small { display: block; font-weight: 400; color: var(--ink); margin-top: 2px; font-size: .95rem; }
+/* Zettel (Missionen) */
+.zettel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; margin-top: 18px; }
+.zettel { position: relative; text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 18px 16px 14px; box-shadow: 0 8px 18px -12px rgba(0,0,0,.4); transform: rotate(var(--rot, 0deg)); transition: transform .2s; }
+.zettel:hover { transform: rotate(0deg) translateY(-2px); }
+.zettel::before { content: ""; position: absolute; top: -9px; left: 50%; width: 70px; height: 18px; margin-left: -35px; background: var(--tape); transform: rotate(-3deg); }
+.zettel .info { font-family: var(--font-h); font-size: 1.5rem; line-height: 1; color: var(--muted); }
+.zettel h3 { font-size: 1.12rem; margin: 4px 0 4px; }
+.zettel .st { color: var(--gold); letter-spacing: 2px; font-size: 1.1rem; }
+.zettel.done { border-color: var(--gold); }
+.zettel .mini { margin-top: 8px; font-size: .86rem; color: var(--muted); }
+/* Sortierer */
+.sortkarte { font-family: var(--font-d); font-weight: 800; font-size: clamp(1.3rem, 4.5vw, 2rem); text-align: center; padding: 26px 16px; background: var(--paper); border: 2px dashed var(--line); border-radius: 16px; }
+.bins { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+.bin { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 8px; font-weight: 700; text-align: center; }
+.bin small { display: block; font-weight: 400; color: var(--muted); font-size: .8rem; }
+.bin.ok { border-color: var(--ok); background: var(--okbg); }
+.bin.bad { border-color: var(--bad); background: var(--badbg); }
+@media (max-width: 620px) { .bins { grid-template-columns: 1fr 1fr; } }
+/* Wahlabend */
+.parteien { display: grid; gap: 8px; }
+.prow { display: grid; grid-template-columns: 16px 1fr auto auto auto; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; }
+.prow .sw { width: 16px; height: 16px; border-radius: 4px; }
+.prow .n { font-weight: 700; }
+.prow .n small { font-weight: 400; color: var(--muted); }
+.prow .z { min-width: 3ch; text-align: center; font-family: var(--font-d); font-weight: 800; font-size: 1.2rem; }
+.step { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+/* Memory */
+.memo { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.mk { min-height: 92px; border-radius: 12px; border: 2px solid var(--line); background: var(--red); color: #fff; font-weight: 700; padding: 8px; text-align: center; line-height: 1.25; font-size: .9rem; }
+.mk.auf { background: var(--surface); color: var(--ink); }
+.mk.weg { background: var(--okbg); color: var(--ok); border-color: var(--ok); cursor: default; }
+.mk small { overflow-wrap: anywhere; hyphens: auto; }
+.mk .k { display: block; font-family: var(--font-d); font-size: 1.15rem; }
+.mk.zu .k::after { content: "?"; }
+/* Ergebnis */
+.big { font-family: var(--font-d); font-weight: 800; font-size: clamp(2.4rem, 9vw, 3.6rem); line-height: 1; }
+.sterne { font-size: 2rem; letter-spacing: 6px; color: var(--gold); }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .88rem; margin-top: 8px; }
+.legende span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.palette { display: flex; flex-wrap: wrap; gap: 8px; }
+.farbe { border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; background: var(--surface); font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+.farbe i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); display: inline-block; }
+.farbe[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--c); }
+/* Berufsspiele */
+.frage { font-family: var(--font-d); font-weight: 700; font-size: clamp(1.1rem, 3.2vw, 1.35rem); }
+.opts { display: grid; gap: 10px; }
+.opt { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.opt:hover:not(:disabled) { border-color: var(--muted); }
+.opt.right { border-color: var(--ok); background: var(--okbg); } .opt.wrong { border-color: var(--bad); background: var(--badbg); }
+.opt:disabled { cursor: default; }
+.reihe { display: grid; gap: 8px; }
+.reihe .opt .pos { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--picksoft); color: var(--pick); font-weight: 700; margin-right: 8px; font-size: .9rem; vertical-align: middle; }
+.reihe .opt.gewaehlt { border-color: var(--pick); }
+.resgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.resgrid div { background: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: .9rem; }
+.resgrid b { display: block; color: var(--gold); letter-spacing: 2px; }
+
+.uhr { font-family: var(--font-d); font-weight: 800; font-size: 1.05rem; color: var(--red); }
+.zeitstrahl { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; position: relative; }
+.zeitstrahl::before { content: ""; position: absolute; left: 44px; top: 16px; bottom: 16px; border-left: 3px solid var(--line); }
+.phase { position: relative; display: grid; grid-template-columns: 90px 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 12px 14px 12px 8px; }
+.phase .zeitp { position: relative; z-index: 1; justify-self: center; background: var(--bg); border: 2px solid var(--line); border-radius: 999px; padding: 4px 10px; font-weight: 800; font-family: var(--font-d); }
+.phase.done .zeitp { border-color: var(--gold); background: var(--goldsoft); }
+.phase .tt { font-family: var(--font-d); font-weight: 700; font-size: 1.08rem; }
+.phase .sub { font-size: .88rem; color: var(--muted); }
+.phase .st { color: var(--gold); letter-spacing: 2px; white-space: nowrap; }
+@media (max-width: 560px) { .phase { grid-template-columns: 70px 1fr; } .phase .st { grid-column: 2; } .zeitstrahl::before { left: 34px; } }
+.items { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.item { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.item .ic { font-size: 1.7rem; display: block; }
+.item b { display: block; }
+.item small { color: var(--muted); }
+.item[aria-pressed="true"] { border-color: var(--pick); background: var(--picksoft); }
+.item.right { border-color: var(--ok); background: var(--okbg); } .item.wrong { border-color: var(--bad); background: var(--badbg); }
+.beleg { background: var(--paper); border: 1px dashed var(--muted); border-radius: 10px; padding: 12px 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92rem; }
+.beleg table { border-collapse: collapse; width: 100%; } .beleg td, .beleg th { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--line); }
+.lager { display: grid; gap: 6px; }
+.gang { display: grid; grid-template-columns: 64px repeat(6, 1fr); gap: 6px; align-items: stretch; }
+.gang .gl { font-weight: 700; font-size: .85rem; color: var(--muted); align-self: center; }
+.fach { min-height: 46px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface); font-size: .78rem; padding: 4px; line-height: 1.15; }
+.fach[aria-pressed="true"] { background: var(--picksoft); border-color: var(--pick); }
+.fach.right { background: var(--okbg); border-color: var(--ok); } .fach.wrong { background: var(--badbg); border-color: var(--bad); }
+.wert { font-family: var(--font-d); font-weight: 800; font-size: 1.5rem; }
+.ghs { width: 64px; height: 64px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="spielbasis.js"></script>
+<script>
+// Berufsspiel Logistik: Schicht im Lager
+const GHS = {
+  flamme: '<path d="M32 46c-7 0-11-5-11-10 0-6 5-9 6-15 3 3 3 6 3 8 2-3 3-7 2-12 7 5 11 11 11 18 0 6-4 11-11 11z" fill="#000"/><rect x="18" y="47" width="28" height="3" fill="#000"/>',
+  totenkopf: '<circle cx="32" cy="27" r="9" fill="#000"/><circle cx="28.5" cy="26" r="2.4" fill="#fff"/><circle cx="35.5" cy="26" r="2.4" fill="#fff"/><rect x="28" y="34" width="8" height="4" fill="#000"/><path d="M19 41l26 8M45 41l-26 8" stroke="#000" stroke-width="3"/>',
+  aetzend: '<path d="M20 18l6 8M30 18l4 8" stroke="#000" stroke-width="3"/><path d="M17 30h12l-2 6H19z" fill="#000"/><path d="M33 30h12l-2 6H35z" fill="#000"/><rect x="16" y="42" width="14" height="5" fill="#000"/><path d="M36 47c2-4 8-4 10 0" stroke="#000" stroke-width="3" fill="none"/>',
+  ausruf: '<rect x="29.5" y="16" width="5" height="22" rx="2" fill="#000"/><circle cx="32" cy="45" r="3.2" fill="#000"/>',
+  umwelt: '<path d="M22 44V30l-5 8h10zM22 30l-4-6h8z" fill="#000"/><path d="M30 40c4-6 12-6 16 0-4 6-12 6-16 0z" fill="#000"/><path d="M28 47h20" stroke="#000" stroke-width="2.5"/>',
+  gasflasche: '<rect x="22" y="30" width="20" height="9" rx="4" fill="#000"/><rect x="42" y="32" width="5" height="5" fill="#000"/><path d="M20 44h24" stroke="#000" stroke-width="2.5"/>'
+};
+const ghs = k => `<svg class="ghs" viewBox="0 0 64 64" role="img" aria-label="Gefahrensymbol"><rect x="12" y="12" width="40" height="40" transform="rotate(45 32 32)" fill="#fff" stroke="#c8102e" stroke-width="4"/>${GHS[k]}</svg>`;
+
+function ausruestung() {
+  const pool = [
+    ["🥾", "Sicherheitsschuhe", true, "Schützen die Zehen."], ["🦺", "Warnweste", true, "Du bist gut sichtbar für Staplerfahrer."], ["🧤", "Arbeitshandschuhe", true, "Schützen vor Schnitten und Splittern."],
+    ["📟", "Scanner, voll geladen", true, "Damit buchst du die Ware."], ["🛒", "Handhubwagen, geprüft", true, "Funktioniert einwandfrei."], ["🩴", "Flip-Flops", false, "Keine Schutzwirkung, Rutsch- und Quetschgefahr."],
+    ["🎧", "Kopfhörer mit lauter Musik", false, "Du hörst Warnsignale und Stapler nicht."], ["🛠️", "Hubwagen mit verbogener Gabel", false, "Defekte Geräte nicht benutzen, sondern melden."], ["🔋", "Scanner mit leerem Akku", false, "Zuerst laden oder einen anderen nehmen."],
+    ["💍", "Langer Schal und Halsketten", false, "Kann sich in Maschinen verfangen."], ["🧰", "Cutter mit Klingenschutz", true, "Sicherer Cutter zum Öffnen von Kartons."], ["🔪", "Küchenmesser zum Öffnen", false, "Verletzungsgefahr, nimm einen Sicherheitscutter."]
+  ];
+  const items = mische(pool).slice(0, E() ? 12 : 9);
+  zeigePhase("ausruestung", `<div class="auftrag"><div><span class="muted">Schichtbeginn</span><div class="ziel">Was nimmst du mit, was ziehst du an?</div></div></div>
+    <p class="muted" style="margin-bottom:10px">Tippe alles an, was sicher und einsatzbereit ist. Lass weg, was gefährlich oder defekt ist.</p>
+    <div class="items">${items.map((it, i) => `<button class="item" data-i="${i}" aria-pressed="false"><span class="ic" aria-hidden="true">${it[0]}</span><b>${esc(it[1])}</b></button>`).join("")}</div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="pruef">Fertig</button></div><div id="fb" aria-live="polite"></div>`);
+  $$(".item").forEach(b => b.onclick = () => b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true")));
+  $("#pruef").onclick = () => {
+    let ok = 0; const tipps = [];
+    $$(".item").forEach(b => { const it = items[+b.dataset.i], gew = b.getAttribute("aria-pressed") === "true", richtig = gew === it[2]; if (richtig) ok++; else tipps.push(`${it[1]}: ${it[3]}`); b.classList.add(richtig ? "right" : "wrong"); b.disabled = true; b.insertAdjacentHTML("beforeend", `<small>${esc(it[3])}</small>`); });
+    $("#pruef").disabled = true;
+    $("#fb").innerHTML = fb(ok === items.length, `${ok} von ${items.length} richtig entschieden.`, tipps.length ? "Achte auf: " + tipps.join(" · ") : "Perfekt ausgerüstet!") + `<div class="row" style="margin-top:10px"><button class="btn" id="weiter">Auswertung</button></div>`;
+    $("#weiter").onclick = () => phaseEnde("ausruestung", ok / items.length * 100);
+    meldeHoehe();
+  };
+}
+
+function wareneingang() {
+  const lief = [
+    { lf: "Müller Transport", pos: [["Kopierpapier A4", 12], ["Ordner blau", 30], ["Toner schwarz", 4]], ist: [["Kopierpapier A4", 12, ""], ["Ordner blau", 28, ""], ["Toner schwarz", 4, "nass"]] },
+    { lf: "Planzer", pos: [["Mineralwasser 6×1,5 l", 40], ["Orangensaft 1 l", 24], ["Eistee 0,5 l", 48]], ist: [["Mineralwasser 6×1,5 l", 40, ""], ["Apfelsaft 1 l", 24, ""], ["Eistee 0,5 l", 48, ""]] },
+    { lf: "Galliker", pos: [["Velohelm M", 10], ["Velohelm L", 10], ["Veloschloss", 25]], ist: [["Velohelm M", 10, "eingedrückt"], ["Velohelm L", 8, ""], ["Veloschloss", 25, ""]] },
+    { lf: "Post Logistics", pos: [["Schrauben M6", 50], ["Dübel 8 mm", 50], ["Bohrer-Set", 6]], ist: [["Schrauben M6", 50, ""], ["Dübel 8 mm", 50, ""], ["Bohrer-Set", 6, ""]] },
+    { lf: "DHL Freight", pos: [["Bildschirm 24 Zoll", 8], ["Tastatur", 15], ["Maus", 15]], ist: [["Bildschirm 24 Zoll", 8, "Karton aufgerissen"], ["Tastatur", 15, ""], ["Maus", 12, ""]] }
+  ];
+  const runden = mische(lief).slice(0, E() ? 4 : 3);
+  let r = 0, summe = 0;
+  zeigePhase("eingang", `<div id="inhalt"></div><div id="fb" aria-live="polite"></div>`, `<span class="pill" id="runde"></span>`);
+  function runde() {
+    if (r >= runden.length) return phaseEnde("eingang", summe / runden.length * 100);
+    const L = runden[r]; $("#runde").textContent = `Lieferung ${r + 1} / ${runden.length}`;
+    $("#inhalt").innerHTML = `<div class="grid2"><div class="beleg"><b>Lieferschein · ${esc(L.lf)}</b><table><tr><th>Artikel</th><th>Menge</th></tr>${L.pos.map(p => `<tr><td>${esc(p[0])}</td><td>${p[1]}</td></tr>`).join("")}</table></div>
+      <div><p class="muted">Das ist angekommen. Tippe alle Positionen an, bei denen etwas nicht stimmt.</p><div class="items">${L.ist.map((p, i) => `<button class="item" data-i="${i}" aria-pressed="false"><span class="ic" aria-hidden="true">${p[2] ? "📦💥" : "📦"}</span><b>${esc(p[0])}</b><small>${p[1]} Stück${p[2] ? " · " + esc(p[2]) : ""}</small></button>`).join("")}</div></div></div>
+      <p class="frage" style="margin-top:12px">Wie unterschreibst du den Lieferschein?</p>
+      <div class="opts" id="unt"><button class="opt" data-u="ohne">Ohne Bemerkung unterschreiben</button><button class="opt" data-u="mit">Mit Vorbehalt: Mängel aufschreiben und vom Chauffeur unterschreiben lassen</button></div>`;
+    $("#fb").innerHTML = "";
+    let unt = null;
+    $$("#inhalt .item").forEach(b => b.onclick = () => b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true")));
+    $$("#unt .opt").forEach(b => b.onclick = () => { unt = b.dataset.u; auswerten(); });
+    function auswerten() {
+      let ok = 0; const n = L.ist.length; const maengel = [];
+      L.ist.forEach((p, i) => { const soll = L.pos[i], fehler = p[0] !== soll[0] || p[1] !== soll[1] || !!p[2]; if (fehler) maengel.push(p[0] !== soll[0] ? `${soll[0]}: falscher Artikel (${p[0]})` : p[1] !== soll[1] ? `${soll[0]}: ${p[1]} statt ${soll[1]}` : `${soll[0]}: ${p[2]}`);
+        const b = $(`#inhalt .item[data-i="${i}"]`), gew = b.getAttribute("aria-pressed") === "true"; if (gew === fehler) ok++; b.classList.add(gew === fehler ? "right" : "wrong"); b.disabled = true; });
+      const sollUnt = maengel.length ? "mit" : "ohne", untOk = unt === sollUnt;
+      $$("#unt .opt").forEach(b => { b.disabled = true; if (b.dataset.u === sollUnt) b.classList.add("right"); else b.classList.add("wrong"); });
+      const w = (ok / n) * 0.6 + (untOk ? 0.4 : 0); summe += w;
+      $("#fb").innerHTML = fb(w > 0.95, maengel.length ? `Mängel: ${maengel.join(" · ")}` : "Diese Lieferung war in Ordnung.", untOk ? (maengel.length ? "Richtig: mit Vorbehalt unterschreiben." : "Richtig: ohne Bemerkung unterschreiben.") : (maengel.length ? "Bei Mängeln immer einen Vorbehalt anbringen, sonst kann man nicht mehr reklamieren." : "Ohne Mängel braucht es keinen Vorbehalt.")) + `<div class="row" style="margin-top:10px"><button class="btn" id="weiter">Nächste Lieferung</button></div>`;
+      $("#weiter").onclick = () => { r++; runde(); }; meldeHoehe();
+    }
+    meldeHoehe();
+  }
+  runde();
+}
+
+function einlagern() {
+  const zonen = [["Kühllager", "2–8 °C"], ["Tiefkühllager", "−18 °C"], ["Gefahrstofflager", "gesichert"], ["Palettenregal unten", "schwer"], ["Fachbodenregal", "Kleinteile"]];
+  const pool = [["Joghurt", 0], ["Frischer Salat", 0], ["Butter", 0], ["Glace", 1], ["Tiefkühlpizza", 1], ["Gefrorene Erbsen", 1], ["Benzinkanister", 2], ["Spraydosen Farbe", 2], ["Brennspiritus", 2], ["Palette Zement 900 kg", 3], ["Palette Mineralwasser", 3], ["Waschmaschine", 3], ["Schrauben M6 (Schachtel)", 4], ["Kabelbinder", 4], ["USB-Sticks", 4], ["Ersatzbirnen", 4], ["Frischfleisch", 0], ["Chlorreiniger", 2]];
+  const karten = mische(pool).slice(0, E() ? 14 : 10), ms = E() ? 5000 : 8000;
+  let r = 0, summe = 0, aktiv = false, rest = null;
+  zeigePhase("einlagern", `<div class="zeit" aria-hidden="true"><span id="bar"></span></div><div class="sortkarte" id="karte" aria-live="polite"></div>
+    <div class="bins" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">${zonen.map((z, i) => `<button class="bin" data-z="${i}">${esc(z[0])}<small>${esc(z[1])}</small></button>`).join("")}</div><div id="fb" aria-live="polite"></div>`, `<span class="pill" id="runde"></span><span class="pill red" id="pkt">0 Punkte</span>`);
+  function runde() {
+    if (r >= karten.length) return phaseEnde("einlagern", summe / karten.length * 100);
+    aktiv = true; $("#karte").textContent = karten[r][0]; $$(".bin").forEach(b => b.classList.remove("ok", "bad"));
+    $("#runde").textContent = `${r + 1} / ${karten.length}`;
+    rest = timer(ms, x => $("#bar").style.transform = `scaleX(${x})`, () => wahl(-1));
+  }
+  function wahl(z) {
+    if (!aktiv) return; aktiv = false; stopTimer();
+    const soll = karten[r][1], ok = z === soll, w = ok ? 0.6 + 0.4 * rest() : 0; summe += w;
+    $(`.bin[data-z="${soll}"]`).classList.add("ok"); if (!ok && z >= 0) $(`.bin[data-z="${z}"]`).classList.add("bad");
+    $("#fb").innerHTML = ok ? fb(true, `Richtig! +${Math.round(w * 100 / karten.length)}`) : fb(false, `${z < 0 ? "Zeit abgelaufen." : "Falsch."} ${esc(karten[r][0])} gehört ins ${esc(zonen[soll][0])}.`);
+    $("#pkt").textContent = `${Math.round(summe / karten.length * 100)} Punkte`;
+    setTimeout(() => { r++; if ($("#karte")) runde(); }, ok ? 700 : 1700);
+  }
+  $$(".bin").forEach(b => b.onclick = () => wahl(+b.dataset.z));
+  runde();
+}
+
+function kommissionieren() {
+  const artikel = ["Hefte", "Stifte", "Leim", "Scheren", "Ordner", "Locher", "Papier", "Tinte", "Lineale", "Gummis", "Klebeband", "Kreide", "Marker", "Mappen", "Zirkel", "Rechner", "Etiketten", "Kabel", "Batterien", "Lampen", "Mäppchen", "Folien", "Notizblöcke", "Bostitch"];
+  const gaenge = 4, regale = 6, belegung = mische(artikel);
+  const platz = i => `${String(Math.floor(i / regale) + 1).padStart(2, "0")}-${String(i % regale + 1).padStart(2, "0")}`;
+  let runde = 0, summe = 0;
+  const RUNDEN = E() ? 3 : 2, POS = E() ? 6 : 4;
+  zeigePhase("kommi", `<div id="inhalt"></div><div id="fb" aria-live="polite"></div>`, `<span class="pill" id="runde"></span>`);
+  function neu() {
+    if (runde >= RUNDEN) return phaseEnde("kommi", summe / RUNDEN * 100);
+    const liste = mische(artikel.map((_, i) => i)).slice(0, POS).sort((a, b) => a - b);
+    const gew = new Set(); $("#runde").textContent = `Auftrag ${runde + 1} / ${RUNDEN}`;
+    $("#inhalt").innerHTML = `<div class="grid2"><div class="beleg"><b>Pickliste Auftrag ${4711 + runde}</b><table><tr><th>Platz</th><th>Artikel</th></tr>${liste.map(i => `<tr><td>${platz(i)}</td><td>${E() ? "–" : esc(belegung[i])}</td></tr>`).join("")}</table><p class="muted" style="font-family:var(--font-b);font-size:.85rem;margin-top:6px">Platz = Gang-Regal, z. B. 02-05 = Gang 2, Regal 5</p></div>
+      <div><p class="muted">Tippe im Lager genau die Fächer an, die auf der Pickliste stehen.</p>
+      <div class="lager">${Array.from({ length: gaenge }, (_, g) => `<div class="gang"><span class="gl">Gang ${g + 1}</span>${Array.from({ length: regale }, (_, rr) => { const i = g * regale + rr; return `<button class="fach" data-i="${i}" aria-pressed="false" title="${platz(i)}">${E() ? `<small>${platz(i)}</small>` : ""}<br>${esc(belegung[i])}</button>`; }).join("")}</div>`).join("")}</div></div></div>
+      <div class="row" style="margin-top:12px"><button class="btn" id="pruef">Kommissionierung prüfen</button></div>`;
+    $("#fb").innerHTML = "";
+    $$(".fach").forEach(b => b.onclick = () => { const i = +b.dataset.i; if (gew.has(i)) gew.delete(i); else gew.add(i); b.setAttribute("aria-pressed", String(gew.has(i))); });
+    $("#pruef").onclick = () => {
+      const treffer = liste.filter(i => gew.has(i)).length, falsch = [...gew].filter(i => !liste.includes(i)).length;
+      const w = Math.max(0, (treffer - falsch) / liste.length); summe += w;
+      $$(".fach").forEach(b => { const i = +b.dataset.i; b.disabled = true; if (liste.includes(i)) b.classList.add(gew.has(i) ? "right" : "wrong"); else if (gew.has(i)) b.classList.add("wrong"); });
+      $("#pruef").disabled = true;
+      $("#fb").innerHTML = fb(w === 1, `${treffer} von ${liste.length} Positionen richtig${falsch ? `, ${falsch} falsche Artikel im Korb` : ""}.`, "Grün umrandet = auf der Pickliste. Rot = vergessen oder falsch genommen.") + `<div class="row" style="margin-top:10px"><button class="btn" id="weiter">${runde + 1 < RUNDEN ? "Nächster Auftrag" : "Auswertung"}</button></div>`;
+      $("#weiter").onclick = () => { runde++; neu(); }; meldeHoehe();
+    };
+    meldeHoehe();
+  }
+  neu();
+}
+
+function verladen() {
+  reihenRunde("verladen", [
+    { q: "Der Lastwagen fährt zuerst zu Bäckerei Huber, dann zu Garage Weber, dann zu Hotel Seeblick. In welcher Reihenfolge lädst du ein? (zuerst = ganz hinten im Laderaum)", s: ["Ware für Hotel Seeblick", "Ware für Garage Weber", "Ware für Bäckerei Huber"] },
+    { q: "Wie lädst du eine Palette richtig?", s: ["Ladefläche kontrollieren und Antirutschmatten legen", "Schwere Ware unten, leichte oben", "Paletten eng aneinander stellen", "Mit Spanngurten sichern", "Ladung nochmals kontrollieren"] },
+    ...(E() ? [{ q: "Eine Retoure kommt zurück. Ordne die Schritte.", s: ["Retoure annehmen und Lieferschein prüfen", "Ware auf Schäden kontrollieren", "Grund der Rücksendung erfassen", "Ware wieder einlagern oder aussortieren", "Im System buchen"] }] : [])
+  ], pA => fragenRunde("verladen", [
+    { q: "Zwischen zwei Paletten ist eine grosse Lücke. Was tust du?", o: ["Lücke füllen oder Ladung zusätzlich sichern", "So lassen, das hält schon", "Schneller fahren, dann rutscht nichts"], x: "Lücken lassen die Ladung beim Bremsen rutschen." },
+    { q: "Eine schwere Kiste steht auf leichten Kartons.", o: ["Umladen: schwer nach unten", "So lassen", "Noch eine Kiste daraufstellen"] },
+    { q: "Was gehört mit der Ware zur Kundschaft?", o: ["Lieferschein / Begleitpapiere", "Die Inventurliste", "Dein Stundenplan"] },
+    ...(E() ? [{ q: "Der Lieferwagen darf 1000 kg laden. Du hast 22 Pakete zu 45 kg. Darfst du alle laden?", o: ["Ja, es sind 990 kg", "Nein, es sind 1100 kg", "Nein, es sind 1045 kg"], x: "22 × 45 kg = 990 kg" }] : [])
+  ], { titel: "Teil 2: Ladungssicherung", nach: pB => phaseEnde("verladen", (pA + pB) / 2, `<p>Reihenfolgen: ${Math.round(pA)} · Sicherung: ${Math.round(pB)}</p>`) }));
+}
+
+function gefahrgut() {
+  const f = [
+    { bild: ghs("flamme"), q: "Was bedeutet dieses Zeichen?", o: ["Entzündbar: kann leicht brennen", "Giftig", "Umweltgefährlich"] },
+    { bild: ghs("totenkopf"), q: "Was bedeutet dieses Zeichen?", o: ["Akut giftig: kann schon in kleinen Mengen tödlich sein", "Ätzend", "Unter Druck"] },
+    { bild: ghs("aetzend"), q: "Was bedeutet dieses Zeichen?", o: ["Ätzend: verätzt Haut und Metall", "Entzündbar", "Explosiv"] },
+    { bild: ghs("umwelt"), q: "Was bedeutet dieses Zeichen?", o: ["Gefährlich für Wasser und Umwelt", "Leicht entzündbar", "Ätzend"] },
+    { bild: ghs("ausruf"), q: "Was bedeutet dieses Zeichen?", o: ["Gesundheitsschädlich oder reizend, Vorsicht", "Sehr giftig", "Kein Gefahrgut"] },
+    { bild: ghs("gasflasche"), q: "Was bedeutet dieses Zeichen?", o: ["Gas unter Druck", "Ätzend", "Umweltgefährlich"] },
+    { q: "Aus einem Kanister mit Ätz-Zeichen tropft es. Was tust du?", o: ["Abstand halten, Bereich sichern, sofort melden", "Mit der Hand abwischen", "Kanister schnell ins Regal stellen"] },
+    { q: "Wie hebst du einen schweren Karton?", o: ["Gerader Rücken, aus den Knien, Last nah am Körper", "Mit rundem Rücken und gestreckten Beinen", "Mit einem Ruck über den Kopf"] },
+    { q: "Ein Stapler fährt rückwärts auf dich zu.", o: ["Aus dem Fahrweg gehen und Blickkontakt suchen", "Stehen bleiben, er sieht mich schon", "Hinter dem Stapler durchrennen"] },
+    { q: "Wo lagert man brennbare Flüssigkeiten?", o: ["Im gesicherten Gefahrstofflager", "Neben der Heizung", "Im Pausenraum"] }
+  ];
+  fragenRunde("gefahr", E() ? mische(f) : mische(f).slice(0, 7), { titel: "Erkenne Gefahren und handle sicher.", zeit: E() ? 12000 : 0 });
+}
+
+starteSpiel({
+  titel: "Schicht im Lager", ic: "📦", beruf: "Logistiker/in EFZ", speicher: "lager-spiel-v1",
+  intro: "Du startest deine erste Schicht im Logistikzentrum. Rüste dich richtig aus, kontrolliere Lieferungen, lagere Waren ein, kommissioniere Aufträge, belade den Lastwagen und erkenne Gefahren.",
+  hubText: "Deine Schicht beginnt. Wähle eine Station – am besten der Reihe nach.",
+  titelFuer: p => p >= .9 ? "Lagerprofi" : p >= .75 ? "Teamleiter/in Wareneingang" : p >= .55 ? "Logistiker/in im 2. Lehrjahr" : p >= .35 ? "Lernende/r im 1. Lehrjahr" : "Schnupperlernende/r",
+  phasen: [
+    { key: "ausruestung", uhr: "06:30", ic: "🦺", t: "Schichtbeginn", d: "Schutzausrüstung und Arbeitsmittel prüfen", run: ausruestung, merke: "Defekte Geräte nicht benutzen, sondern melden. Sicherheitsschuhe immer tragen." },
+    { key: "eingang", uhr: "07:00", ic: "🚚", t: "Wareneingang", d: "Lieferschein mit der Lieferung vergleichen", run: wareneingang, merke: "Mängel sofort auf dem Lieferschein vermerken und vom Chauffeur unterschreiben lassen (Vorbehalt)." },
+    { key: "einlagern", uhr: "08:30", ic: "🏗️", t: "Einlagern", d: "Jede Ware an den richtigen Ort – gegen die Zeit", run: einlagern, merke: "Kühlware ins Kühllager, Gefahrstoffe ins gesicherte Lager, Schweres nach unten." },
+    { key: "kommi", uhr: "10:00", ic: "🧺", t: "Kommissionieren", d: "Pickliste lesen und die richtigen Fächer finden", run: kommissionieren, merke: "Lagerplatz-Code genau lesen und am Schluss mit der Pickliste kontrollieren." },
+    { key: "verladen", uhr: "13:00", ic: "🚛", t: "Verladen", d: "Tour-Reihenfolge und Ladungssicherung", run: verladen, merke: "Was zuletzt ausgeliefert wird, kommt zuerst hinein. Schweres unten, Ladung sichern." },
+    { key: "gefahr", uhr: "15:00", ic: "⚠️", t: "Gefahrgut und Sicherheit", d: "Gefahrensymbole erkennen und richtig handeln", run: gefahrgut, merke: "Rautenzeichen zeigen Gefahren. Bei Unklarheit Abstand halten und melden." }
+  ]
+});
+</script>
+</body>
+</html>
