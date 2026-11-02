@@ -18,7 +18,7 @@ function timer(ms, onTick, onEnd) {
 }
 function meldeHoehe() {
   clearTimeout(hoeheT);
-  hoeheT = setTimeout(() => { try { if (parent !== window) parent.postMessage({ seekarteHoehe: document.documentElement.scrollHeight + 8 }, "*"); } catch (e) {} }, 60);
+  hoeheT = setTimeout(() => { try { if (parent !== window) parent.postMessage({ seekarteHoehe: Math.ceil(document.getElementById("app").getBoundingClientRect().height) + 24 }, "*"); } catch (e) {} }, 60);
 }
 addEventListener("resize", meldeHoehe);
 function zeige(html) {
@@ -72,15 +72,17 @@ function ankunft() {
 }
 function planSvg() {
   const P = SP.plan, naechste = SP.phasen.find(p => !fertig(p.key));
-  const z = P.zonen.map(o => {
+  const z = P.zonen.map((o, zi) => {
     const ph = o.k ? phase(o.k) : null, done = ph && fertig(ph.key), next = ph && naechste && naechste.key === ph.key;
-    const cls = (ph ? `hot${done ? " done" : ""}${next ? " next" : ""}` : "deko") + (o.f ? " farbig" : "");
-    return `<g class="${cls}" ${ph ? `data-k="${ph.key}" tabindex="0" role="button" aria-label="${esc(o.label)}, ${esc(ph.uhr)} Uhr: ${esc(ph.t)}${done ? ", erledigt" : ""}"` : ""}>
+    const aktiv = !!(ph || (o.units && o.units.length) || o.karten);
+    const nU = (o.units || []).length, dU = (o.units || []).filter(id => LW.best(id) != null).length;
+    const cls = (aktiv ? `hot${done ? " done" : ""}${next ? " next" : ""}` : "deko") + (o.f ? " farbig" : "");
+    return `<g class="${cls}" ${aktiv ? `data-z="${zi}" tabindex="0" role="button" aria-label="${esc(o.label)}${ph ? `, ${esc(ph.uhr)} Uhr: ${esc(ph.t)}` : ""}${nU ? `, ${nU} Aufträge` : ""}"` : ""}>
       <rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="6" style="fill:${o.f || "var(--zone)"}"/>
       ${o.innen || ""}
       <text class="zl" x="${o.x + o.w / 2}" y="${o.y + (o.ty || 26)}">${esc(o.label)}</text>
-      ${ph ? `<text class="zi" x="${o.x + o.w / 2}" y="${o.y + o.h / 2 + 14}">${ph.ic}</text>
-      <text class="zu" x="${o.x + o.w / 2}" y="${o.y + o.h - 12}">${esc(ph.uhr)}${done ? " ✓" : ""}</text>` : ""}
+      ${aktiv ? `<text class="zi" x="${o.x + o.w / 2}" y="${o.y + o.h / 2 + 14}">${ph ? ph.ic : o.ic || "📋"}</text>
+      <text class="zu" x="${o.x + o.w / 2}" y="${o.y + o.h - 12}">${ph ? esc(ph.uhr) + (done ? " ✓" : "") : ""}${ph && nU ? " · " : ""}${nU ? `📋 ${dU}/${nU}` : ""}${o.karten ? (nU || ph ? " · 🗂️" : "🗂️ Karteikarten") : ""}</text>` : ""}
       ${next ? `<circle class="pin" cx="${o.x + o.w - 16}" cy="${o.y + 16}" r="9"/>` : ""}
     </g>`;
   }).join("");
@@ -92,6 +94,14 @@ function hub() {
     <div class="pills"><span class="pill uhrpill">🕒 ${esc(nx ? nx.uhr : SP.feierabend.uhr)}</span><span class="pill">${E() ? "Erweitert" : "Grundniveau"}</span><span class="pill red">${gesamt()} / ${MAXP()} Punkte</span><span class="pill">${n} / ${SP.phasen.length}</span></div></div>
     <p class="muted" style="margin-bottom:10px">${n === 0 ? esc(SP.hubText) : nx ? `Weiter geht's: ${esc(nx.uhr)} Uhr, ${esc(nx.ort)}. Tippe im Plan auf den markierten Ort.` : "Schicht geschafft! Du kannst Stationen wiederholen und dich verbessern."}</p>
     <div class="mapwrap planwrap">${planSvg()}</div>
+    <p class="muted" style="margin-top:8px">📋 = Arbeitsaufträge an diesem Ort (Lerntext und Aufgaben in 3 Niveaus) · 🗂️ = Karteikarten</p>
+    ${(() => { const alle = SP.plan.zonen.flatMap(z => z.units || []), d = LW.daten(), ks = SP.plan.zonen.find(z => z.karten);
+      const sterneU = alle.reduce((s, id) => s + [1, 2, 3].filter(n => (d[id] || {})[n] >= 75).length, 0);
+      return `<div class="lernpass"><b>🎫 Dein Lernpass</b>
+        <span>⏱️ Schicht: ${n} / ${SP.phasen.length}</span>
+        <span>📋 Aufträge gelöst: ${alle.filter(id => LW.best(id) != null).length} / ${alle.length}</span>
+        <span>🏅 Niveaus geschafft (ab 75 %): ${sterneU} / ${alle.length * 3}</span>
+        ${ks ? `<span>⚡ Begriffe-Blitz: ${(d["karten-" + ks.karten] || {}).quiz ?? "–"} / 10</span>` : ""}</div>`; })()}
     <h3 style="margin:18px 0 10px">Dein Tagesablauf</h3>
     <ol class="zeitstrahl">${SP.phasen.map((p, i) => `<li><button class="phase ${fertig(p.key) ? "done" : ""}" data-i="${i}">
       <span class="zeitp">${esc(p.uhr)}</span>
@@ -102,7 +112,7 @@ function hub() {
       ${n === SP.phasen.length ? `<button class="btn" id="schluss">🌇 Feierabend und Schichtbericht</button>` : "<span></span>"}
       <button class="btn ghost small" id="neu">Neu beginnen</button></div>`);
   $$(".phase").forEach(b => b.onclick = () => intro(SP.phasen[+b.dataset.i]));
-  $$(".plan .hot").forEach(g => { const go = () => intro(phase(g.dataset.k)); g.addEventListener("click", go); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+  $$(".plan .hot").forEach(g => { const go = () => ort(SP.plan.zonen[+g.dataset.z]); g.addEventListener("click", go); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
   let k = 0;
   $("#neu").onclick = () => { if (Date.now() - k < 4000) { G = { niv: null, best: {} }; sichern(); start(); } else { k = Date.now(); $("#neu").textContent = "Wirklich? Nochmals klicken"; } };
   if ($("#schluss")) $("#schluss").onclick = schluss;

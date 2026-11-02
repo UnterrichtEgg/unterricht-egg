@@ -376,8 +376,8 @@ const THEMEN_RZG = [
   { key: "politik", name: "Politische Bildung", kurz: "Zum Heft «So regiert sich die Schweiz»: Polit-Reise, Themenkarte-Expedition und Karteikarten.", stat: "2 Spiele · Karteikarten" }
 ];
 const THEMEN_BV = [
-  { key: "logistik", name: "Logistiker/in EFZ", kurz: "Waren annehmen, lagern, kommissionieren und ausliefern: 11 Stationen nach Bildungsplan und Schullehrplan, das Spiel «Schicht im Lager» und Karteikarten." },
-  { key: "fage", name: "Fachfrau/Fachmann Gesundheit EFZ", kurz: "Pflegen, betreuen, Hygiene und Vitalzeichen: 9 Stationen, das Spiel «Ein Tag auf der Station» und Karteikarten." }
+  { key: "logistik", name: "Logistiker/in EFZ", kurz: "Waren annehmen, lagern, kommissionieren und ausliefern: 11 Stationen nach Bildungsplan und Schullehrplan und die Lernwelt «Schicht im Lager» mit allen Aufträgen und Karteikarten." },
+  { key: "fage", name: "Fachfrau/Fachmann Gesundheit EFZ", kurz: "Pflegen, betreuen, Hygiene und Vitalzeichen: 9 Stationen und die Lernwelt «Ein Tag auf der Station» mit allen Aufträgen und Karteikarten." }
 ];
 const FAECHER = [
   { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt und Biologie. Lesen: 38 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen. Jeweils mit Fragebogen. Sprache im Fokus: 12 Übungen zu Rechtschreibung und Grammatik.", kompetenzen: KOMPETENZEN },
@@ -2596,8 +2596,8 @@ const SPIELE = [
   { id: "seekarte-spiel", file: "seekarte.html", kz: "SK", name: "Seekarte-Spiel", titel: "Entdeckerreise", r: "expg", link: "Seekarte: Lernkarte und Spiel", iframe: "Interaktive Seekarte: Lernkarte und Spiel", fenster: "Seekarte im eigenen Fenster öffnen" },
   { id: "politik-spiel", file: "politik.html", kz: "PR", name: "Polit-Reise", titel: "Polit-Reise", r: "polit", link: "Polit-Reise: Spiel zum Heft", iframe: "Polit-Reise: Spiel zur Politischen Bildung", fenster: "Polit-Reise im eigenen Fenster öffnen" },
   { id: "themenkarte-spiel", file: "themenkarte.html", kz: "TK", name: "Themenkarte-Expedition", titel: "Themenkarte-Expedition", r: "polit", link: "Themenkarte-Expedition: Spiel zur Karte", iframe: "Themenkarte-Expedition: Spiel zur Schweizer Politik", fenster: "Themenkarte-Expedition im eigenen Fenster öffnen" },
-  { id: "lager-spiel", file: "lager.html", kz: "LS", name: "Schicht im Lager", titel: "Schicht im Lager", r: "blog", link: "Spiel: Schicht im Lager", iframe: "Spiel: Schicht im Lager (Logistik)", fenster: "Spiel im eigenen Fenster öffnen" },
-  { id: "station-spiel", file: "station.html", kz: "ST", name: "Ein Tag auf der Station", titel: "Ein Tag auf der Station", r: "bfage", link: "Spiel: Ein Tag auf der Station", iframe: "Spiel: Ein Tag auf der Station (FaGe)", fenster: "Spiel im eigenen Fenster öffnen" }
+  { id: "lager-spiel", file: "lager.html", kz: "LS", name: "Schicht im Lager", titel: "Schicht im Lager", r: "blog", link: "🏭 Lernwelt: Schicht im Lager", iframe: "Spiel: Schicht im Lager (Logistik)", fenster: "Spiel im eigenen Fenster öffnen" },
+  { id: "station-spiel", file: "station.html", kz: "ST", name: "Ein Tag auf der Station", titel: "Ein Tag auf der Station", r: "bfage", link: "🏥 Lernwelt: Ein Tag auf der Station", iframe: "Spiel: Ein Tag auf der Station (FaGe)", fenster: "Spiel im eigenen Fenster öffnen" }
 ];
 const spielVon = file => SPIELE.find(g => g.file === file) || SPIELE[0];
 const spielById = id => SPIELE.find(g => g.id === id);
@@ -2608,7 +2608,7 @@ function renderSeekarte(file) {
   const f = r.fach || "deutsch", komp = kompVon(r.key), b = bestOf(S.myResults || [], g.id);
   document.title = g.name + " · Unterricht Egg";
   app.innerHTML = topbar() + `<a class="back" href="#fach-${f}${komp ? "-" + komp : ""}">← ${esc(komp ? kompName(komp) : fachName(f))}</a>
-    <p class="hint" id="spielstatus" aria-live="polite">${S.isTeacher ? "Als Lehrperson werden Spielergebnisse nicht gespeichert." : b ? `Dein bestes Spiel bisher: ${b.punkte} von ${b.total} Punkten. Spiel die ${esc(g.titel)} bis zum Ende, dann wird dein Ergebnis gespeichert.` : `Spiel die ${esc(g.titel)} bis zum Ende, dann wird dein Ergebnis gespeichert.`}</p>
+    <p class="hint" id="spielstatus" aria-live="polite">${S.isTeacher ? "Als Lehrperson werden Spielergebnisse nicht gespeichert." : b ? `Dein bestes Spiel bisher: ${b.punkte} von ${b.total} Punkten. Spiele «${esc(g.titel)}» bis zum Ende, dann wird dein Ergebnis gespeichert.${g.r === "blog" || g.r === "bfage" ? " Gelöste Arbeitsaufträge werden sofort gespeichert." : ""}` : `Spiele «${esc(g.titel)}» bis zum Ende, dann wird dein Ergebnis gespeichert.${g.r === "blog" || g.r === "bfage" ? " Gelöste Arbeitsaufträge werden sofort gespeichert." : ""}`}</p>
     <iframe id="seekarte" class="seekarte" src="${esc(file)}" title="${esc(g.iframe)}"></iframe>
     <p class="hint"><a href="${esc(file)}" target="_blank" rel="noopener">${esc(g.fenster)}</a> (grössere Ansicht)</p>`;
   bindTop();
@@ -2619,7 +2619,21 @@ addEventListener("message", e => {
   if (h && el && e.source === el.contentWindow) el.style.height = Math.min(Math.max(h, 500), 4000) + "px";
   const d = e.data && e.data.seekarteErgebnis;
   if (d && el && e.source === el.contentWindow) spielSpeichern(d);
+  const st = e.data && e.data.stationErgebnis;
+  if (st && el && e.source === el.contentWindow) stationAusSpiel(st, el);
 });
+// Arbeitsaufträge, die im Berufsspiel gelöst wurden, wie normale Stationen speichern
+async function stationAusSpiel(d, el) {
+  const antwort = m => { try { el.contentWindow.postMessage({ stationGespeichert: m }, "*"); } catch (e) {} };
+  const u0 = UNITS.find(u => u.id === d.id);
+  if (!u0 || !Array.isArray(d.sp)) return;
+  const u = effUnit(u0, [1, 2, 3].includes(d.stufe) ? d.stufe : 1), res = spScore(u, d.sp);
+  if (S.isTeacher || !S.email) return antwort("lehrer");
+  const { error } = await sb.from("ergebnisse").insert({ email: S.email, unit_id: u.id, punkte: res.pts, total: res.total, antworten: { sp: d.sp, stufe: u.stufe || 1, quelle: "spiel" } });
+  if (error) return antwort("fehler");
+  (S.myResults = S.myResults || []).unshift({ unit_id: u.id, punkte: res.pts, total: res.total, stufe: u.stufe || 1, created_at: new Date().toISOString() });
+  antwort("ok");
+}
 function spielHinweis(files) {
   return files.map(file => { const g = spielVon(file), b = bestOf(S.myResults || [], g.id);
     return `<p class="hint">${b ? `Dein bestes Ergebnis in «${esc(g.name)}»: <strong>${b.punkte} von ${b.total} Punkten</strong>.` : `${esc(g.name)}: Wenn du das Spiel bis zum Ende spielst, wird dein Ergebnis gespeichert.`}</p>`; }).join("");

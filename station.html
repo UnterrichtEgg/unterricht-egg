@@ -146,6 +146,35 @@ button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outlin
 .farbe { border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; background: var(--surface); font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
 .farbe i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); display: inline-block; }
 .farbe[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--c); }
+/* Lernwelt */
+.ort-h { margin: 20px 0 10px; font-size: 1.15rem; }
+.auftraege { display: grid; gap: 10px; }
+.auftrag-k { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: start; text-align: left; width: 100%; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; font: inherit; color: inherit; }
+button.auftrag-k:hover { border-color: var(--muted); }
+.auftrag-k.schicht { border-color: var(--red); box-shadow: 0 0 0 3px var(--redsoft); }
+.ak-ic { font-size: 1.8rem; line-height: 1; }
+.ak-st { color: var(--gold); letter-spacing: 2px; white-space: nowrap; }
+.niveaus { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.niv-b { font: inherit; font-size: .88rem; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.niv-b:hover { border-color: var(--red); } .niv-b .st { color: var(--gold); } .niv-b small { color: var(--ok); font-weight: 700; }
+.lernbox { background: var(--goldsoft); border-left: 4px solid var(--gold); padding: 10px 14px; border-radius: 8px; }
+.glossar { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin: 0; }
+.glossar div { background: var(--bg); border-radius: 10px; padding: 8px 12px; } .glossar dt { font-weight: 700; } .glossar dd { margin: 2px 0 0; color: var(--muted); font-size: .92rem; }
+.qtyp { font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.luecke { display: inline-block; min-width: 3em; border-bottom: 2px solid var(--muted); }
+.ein { font: inherit; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); width: 10em; margin: 0 4px; }
+.ein.gross { width: 100%; min-height: 6em; margin: 0; }
+.ein.right { border-color: var(--ok); background: var(--okbg); } .ein.wrong { border-color: var(--bad); background: var(--badbg); }
+.toks { line-height: 2.3; font-size: 1.05rem; }
+.tk { font: inherit; border: 1.5px dashed var(--muted); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 2px 8px; cursor: pointer; }
+.tk[aria-pressed="true"] { border-style: solid; border-color: var(--pick); background: var(--picksoft); }
+.tk.right { border-style: solid; border-color: var(--ok); background: var(--okbg); } .tk.wrong { border-style: solid; border-color: var(--bad); background: var(--badbg); } .tk.fehlt { outline: 2px dashed var(--ok); }
+.opt.gewaehlt { border-color: var(--pick); background: var(--picksoft); }
+.kk { display: grid; place-items: center; width: 100%; min-height: 220px; font: inherit; font-size: clamp(1.2rem, 3.6vw, 1.6rem); text-align: center; padding: 24px; border-radius: 18px; border: 2px solid var(--line); background: var(--paper); color: var(--ink); box-shadow: 0 10px 24px -16px rgba(0,0,0,.4); cursor: pointer; }
+.kk b { font-family: var(--font-d); font-size: clamp(1.6rem, 5vw, 2.4rem); }
+.kk.hinten { background: var(--goldsoft); }
+.niv-b.empf { border-color: var(--red); background: var(--redsoft); }
+.lernpass { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; background: var(--surface); border: 1.5px dashed var(--gold); border-radius: 14px; padding: 10px 14px; margin-top: 12px; font-size: .95rem; }
 /* Berufsspiele */
 :root { --zone: #f4f1ea; --wand: #4b5563; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --zone: #2a323b; --wand: #9aa3ad; } }
@@ -221,6 +250,9 @@ button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outlin
 <body>
 <div id="app"></div>
 <script src="spielbasis.js"></script>
+<script src="beruf-extra.js"></script>
+<script src="beruf.js"></script>
+<script src="lernwelt.js"></script>
 <script>
 // Szenen und Grundriss für «Ein Tag auf der Station»
 const SZ = {
@@ -266,6 +298,9 @@ const SZ = {
   zimmer() { return SZ.banner(`<rect x="620" y="40" width="180" height="120" fill="#cfe6f5" stroke="#9ca3af" stroke-width="3"/><path d="M710 40v120M620 100h180" stroke="#9ca3af" stroke-width="3"/><path d="M560 40 Q590 120 560 200 L600 200 Q615 120 600 40z" fill="#fca5a5" opacity=".8"/>${SZ.bett(150, 80, 1)}<rect x="440" y="140" width="60" height="78" fill="#d6b38a"/><text x="470" y="132" font-size="22" text-anchor="middle">🖼️</text><rect x="830" y="120" width="110" height="98" rx="6" fill="#e5e7eb" stroke="#9ca3af"/><text x="885" y="175" font-size="28" text-anchor="middle">🧼</text>${SZ.person(540, 218, "#ffffff", 1.1)}`); },
   gang() { return SZ.banner(`${[0, 1, 2, 3].map(i => `<rect x="${60 + i * 230}" y="50" width="80" height="168" fill="#d6b38a" stroke="#9a7b56"/><text x="${100 + i * 230}" y="42" font-family="sans-serif" font-weight="700" font-size="14" text-anchor="middle">Zimmer ${12 + i}</text><circle cx="${128 + i * 230}" cy="140" r="4" fill="#4b5563"/><rect x="${155 + i * 230}" y="90" width="26" height="46" rx="5" fill="#e0f2fe" stroke="#0f7c8c"/><text x="${168 + i * 230}" y="120" font-size="16" text-anchor="middle">🧴</text>`).join("")}<rect x="0" y="200" width="1000" height="8" fill="#9ca3af"/>${SZ.person(470, 218, "#ffffff", 1.1)}${SZ.person(540, 218, "#e0f2fe", 1.1, "#c68b5a", "#1f1f1f")}<rect x="760" y="160" width="60" height="50" rx="6" fill="#9ca3af"/><text x="790" y="192" font-size="22" text-anchor="middle">🧺</text>`, "#eef2f3"); },
   speisesaal() { return SZ.banner(`<rect x="0" y="30" width="1000" height="90" fill="#9fd0ee"/><path d="M0 95 L150 60 L300 90 L450 50 L600 88 L800 55 L1000 90 V120 H0z" fill="#8fa3b8"/><rect y="105" width="1000" height="15" fill="#5aa3d6"/>${[0, 1, 2].map(i => `<g transform="translate(${90 + i * 300} 150)"><rect x="0" y="0" width="200" height="14" rx="4" fill="#9a5b3c"/><rect x="20" y="14" width="10" height="54" fill="#9a5b3c"/><rect x="170" y="14" width="10" height="54" fill="#9a5b3c"/><text x="50" y="-4" font-size="22">🍽️</text><text x="120" y="-4" font-size="22">🥤</text></g>`).join("")}${SZ.person(360, 218, "#ffffff", 1.1)}`, "#fbf7ef"); },
+  pausenraum() { return SZ.banner(`<rect x="40" y="40" width="320" height="160" rx="6" fill="#d9c7a7" stroke="#8b6b43" stroke-width="3"/><text x="200" y="64" font-family="sans-serif" font-weight="800" font-size="16" text-anchor="middle">FACHBEGRIFFE DER WOCHE</text>${[0, 1, 2, 3, 4, 5].map(i => `<rect x="${58 + (i % 3) * 100}" y="${78 + Math.floor(i / 3) * 58}" width="88" height="48" rx="4" fill="${["#fef9c3", "#ccfbf1", "#fce7f3"][i % 3]}" transform="rotate(${(i % 2 ? 3 : -3)} ${102 + (i % 3) * 100} ${102 + Math.floor(i / 3) * 58})"/><text x="${102 + (i % 3) * 100}" y="${107 + Math.floor(i / 3) * 58}" font-family="sans-serif" font-size="12" text-anchor="middle">${["Dekubitus", "Prophylaxe", "Vitalzeichen", "Ressourcen", "Palliativ", "Aseptisch"][i]}</text>`).join("")}
+    <rect x="430" y="140" width="250" height="14" rx="4" fill="#9a5b3c"/><rect x="450" y="154" width="10" height="64" fill="#9a5b3c"/><rect x="650" y="154" width="10" height="64" fill="#9a5b3c"/><text x="490" y="135" font-size="26">☕</text><text x="570" y="135" font-size="26">🍎</text>${SZ.person(760, 218, "#ffffff", 1.1)}${SZ.person(830, 218, "#e0f2fe", 1.1, "#c68b5a", "#1f1f1f")}`, "#f6f1e8"); },
+  waescherei() { return SZ.banner(`${[0, 1, 2].map(i => `<g transform="translate(${60 + i * 150} 80)"><rect x="0" y="0" width="120" height="138" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/><circle cx="60" cy="78" r="38" fill="#cfe6f5" stroke="#94a3b8" stroke-width="4"/><rect x="10" y="10" width="60" height="12" rx="3" fill="#cbd5e1"/></g>`).join("")}<g transform="translate(560 120)"><rect x="0" y="0" width="140" height="98" rx="8" fill="#93c5fd"/><text x="70" y="40" font-size="28" text-anchor="middle">👕👖</text><text x="70" y="80" font-family="sans-serif" font-size="13" text-anchor="middle">Buntwäsche 40°</text></g><g transform="translate(720 120)"><rect x="0" y="0" width="120" height="98" rx="8" fill="#fca5a5"/><text x="60" y="45" font-family="sans-serif" font-weight="800" font-size="14" text-anchor="middle">INFEKTIÖS</text><text x="60" y="75" font-size="22" text-anchor="middle">⚠️</text></g>${SZ.person(900, 218, "#ffffff", 1.1)}`, "#eef6f8"); },
   notfall() { return SZ.banner(`${SZ.bett(560, 80, 1, false)}<g transform="translate(250 205)"><circle cx="0" cy="0" r="14" fill="#f1c9a5"/><rect x="14" y="-10" width="120" height="22" rx="10" fill="#93c5fd"/><rect x="134" y="-8" width="60" height="16" rx="7" fill="#64748b"/></g><text x="900" y="80" font-size="40" text-anchor="middle">🔔</text><text x="900" y="120" font-family="sans-serif" font-weight="800" font-size="16" fill="#c8102e" text-anchor="middle">Zimmer 7</text>${SZ.person(120, 218, "#ffffff", 1.1)}<rect x="40" y="40" width="160" height="60" rx="6" fill="#fee2e2" stroke="#c8102e"/><text x="120" y="66" font-family="sans-serif" font-weight="800" font-size="15" text-anchor="middle" fill="#c8102e">NOTRUF 144</text><text x="120" y="88" font-family="sans-serif" font-size="12" text-anchor="middle">Notfallteam: 222</text>`); }
 };
 
@@ -274,16 +309,16 @@ const STATION_PLAN = {
   unter: `<rect x="0" y="0" width="1000" height="620" fill="var(--bg)"/><rect x="30" y="30" width="940" height="560" rx="10" fill="none" stroke="var(--wand)" stroke-width="6"/>
     <rect x="975" y="200" width="25" height="300" fill="#5aa3d6" opacity=".6"/><text x="988" y="190" font-size="12" text-anchor="middle" fill="var(--muted)">See</text>`,
   zonen: [
-    { k: "dienst", x: 40, y: 430, w: 200, h: 150, label: "Umkleideraum", f: "#ccfbf1" },
-    { x: 250, y: 430, w: 110, h: 150, label: "Lift", ty: 80 },
-    { k: "vital", x: 40, y: 40, w: 200, h: 170, label: "Stationszimmer" },
+    { k: "dienst", x: 40, y: 430, w: 160, h: 150, label: "Umkleideraum", f: "#ccfbf1", person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Hier beginnt jeder Dienst: Berufskleidung, Schmuck in den Spind, Hände desinfizieren." },
+    { x: 210, y: 430, w: 160, h: 150, label: "Pausenraum", ic: "☕", units: ["fg-check"], karten: "fage", f: "#fef9c3", bild: SZ.pausenraum, person: ["🧑‍🎓", "Noemi, Lernende im 2. Lehrjahr"], sagt: "Hier machen wir Pause und lernen zusammen die Fachbegriffe. Am Anschlagbrett hängen die Wörter der Woche. Teste dich!" },
+    { x: 380, y: 430, w: 160, h: 150, label: "Wäscherei", ic: "🧺", units: ["fg-g"], f: "#e0f2fe", bild: SZ.waescherei, person: ["👩‍🔧", "Frau Ivanović, Hauswirtschaft"], sagt: "Saubere Wäsche und ein sicheres Zimmer gehören auch zur Pflege. Ich zeig dir, worauf es ankommt." },
+    { x: 550, y: 430, w: 170, h: 150, label: "Lift / Treppe", ty: 80 },
+    { k: "vital", x: 40, y: 40, w: 200, h: 170, label: "Stationszimmer", units: ["fg-a", "fg-d", "fg-h"], person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Das Stationszimmer ist unsere Zentrale: Rapport, Medikamente richten, Dokumentation. Hier lernst du professionell zu arbeiten." },
     { x: 250, y: 40, w: 120, h: 170, label: "Zimmer 14–18", ty: 95 },
-    { k: "pflege", x: 380, y: 40, w: 170, h: 170, label: "Zimmer 12", f: "#e0f2fe" },
-    { k: "notfall", x: 560, y: 40, w: 160, h: 170, label: "Zimmer 7", f: "#fee2e2" },
-    { k: "hygiene", x: 40, y: 220, w: 680, h: 200, label: "Gang · 2. Stock", ty: 40 },
-    { x: 370, y: 430, w: 170, h: 150, label: "Zimmer 8–11", ty: 80 },
-    { x: 550, y: 430, w: 170, h: 150, label: "Pflegebad", ty: 80 },
-    { k: "trinken", x: 730, y: 40, w: 230, h: 540, label: "Speisesaal mit Seesicht", f: "#fef3c7" }
+    { k: "pflege", x: 380, y: 40, w: 170, h: 170, label: "Zimmer 12", units: ["fg-b"], f: "#e0f2fe", person: ["👵", "Frau Ammann, 84 Jahre"], sagt: "Kommen Sie nur herein! Ich zeige Ihnen gern, was ich noch alles selbst kann." },
+    { k: "notfall", x: 560, y: 40, w: 160, h: 170, label: "Zimmer 7", units: ["fg-c"], f: "#fee2e2", person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Herr Lang ist sturzgefährdet und hat Demenz. Hier übst du, in schwierigen Situationen ruhig zu handeln." },
+    { k: "hygiene", x: 40, y: 220, w: 680, h: 200, label: "Gang · 2. Stock", ty: 40, units: ["fg-e"], person: ["🧑‍⚕️", "Herr Demir, Hygieneverantwortlicher"], sagt: "An jeder Zimmertür hängt ein Desinfektionsmittelspender. Hygiene schützt alle – die Bewohnenden und dich." },
+    { k: "trinken", x: 730, y: 40, w: 230, h: 540, label: "Speisesaal mit Seesicht", units: ["fg-f"], f: "#fef3c7", person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Im Speisesaal treffen sich alle: essen, trinken, plaudern, singen. Hier gestalten wir den Alltag mit." }
   ],
   ueber: `<text x="42" y="610" font-size="14" fill="var(--muted)">Tippe auf einen Raum. Der rote Punkt zeigt, wohin du als Nächstes gehst.</text>`
 };
