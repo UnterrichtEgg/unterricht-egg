@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polit-Reise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root {
+  --bg: #f6f3ef; --surface: #ffffff; --ink: #1d232a; --muted: #5d6670; --line: #e2ddd6;
+  --red: #c8102e; --redsoft: #fbe6e9; --gold: #b7791f; --goldsoft: #fdf3dc;
+  --ok: #1f7a4d; --okbg: #e3f3ea; --bad: #b42318; --badbg: #fbe7e5; --pick: #2847c9; --picksoft: #e6ebfb;
+  --font-d: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-b: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181d; --surface: #1d232a; --ink: #eef1f4; --muted: #a2adb8; --line: #323b45;
+    --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+    --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181d; --surface: #1d232a; --ink: #eef1f4; --muted: #a2adb8; --line: #323b45;
+  --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+  --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font-b); }
+#app { max-width: 880px; margin: 0 auto; padding: 18px 16px 32px; }
+h1, h2, h3 { font-family: var(--font-d); line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(1.7rem, 5vw, 2.5rem); letter-spacing: -.01em; }
+h2 { font-size: clamp(1.3rem, 3.6vw, 1.7rem); }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 12px 22px; background: var(--red); color: #fff; font-weight: 700; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn:focus-visible, .opt:focus-visible, .chip:focus-visible, .stn:focus-visible { outline: 3px solid var(--pick); outline-offset: 2px; }
+.eyebrow { display: inline-block; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+.muted { color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.stack > * + * { margin-top: 14px; }
+/* Kopfzeile */
+.hud { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.hud .t { font-family: var(--font-d); font-weight: 800; font-size: 1.1rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem; font-weight: 700; white-space: nowrap; }
+.pill.red { background: var(--redsoft); border-color: transparent; color: var(--red); }
+/* Start */
+.hero { position: relative; overflow: hidden; }
+.hero .flag { position: absolute; right: -24px; top: -24px; width: 140px; height: 140px; background: var(--red); border-radius: 24px; transform: rotate(12deg); opacity: .12; }
+.niv { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.nivbtn { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.nivbtn[aria-pressed="true"] { border-color: var(--red); background: var(--redsoft); }
+.nivbtn strong { display: block; font-family: var(--font-d); font-size: 1.1rem; }
+/* Karte der Stationen */
+.weg { list-style: none; margin: 0; padding: 0; position: relative; display: grid; gap: 12px; }
+.weg::before { content: ""; position: absolute; left: 31px; top: 20px; bottom: 20px; border-left: 3px dashed var(--line); }
+.stn { position: relative; display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 10px 14px 10px 8px; }
+.stn .nr { width: 48px; height: 48px; margin-left: 0; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem; background: var(--bg); border: 2px solid var(--line); position: relative; z-index: 1; }
+.stn .tt { font-family: var(--font-d); font-weight: 700; font-size: 1.05rem; }
+.stn .sub { font-size: .85rem; color: var(--muted); }
+.stn .st { font-size: 1.1rem; letter-spacing: 2px; color: var(--gold); white-space: nowrap; }
+.stn.offen { border-color: var(--red); box-shadow: 0 0 0 3px var(--redsoft); }
+.stn.offen .nr { border-color: var(--red); background: var(--redsoft); }
+.stn.fertig .nr { border-color: var(--gold); background: var(--goldsoft); }
+.stn.zu { opacity: .55; cursor: default; }
+.stn .lock { font-size: .85rem; color: var(--muted); }
+/* Lernkarte */
+.lern { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.lern li { padding: 10px 14px 10px 40px; position: relative; background: var(--bg); border-radius: 12px; }
+.lern li::before { content: "✓"; position: absolute; left: 14px; top: 10px; color: var(--red); font-weight: 700; }
+/* Fragen */
+.dots { display: flex; gap: 6px; }
+.dots span { width: 26px; height: 8px; border-radius: 99px; background: var(--line); }
+.dots span.ok { background: var(--ok); } .dots span.bad { background: var(--bad); } .dots span.now { background: var(--red); }
+.qtyp { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.frage { font-family: var(--font-d); font-weight: 700; font-size: clamp(1.15rem, 3.2vw, 1.4rem); }
+.opts { display: grid; gap: 10px; }
+.opt { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.opt:hover:not(:disabled) { border-color: var(--muted); }
+.opt.right { border-color: var(--ok); background: var(--okbg); }
+.opt.wrong { border-color: var(--bad); background: var(--badbg); }
+.opt.weg5050 { visibility: hidden; }
+.opt:disabled { cursor: default; }
+.rfopts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.zu-item { padding: 10px 0; border-top: 1px solid var(--line); }
+.zu-item:first-child { border-top: 0; }
+.zu-item .w { font-weight: 700; margin-bottom: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: .92rem; }
+.chip[aria-pressed="true"] { background: var(--picksoft); border-color: var(--pick); color: var(--ink); font-weight: 700; }
+.chip.right { background: var(--okbg); border-color: var(--ok); }
+.chip.wrong { background: var(--badbg); border-color: var(--bad); }
+.reihe { display: grid; gap: 8px; }
+.reihe .opt .pos { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--picksoft); color: var(--pick); font-weight: 700; margin-right: 8px; font-size: .9rem; }
+.reihe .opt.gewaehlt { border-color: var(--pick); }
+.fb { border-radius: 12px; padding: 12px 14px; font-weight: 700; }
+.fb.ok { background: var(--okbg); color: var(--ok); }
+.fb.bad { background: var(--badbg); color: var(--bad); }
+.fb small { display: block; font-weight: 400; color: var(--ink); margin-top: 4px; font-size: .95rem; }
+/* Ergebnis */
+.big { font-family: var(--font-d); font-weight: 800; font-size: clamp(2.4rem, 9vw, 3.6rem); line-height: 1; }
+.sterne { font-size: 2.2rem; letter-spacing: 6px; color: var(--gold); }
+.resgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.resgrid div { background: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: .9rem; }
+.resgrid b { display: block; color: var(--gold); letter-spacing: 2px; }
+@media (max-width: 520px) { .rfopts { grid-template-columns: 1fr; } .stn { grid-template-columns: 56px 1fr; } .stn .st, .stn .lock { grid-column: 2; } .weg::before { left: 27px; } }
+@media (prefers-reduced-motion: no-preference) { .pop { animation: pop .35s ease-out; } @keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const STATIONEN = [
+{ t: "Die Schweiz in Zahlen", ic: "🇨🇭", ort: "Startpunkt",
+  lern: ["Die Schweiz hat 26 Kantone und gut 9 Millionen Einwohnerinnen und Einwohner, etwa ein Viertel davon sind Ausländerinnen und Ausländer.",
+    "Es gibt vier Amtssprachen: Deutsch (gut 60 %), Französisch (gut 20 %), Italienisch (etwa 8 %) und Rätoromanisch (unter 1 %, vor allem in Graubünden).",
+    "Die Sprachgrenze zwischen Deutsch- und Westschweiz nennt man «Röstigraben».",
+    "Die moderne Schweiz ist ein Bundesstaat und wurde 1848 gegründet, nach dem Sonderbundskrieg. Seither regelt die Bundesverfassung das Zusammenleben.",
+    "Wichtige Wirtschaftszentren: Zürich und Genf (Finanzplätze), Basel (Chemieindustrie), Lausanne (Firmensitze)."],
+  g: [
+    { m: "Wie viele Kantone hat die Schweiz?", o: ["26", "23", "28", "20"] },
+    { m: "Wie viele Menschen leben ungefähr in der Schweiz?", o: ["Gut 9 Millionen", "Etwa 7 Millionen", "Etwa 20 Millionen", "Etwa 3 Millionen"] },
+    { m: "Welche Sprache wird in der Schweiz am häufigsten gesprochen?", o: ["Deutsch", "Französisch", "Italienisch", "Rätoromanisch"] },
+    { m: "Wie nennt man die Sprachgrenze zwischen Deutsch- und Westschweiz?", o: ["Röstigraben", "Fonduegraben", "Schoggigraben", "Alpengraben"] },
+    { m: "Seit wann gibt es die moderne Schweiz als Bundesstaat?", o: ["1848", "1291", "1912", "1971"] },
+    { rf: "Etwa ein Viertel der Menschen in der Schweiz sind Ausländerinnen und Ausländer.", a: true },
+    { rf: "Die Bundesverfassung regelt das Zusammenleben der Menschen in der Schweiz.", a: true },
+    { rf: "Rätoromanisch spricht man vor allem im Tessin.", a: false, x: "Rätoromanisch spricht man vor allem in Graubünden." },
+    { z: "Ordne jeder Sprache den ungefähren Anteil zu.", k: ["gut 60 %", "gut 20 %", "etwa 8 %", "unter 1 %"], i: [["Deutsch", 0], ["Französisch", 1], ["Italienisch", 2], ["Rätoromanisch", 3]] }
+  ],
+  e: [
+    { m: "Was ist eine Amtssprache?", o: ["Eine offizielle Sprache des Landes, in der auch die Gesetze geschrieben sind", "Eine Sprache, die nur Beamte sprechen", "Die Sprache der Hauptstadt", "Eine Fremdsprache in der Schule"] },
+    { m: "Welcher Bürgerkrieg ging der Gründung des Bundesstaats 1848 voraus?", o: ["Der Sonderbundskrieg", "Der Schwabenkrieg", "Der Bauernkrieg", "Der Erste Weltkrieg"] },
+    { m: "Seit wann sind die Schweizer Grenzen international anerkannt?", o: ["1815", "1848", "1291", "1945"] },
+    { m: "Welche Kantone gehören zu den bevölkerungsreichsten?", o: ["Zürich, Bern und Waadt", "Uri, Glarus und Jura", "Zug, Schwyz und Appenzell", "Basel-Stadt, Uri und Glarus"] },
+    { m: "Warum nennt man die Schweiz einen «Bundesstaat»?", o: ["Weil sich mehrere Kantone zu einem Bund zusammengeschlossen haben", "Weil sie von einem König regiert wird", "Weil alle Kantone gleich gross sind", "Weil sie Mitglied der EU ist"] },
+    { rf: "Die Sprachgrenzen schaffen in der Schweiz oft mehr Identität als die Kantonsgrenzen.", a: true },
+    { rf: "Die Lebenserwartung in der Schweiz liegt unter dem Durchschnitt der OECD-Länder.", a: false, x: "Sie liegt bei etwa 84 Jahren, rund drei Jahre über dem OECD-Durchschnitt." },
+    { rf: "Teilweise werden in einem Kanton zwei Amtssprachen gesprochen.", a: true },
+    { z: "Welche Stadt passt zu welcher Beschreibung?", k: ["Finanzplatz", "Chemieindustrie", "Firmenhauptsitze", "Bundesstadt"], i: [["Zürich", 0], ["Basel", 1], ["Lausanne", 2], ["Bern", 3]] }
+  ] },
+{ t: "Die Demokratie", ic: "🗳️", ort: "Landsgemeinde",
+  lern: ["In einer Demokratie bestimmen die Bewohnerinnen und Bewohner mit. «Demokratie» heisst auf Altgriechisch «Volksherrschaft».",
+    "Merkmale: freie Wahlen, Rede- und Meinungsfreiheit, mehrere Parteien (Pluralismus), eine Verfassung und Gewaltenteilung.",
+    "Die Schweiz ist eine direkte Demokratie: Das Volk wählt nicht nur Politiker, sondern stimmt auch über Sachfragen ab. Darum haben Politiker weniger Macht.",
+    "In einer Diktatur herrscht eine Person oder eine kleine Gruppe mit Gewalt. Es gibt keine freien Wahlen und kaum Meinungsfreiheit.",
+    "Nachteile von Demokratien: Oft dürfen Ausländerinnen und Ausländer nicht mitbestimmen, und Fake News können Menschen beeinflussen."],
+  g: [
+    { m: "Was bedeutet Demokratie?", o: ["Die Bewohner eines Landes können mitbestimmen", "Ein König entscheidet alles", "Nur die Armee regiert", "Nur reiche Menschen dürfen wählen"] },
+    { m: "Was ist ein Parlament?", o: ["Der Ort, wo gewählte Politiker über Gesetze diskutieren", "Ein Gericht", "Ein Sportverein", "Eine Zeitung"] },
+    { m: "Was ist eine Partei?", o: ["Ein politischer Verein von Menschen mit ähnlicher Meinung", "Ein grosses Fest", "Ein Gericht", "Ein Geschäft"] },
+    { m: "Was ist besonders an der Schweizer Demokratie?", o: ["Das Volk stimmt auch direkt über politische Fragen ab", "Es gibt keine Wahlen", "Der Bundesrat entscheidet alles allein", "Nur die Kantone dürfen abstimmen"] },
+    { rf: "In einer Demokratie gilt die Rede- und Meinungsfreiheit.", a: true },
+    { rf: "In einer Demokratie ist das Demonstrieren verboten.", a: false, x: "In einer Demokratie darf man demonstrieren." },
+    { rf: "In der Schweiz haben Politiker weniger Macht als in vielen anderen Ländern.", a: true },
+    { rf: "In einer Demokratie darf ein Politiker Gesetze machen und gleichzeitig als Richter urteilen.", a: false, x: "Die Macht ist geteilt: Niemand darf gleichzeitig Gesetze machen und darüber urteilen." },
+    { z: "Demokratie oder Diktatur?", k: ["Demokratie", "Diktatur"], i: [["Man darf demonstrieren", 0], ["Eine Person bestimmt alle Regeln", 1], ["Man kann sich frei informieren", 0], ["Politiker kommen mit Gewalt an die Macht", 1]] }
+  ],
+  e: [
+    { m: "Was bedeutet das altgriechische Wort «Demokratie»?", o: ["Volksherrschaft", "Königsherrschaft", "Herrschaft der Reichen", "Herrschaft der Richter"] },
+    { m: "Was bedeutet Pluralismus?", o: ["Es gibt verschiedene Parteien und Interessengruppen", "Es gibt nur eine Partei", "Alle haben dieselbe Meinung", "Das Volk wählt einen König"] },
+    { m: "Was unterscheidet die direkte von der parlamentarischen Demokratie?", o: ["In der direkten Demokratie stimmt das Volk auch über Sachfragen ab", "In der direkten Demokratie gibt es kein Parlament", "In der direkten Demokratie wählt man nie", "In der direkten Demokratie entscheidet ein Präsident"] },
+    { m: "Was kennzeichnet eine Diktatur?", o: ["Keine freien Wahlen und stark eingeschränkte Meinungsfreiheit", "Viele Parteien", "Unabhängige Gerichte", "Häufige Volksabstimmungen"] },
+    { m: "Welcher Nachteil von Demokratien wird oft genannt?", o: ["Menschen können durch Fake News beeinflusst werden", "Es gibt zu viel Gewaltenteilung", "Man darf keine Partei gründen", "Es gibt keine Verfassung"] },
+    { m: "Wie wird an einer Landsgemeinde abgestimmt?", o: ["Unter freiem Himmel, die Stimmen werden von Hand gezählt", "Nur im Internet", "Im Bundesgericht", "Per Brief nach Brüssel"] },
+    { rf: "Gewaltenteilung stellt sicher, dass die Macht auf mehrere Personen verteilt ist.", a: true },
+    { rf: "Einige Länder nennen sich Demokratien, schränken aber die Mitsprache stark ein.", a: true },
+    { z: "Ordne den Begriff der passenden Erklärung zu.", k: ["Pluralismus", "Diktatur", "Gewaltenteilung", "Verfassung"], i: [["Viele Parteien und Interessengruppen", 0], ["Eine Person oder Gruppe herrscht mit Gewalt", 1], ["Die Macht wird verteilt", 2], ["Grundregeln des Zusammenlebens", 3]] }
+  ] },
+{ t: "Wählen und abstimmen", ic: "✉️", ort: "Urne",
+  lern: ["Alle vier Jahre werden die Politikerinnen und Politiker gewählt. Wählen und abstimmen darf, wer 18 Jahre alt ist und den Schweizer Pass hat.",
+    "Volksinitiative: Mit 100 000 Unterschriften in 18 Monaten kann man eine Änderung der Verfassung verlangen. Danach stimmt das Volk ab. Nötig sind Volksmehr und Ständemehr (Mehrheit der Kantone).",
+    "Referendum: Damit stimmt das Volk über Beschlüsse des Parlaments ab. Für ein fakultatives Referendum braucht es 50 000 Unterschriften. Beim obligatorischen Referendum wird immer abgestimmt.",
+    "Eine Initiative darf nur eine Sachfrage enthalten und nicht gegen zwingendes Völkerrecht verstossen, z. B. Todesstrafe oder Sklaverei.",
+    "Frauen dürfen auf Bundesebene erst seit 1971 wählen und abstimmen."],
+  g: [
+    { m: "Wie oft werden die Politikerinnen und Politiker gewählt?", o: ["Alle vier Jahre", "Jedes Jahr", "Alle zehn Jahre", "Nur einmal im Leben"] },
+    { m: "Wie viele Unterschriften braucht eine Volksinitiative?", o: ["100 000", "50 000", "10 000", "1 Million"] },
+    { m: "Was braucht man, um in der Schweiz abstimmen zu dürfen?", o: ["18 Jahre und den Schweizer Pass", "16 Jahre und eine Wohnung", "Ein Auto", "Die Mitgliedschaft in einer Partei"] },
+    { m: "Seit wann dürfen Frauen in der Schweiz auf Bundesebene abstimmen?", o: ["1971", "1848", "1918", "1990"] },
+    { m: "Was ist eine Volksinitiative?", o: ["Man verlangt mit Unterschriften eine Änderung, danach wird abgestimmt", "Ein Fest im Dorf", "Ein Gerichtsurteil", "Eine neue Steuer"] },
+    { rf: "Über die Einführung der Todesstrafe darf nicht abgestimmt werden.", a: true },
+    { rf: "Die Unterlagen zum Abstimmen bekommt man per Post.", a: true },
+    { rf: "Über das Frauenstimmrecht wurde nie abgestimmt.", a: false, x: "Auch über das Frauenstimmrecht wurde abgestimmt." },
+    { z: "Gab es diese Volksinitiative wirklich?", k: ["Gab es wirklich", "Erfunden"], i: [["Hornkuh-Initiative (Kühe behalten ihre Hörner)", 0], ["Gratis Glace in allen Badis", 1], ["Zwölf autofreie Sonntage im Jahr", 0], ["Ein Bankkonto für jedes Haustier", 1]] }
+  ],
+  e: [
+    { m: "Wie viele Unterschriften braucht ein fakultatives Referendum?", o: ["50 000", "100 000", "5 000", "500 000"] },
+    { m: "In welcher Zeit müssen die Unterschriften für eine Volksinitiative gesammelt werden?", o: ["18 Monate", "100 Tage", "5 Jahre", "1 Woche"] },
+    { m: "Was braucht es, damit eine Volksinitiative angenommen wird?", o: ["Volksmehr und Ständemehr", "Nur das Volksmehr", "Die Zustimmung des Bundesgerichts", "Eine Mehrheit im Bundesrat"] },
+    { m: "Was sind die «Stände»?", o: ["Die Kantone", "Die Parteien", "Die Gemeinden", "Die Gerichte"] },
+    { m: "Womit stimmt das Volk über Beschlüsse des Parlaments ab?", o: ["Mit dem Referendum", "Mit der Landsgemeinde", "Mit einem Gerichtsurteil", "Mit der Bundesratswahl"] },
+    { m: "Was bedeutet: Volksinitiativen sind in der Schweiz «rechtlich bindend»?", o: ["Wird sie angenommen, muss sie umgesetzt werden", "Sie ist nur ein Vorschlag", "Nur der Bundesrat darf sie lesen", "Sie gilt nur in einem Kanton"] },
+    { rf: "Eine Volksinitiative darf nur eine Sachfrage enthalten.", a: true },
+    { rf: "Die Frauen erhielten das Stimmrecht ohne öffentlichen Druck.", a: false, x: "Es brauchte Kundgebungen und Demonstrationen, z. B. den «Marsch auf Bern»." },
+    { z: "Wäre diese Volksinitiative gültig oder ungültig?", k: ["gültig", "ungültig"], i: [["Für eine Einschränkung von Feuerwerk", 0], ["Für die Einführung der Todesstrafe", 1], ["Schweizer Pass für alle und Klimaschutz jetzt!", 1], ["Ja zu fairen und sicheren Renten", 0]], x: "Ungültig ist, was gegen zwingendes Völkerrecht verstösst oder mehrere Sachfragen vermischt." }
+  ] },
+{ t: "Föderalismus", ic: "🏘️", ort: "Gemeindehaus",
+  lern: ["Die Schweiz ist in drei Stufen organisiert: Gemeinde (tiefste Stufe), Kanton und Bund (höchste Stufe). Das nennt man Föderalismus.",
+    "Gemeinden entscheiden über Dinge im Dorf oder in der Stadt: Schulhaus, Schwimmbad, Dorfplatz, Feuerwehr, Wasserversorgung.",
+    "Kantone sind z. B. für Polizei, Spitäler und die Volksschule zuständig. Jeder Kanton hat ein eigenes Parlament.",
+    "Der Bund regelt, was einheitlich sein muss: Währung (Franken), Armee, Aussenpolitik.",
+    "Vorteil: Entscheidungen werden dort getroffen, wo die Menschen betroffen sind. Es gibt 26 Kantone und rund 2200 Gemeinden."],
+  g: [
+    { m: "Welches sind die drei Stufen der Schweizer Politik?", o: ["Gemeinde, Kanton, Bund", "Stadt, Land, Welt", "Dorf, Schule, Familie", "Kanton, EU, UNO"] },
+    { m: "Welche Stufe ist die tiefste?", o: ["Die Gemeinde", "Der Kanton", "Der Bund", "Der Bundesrat"] },
+    { m: "Wer ist für die Polizei zuständig?", o: ["Der Kanton", "Die Gemeinde", "Der Bund", "Die EU"] },
+    { m: "Wer sorgt dafür, dass wir alle mit Schweizer Franken bezahlen?", o: ["Der Bund", "Der Kanton", "Die Gemeinde", "Die Bank"] },
+    { m: "Wer entscheidet über ein neues Schwimmbad im Dorf?", o: ["Die Gemeinde", "Der Bund", "Der Bundesrat", "Das Bundesgericht"] },
+    { rf: "Jeder Kanton hat ein eigenes Parlament.", a: true },
+    { rf: "Die Kantone sind für die Landesverteidigung zuständig.", a: false, x: "Die Landesverteidigung (Armee) ist Aufgabe des Bundes." },
+    { rf: "Als Schweizerin oder Schweizer kann man auf allen drei Stufen mitentscheiden.", a: true },
+    { z: "Welche Stufe ist zuständig?", k: ["Gemeinde", "Kanton", "Bund"], i: [["Einen Skaterpark eröffnen", 0], ["Ein Spital betreiben", 1], ["Die Armee", 2], ["Ein neues Schulhaus planen", 0]] }
+  ],
+  e: [
+    { m: "Was bedeutet Föderalismus?", o: ["Die Macht ist auf Bund, Kantone und Gemeinden verteilt", "Alles wird zentral von Bern aus bestimmt", "Die Schweiz gehört zur EU", "Nur die Gemeinden haben Macht"] },
+    { m: "Wie viele Gemeinden gibt es in der Schweiz ungefähr?", o: ["Rund 2200", "26", "Rund 200", "Rund 22 000"] },
+    { m: "Welcher Vorteil des Föderalismus wird genannt?", o: ["Gesetze können an die Bedürfnisse von Kantonen und Gemeinden angepasst werden", "Überall gelten genau dieselben Regeln", "Es braucht keine Wahlen mehr", "Man muss keine Steuern zahlen"] },
+    { m: "Was ist ein Budget?", o: ["Eine Aufstellung von Einnahmen und Ausgaben", "Ein Gesetz", "Eine Partei", "Ein Gerichtsurteil"] },
+    { m: "Worüber kann eine Gemeinde abstimmen lassen?", o: ["Über die Erhöhung des Steuerfusses", "Über die Aussenpolitik", "Über die Währung", "Über die Armee"] },
+    { rf: "Eine Gemeinde darf Gesetze ändern, für die der Bund verantwortlich ist.", a: false, x: "Gemeinden und Kantone dürfen keine Gesetze ändern, die in die Verantwortung des Bundes gehören." },
+    { rf: "Die Kantone sind für die Volksschule zuständig.", a: true },
+    { rf: "Der Föderalismus fördert Wettbewerb und Innovation.", a: true },
+    { z: "Welche Ebene ist zuständig?", k: ["Gemeinde", "Kanton", "Bund"], i: [["Ortsplanung", 0], ["Örtliche Wasserversorgung", 0], ["Universitäten", 1], ["Kantonale Steuern", 1], ["Aussenpolitik", 2], ["Nationale Energiestrategie", 2]] }
+  ] },
+{ t: "Die Gewaltenteilung", ic: "⚖️", ort: "Machtzentrale",
+  lern: ["In einer Demokratie ist die Macht auf drei Gewalten verteilt. Sie kontrollieren sich gegenseitig.",
+    "Legislative (gesetzgebende Gewalt): macht und ändert Gesetze, z. B. National- und Ständerat, Kantonsrat, Gemeindeversammlung.",
+    "Exekutive (ausführende Gewalt): setzt die Gesetze um, z. B. Bundesrat, Regierungsrat, Gemeinderat, Polizei, Verwaltung.",
+    "Judikative (richterliche Gewalt): urteilt bei Streitfällen, z. B. Bezirksgerichte, Kantonsgerichte, Bundesgericht.",
+    "Niemand darf zwei Gewalten gleichzeitig angehören. Die Medien nennt man oft die «vierte Gewalt», weil sie die anderen kontrollieren."],
+  g: [
+    { m: "Welche Gewalt macht die Gesetze?", o: ["Die Legislative", "Die Exekutive", "Die Judikative", "Die Medien"] },
+    { m: "Welche Gewalt setzt die Gesetze um?", o: ["Die Exekutive", "Die Legislative", "Die Judikative", "Das Volk"] },
+    { m: "Welche Gewalt entscheidet bei Streitfällen?", o: ["Die Judikative", "Die Exekutive", "Die Legislative", "Die Partei"] },
+    { m: "Warum ist die Macht auf drei Gewalten verteilt?", o: ["Damit niemand zu viel Macht hat", "Damit Politiker mehr verdienen", "Damit alles schneller geht", "Damit es wieder einen König gibt"] },
+    { rf: "Ein Politiker darf gleichzeitig zur Legislative und zur Judikative gehören.", a: false, x: "Eine Person darf nie mehr als einer Gewalt angehören." },
+    { rf: "Die Polizei gehört zur Exekutive.", a: true },
+    { rf: "Ein König war früher Legislative, Exekutive und Judikative gleichzeitig.", a: true },
+    { z: "Welche Gewalt ist hier tätig?", k: ["Legislative", "Exekutive", "Judikative"], i: [["Ein Streitfall landet vor Gericht", 2], ["Die Polizei kontrolliert die Gesetze", 1], ["Zwei Politiker machen ein neues Gesetz", 0], ["Die Regierung verhandelt einen Vertrag", 1]] }
+  ],
+  e: [
+    { m: "Was nennt man oft die «vierte Gewalt»?", o: ["Die Medien", "Die Armee", "Die Banken", "Die Kirchen"] },
+    { m: "Wer bildet auf Bundesebene die Legislative?", o: ["National- und Ständerat", "Der Bundesrat", "Das Bundesgericht", "Die Polizei"] },
+    { m: "Wer gehört auf Kantonsebene zur Exekutive?", o: ["Der Regierungsrat", "Der Kantonsrat", "Das Obergericht", "Die Gemeindeversammlung"] },
+    { m: "Wer ist in einer Gemeinde die Legislative?", o: ["Die Gemeindeversammlung oder das Gemeindeparlament", "Der Gemeinderat", "Der Friedensrichter", "Die Polizei"] },
+    { m: "In welcher Herrschaftsform konnte eine Person allen drei Gewalten angehören?", o: ["Im Absolutismus", "In der direkten Demokratie", "Im Föderalismus", "Im Zweikammersystem"] },
+    { rf: "Die Medien sind ein offizieller Teil der Gewaltenteilung.", a: false, x: "Sie sind kein offizieller Teil, kontrollieren die Gewalten aber durch ihre Berichterstattung." },
+    { rf: "Auch in Demokratien wurden schon Skandale um bestechliche Politiker aufgedeckt.", a: true },
+    { z: "Zu welcher Gewalt gehört …?", k: ["Legislative", "Exekutive", "Judikative", "Vierte Gewalt"], i: [["Bundesrat", 1], ["Ständerat", 0], ["Bundesgericht", 2], ["Gemeinderat", 1], ["Kantonsrat", 0], ["Zeitung und Fernsehen", 3]] }
+  ] },
+{ t: "Die Legislative", ic: "📜", ort: "Parlament",
+  lern: ["Die Legislative macht neue Gesetze oder ändert bestehende. Gesetze regeln das Zusammenleben.",
+    "Gemeinde: Gemeindeversammlung oder Gemeindeparlament. Kanton: Kantonsrat oder Grosser Rat. Bund: Nationalrat und Ständerat.",
+    "Weg eines Gesetzes: Gesetzesentwurf → Vernehmlassung (Organisationen werden befragt) → Debatte im Parlament → Abstimmung im Parlament → manchmal Abstimmung von Volk und Kantonen.",
+    "Ein Gesetzesentwurf kann vom Parlament, von der Regierung oder aus einer Volksinitiative kommen.",
+    "National- und Ständerat wählen auch den Bundesrat. Die meisten Politikerinnen und Politiker gehören einer Partei an."],
+  g: [
+    { m: "Was macht die Legislative?", o: ["Sie macht neue Gesetze oder ändert bestehende", "Sie verhaftet Diebe", "Sie urteilt vor Gericht", "Sie verkauft Briefmarken"] },
+    { m: "Wie heisst die Legislative im Kanton?", o: ["Kantonsrat oder Grosser Rat", "Regierungsrat", "Obergericht", "Gemeinderat"] },
+    { m: "Wie heisst die Legislative auf Bundesebene?", o: ["Nationalrat und Ständerat", "Bundesrat", "Bundesgericht", "Bundeskanzlei"] },
+    { m: "Wer darf an der Gemeindeversammlung abstimmen?", o: ["Stimmberechtigte Einwohner mit Schweizer Pass", "Alle Touristen", "Nur der Gemeinderat", "Alle Kinder"] },
+    { m: "Was ist ein Gesetzesentwurf?", o: ["Ein Gesetz, das noch nicht fertig und noch nicht gültig ist", "Ein Gerichtsurteil", "Eine Wahl", "Eine Partei"] },
+    { rf: "Ein Gesetzesentwurf kann auch aus einer Volksinitiative kommen.", a: true },
+    { rf: "Parteien beeinflussen mit Werbekampagnen Wahlen und Abstimmungen.", a: true },
+    { r: "Bringe die Schritte in die richtige Reihenfolge: Wie entsteht ein Gesetz?", s: ["Gesetzesentwurf", "Befragung von Organisationen", "Diskussion im Parlament", "Abstimmung im Parlament"] }
+  ],
+  e: [
+    { m: "Was ist eine Vernehmlassung?", o: ["Organisationen und Interessengruppen werden zum Gesetzesentwurf befragt", "Die Schlussabstimmung im Parlament", "Die Wahl des Bundesrats", "Ein Gerichtsverfahren"] },
+    { m: "Welche weitere Aufgabe haben National- und Ständerat?", o: ["Sie wählen den Bundesrat", "Sie leiten die Polizei", "Sie fällen Gerichtsurteile", "Sie drucken das Geld"] },
+    { m: "Wie viele Personen haben im Nationalratssaal Platz?", o: ["200", "46", "7", "26"] },
+    { m: "Was bedeutet «debattieren»?", o: ["Etwas besprechen und politisch miteinander streiten", "Abstimmen", "Jemanden verurteilen", "Unterschriften sammeln"] },
+    { m: "Wie sind Parteien organisiert?", o: ["In Ortssektionen, Kantonalsektionen und auf nationaler Ebene", "Nur in Bern", "Nur in der EU", "Gar nicht"] },
+    { rf: "Der Kantonsrat darf Gesetze ändern, die in die Verantwortung des Bundes gehören.", a: false, x: "Das darf nur der Bund." },
+    { rf: "Bei einigen Gesetzen braucht es auch die Zustimmung von Volk und Kantonen.", a: true },
+    { r: "Bringe die Schritte eines Bundesgesetzes in die richtige Reihenfolge.", s: ["Der Bundesrat bereitet einen Entwurf vor", "Vernehmlassung", "Der Erstrat berät und stimmt ab", "Der Zweitrat berät und stimmt ab", "Schlussabstimmung in beiden Räten"] }
+  ] },
+{ t: "Parteien und Parlament", ic: "🏛️", ort: "Bundeshaus",
+  lern: ["Wichtige Parteien: SVP (grösste Partei, Unabhängigkeit, harte Ausländerpolitik), SP (soziale Gerechtigkeit, Gleichstellung), FDP (Wirtschaft, Freiheit), Die Mitte (Familien, früher CVP), Grüne (Umwelt), GLP (Umwelt und Wirtschaft).",
+    "Der Nationalrat hat 200 Sitze. Grosse Kantone haben mehr Sitze, Zürich zum Beispiel 36.",
+    "Der Ständerat hat 46 Sitze: zwei pro Kanton, die Halbkantone haben je einen. Dort sind alle Kantone fast gleich stark.",
+    "Zusammen bilden die beiden Räte die Vereinigte Bundesversammlung. Man spricht vom Zweikammersystem.",
+    "Beide Räte werden alle vier Jahre gewählt. Ein neues Bundesgesetz braucht die Zustimmung beider Räte."],
+  g: [
+    { m: "Welche Partei ist die grösste der Schweiz?", o: ["SVP", "SP", "FDP", "Grüne"] },
+    { m: "Welcher Partei sind Umweltschutz und erneuerbare Energien besonders wichtig?", o: ["Den Grünen", "Der SVP", "Der FDP", "Der Mitte"] },
+    { m: "Welche Partei setzt sich besonders für Familien ein?", o: ["Die Mitte", "Die SVP", "Die FDP", "Die GLP"] },
+    { m: "Welche Partei setzt sich für die Arbeiter und die Schwächsten ein?", o: ["Die SP", "Die FDP", "Die SVP", "Die Mitte"] },
+    { m: "Wie viele Mitglieder hat der Nationalrat?", o: ["200", "46", "7", "26"] },
+    { m: "Wie viele Mitglieder hat der Ständerat?", o: ["46", "200", "26", "100"] },
+    { rf: "Kantone mit vielen Einwohnern haben im Nationalrat mehr Sitze.", a: true },
+    { rf: "Im Ständerat haben die meisten Kantone genau zwei Sitze.", a: true },
+    { z: "Welches Thema passt zu welcher Partei?", k: ["SVP", "SP", "FDP", "Grüne"], i: [["Unabhängigkeit der Schweiz", 0], ["Gerechtigkeit und Schutz der Schwächsten", 1], ["Wirtschaft und Freiheit des Einzelnen", 2], ["Umweltschutz", 3]] }
+  ],
+  e: [
+    { m: "Wie nennt man National- und Ständerat zusammen?", o: ["Vereinigte Bundesversammlung", "Bundesrat", "Landsgemeinde", "Regierungsrat"] },
+    { m: "Wie viele Nationalratssitze hat der Kanton Zürich?", o: ["36", "2", "12", "46"] },
+    { m: "Wie viele Ständeratssitze hat ein Halbkanton wie Basel-Stadt?", o: ["1", "2", "0", "4"] },
+    { m: "Wie nennt man das System mit zwei Räten?", o: ["Zweikammersystem", "Zauberformel", "Kollegialitätsprinzip", "Föderalismus"] },
+    { m: "Welche Partei ist aus der ehemaligen CVP hervorgegangen?", o: ["Die Mitte", "Die GLP", "Die FDP", "Die Grünen"] },
+    { m: "Warum ist das Zweikammersystem für kleine Kantone wichtig?", o: ["Im Ständerat sind alle Kantone gleich stark vertreten", "Kleine Kantone haben im Nationalrat am meisten Sitze", "Kleine Kantone wählen den Bundesrat allein", "Kleine Kantone müssen nicht abstimmen"] },
+    { rf: "Der Ständerat wird auch «Kleine Kammer» genannt.", a: true },
+    { rf: "Ein neues Bundesgesetz braucht nur die Zustimmung des Nationalrats.", a: false, x: "Nationalrat und Ständerat müssen beide zustimmen." },
+    { z: "Welche Beschreibung passt zu welcher Partei?", k: ["SVP", "FDP", "GLP", "Die Mitte"], i: [["Konservativ, grösste Partei", 0], ["Liberal, stark wirtschaftsorientiert", 1], ["Relativ jung, Umwelt und wirtschaftliche Freiheit", 2], ["Familienpolitik, stark in der Innerschweiz", 3]] }
+  ] },
+{ t: "Der Bundesrat", ic: "👥", ort: "Regierung",
+  lern: ["Der Bundesrat ist die Regierung der Schweiz (Exekutive auf Bundesebene). Er hat sieben Mitglieder mit gleich viel Macht.",
+    "Er wird alle vier Jahre von der Vereinigten Bundesversammlung gewählt, nicht vom Volk.",
+    "Jedes Mitglied leitet ein Departement, z. B. VBS (Armee, Sport), EDA (Aussenpolitik), EFD (Finanzen, Steuern), EJPD (Sicherheit, Migration), UVEK (Verkehr, Energie), WBF (Wirtschaft, Bildung), EDI (Gesundheit, Altersvorsorge).",
+    "Zauberformel: SVP, SP und FDP haben je zwei Sitze, Die Mitte einen. Das ist kein Gesetz, sondern eine Abmachung.",
+    "Kollegialitätsprinzip: Der Bundesrat entscheidet gemeinsam, und alle vertreten nach aussen die Mehrheitsmeinung."],
+  g: [
+    { m: "Wie viele Mitglieder hat der Bundesrat?", o: ["7", "5", "9", "46"] },
+    { m: "Wer wählt den Bundesrat?", o: ["Nationalrat und Ständerat", "Das Volk", "Die Kantone", "Das Bundesgericht"] },
+    { m: "Wie nennt man den Aufgabenbereich eines Bundesrats?", o: ["Departement", "Kanton", "Partei", "Instanz"] },
+    { m: "Welches Departement ist für die Armee zuständig?", o: ["VBS", "EDA", "EFD", "EDI"] },
+    { m: "Welches Departement kümmert sich um die Beziehungen zu anderen Ländern?", o: ["EDA", "VBS", "UVEK", "WBF"] },
+    { rf: "Im Bundesrat gibt es einen Präsidenten, der viel mehr Macht hat als die anderen.", a: false, x: "Alle sieben Mitglieder haben gleich viel Macht." },
+    { rf: "Die Exekutive macht keine neuen Gesetze, sondern setzt sie um.", a: true },
+    { rf: "Man achtet darauf, dass die Sprachregionen im Bundesrat vertreten sind.", a: true },
+    { z: "Welches Departement ist zuständig?", k: ["EFD", "EJPD", "UVEK", "WBF"], i: [["Steuern und Finanzen", 0], ["Sicherheit und Asyl", 1], ["Strassen, Schienen und Strom", 2], ["Wirtschaft, Bildung und Forschung", 3]] }
+  ],
+  e: [
+    { m: "Was ist die «Zauberformel»?", o: ["SVP, SP und FDP haben je zwei Bundesratssitze, Die Mitte einen", "Ein Gesetz über die Steuern", "Ein Trick bei Abstimmungen", "Die Regel für die Wahl der Richter"] },
+    { m: "Ist die Zauberformel in einem Gesetz festgeschrieben?", o: ["Nein, sie ist ein inoffizieller Grundsatz", "Ja, in der Bundesverfassung", "Ja, in einem Bundesgerichtsurteil", "Ja, in einem EU-Vertrag"] },
+    { m: "Was bedeutet das Kollegialitätsprinzip?", o: ["Alle Bundesräte vertreten nach aussen die Mehrheitsmeinung", "Jeder Bundesrat sagt öffentlich seine eigene Meinung", "Der Präsident entscheidet allein", "Das Volk stimmt über jeden Entscheid ab"] },
+    { m: "Womit befasst sich das EJPD?", o: ["Innere Sicherheit, Migration und Bürgerrecht", "Strassen und Strom", "Armee und Sport", "Schulen und Universitäten"] },
+    { m: "Wer unterstützt den Bundesrat bei seiner Arbeit?", o: ["Der Bundeskanzler oder die Bundeskanzlerin", "Ein König", "Das Bundesgericht", "Die EU"] },
+    { m: "Wer kontrolliert die Exekutive bei der Umsetzung der Gesetze?", o: ["Das Parlament (Legislative)", "Niemand", "Die Armee", "Die Partei mit den meisten Mitgliedern"] },
+    { rf: "Bei der Bundesratswahl werden amtierende Bundesräte meistens wiedergewählt.", a: true },
+    { rf: "Andere Länder nennen Departemente oft «Ministerien».", a: true },
+    { z: "Zu welcher Ebene gehört diese Regierung?", k: ["Gemeinde", "Kanton", "Bund"], i: [["Gemeinderat", 0], ["Regierungsrat", 1], ["Bundesrat", 2]] }
+  ] },
+{ t: "Die Gerichte", ic: "🔨", ort: "Gericht",
+  lern: ["Die Judikative (Gerichte und Richter) urteilt bei Streitfällen, kontrolliert die Anwendung der Gesetze und schützt die Rechte der Menschen. Sie macht keine Gesetze.",
+    "Stufen: Friedensrichter und Bezirksgericht → Kantonsgericht oder Obergericht → Bundesgericht. Man kann keine Stufe überspringen.",
+    "Das Bundesgericht ist das höchste Gericht. Sein Urteil ist endgültig. Es hat Standorte in Lausanne (Hauptsitz), Luzern, St. Gallen und Bellinzona.",
+    "Die Bundesrichter werden von National- und Ständerat für sechs Jahre gewählt und dürfen bis 68 arbeiten.",
+    "Eine Instanz ist eine Behörde, die für eine Entscheidung zuständig ist."],
+  g: [
+    { m: "Was ist das höchste Gericht der Schweiz?", o: ["Das Bundesgericht", "Das Bezirksgericht", "Das Kantonsgericht", "Der Friedensrichter"] },
+    { m: "Wer wählt die Bundesrichter?", o: ["Nationalrat und Ständerat", "Das Volk", "Der Bundesrat", "Die Kantone"] },
+    { m: "In welcher Stadt ist der Hauptsitz des Bundesgerichts?", o: ["Lausanne", "Zürich", "Genf", "Basel"] },
+    { m: "Was macht die Judikative?", o: ["Sie urteilt bei Streitfällen und kontrolliert die Anwendung der Gesetze", "Sie macht Gesetze", "Sie wählt den Bundesrat", "Sie leitet die Armee"] },
+    { m: "Für wie viele Jahre werden Bundesrichter gewählt?", o: ["6", "4", "10", "1"] },
+    { rf: "Das Urteil des Bundesgerichts ist endgültig.", a: true },
+    { rf: "Die Judikative macht neue Gesetze.", a: false, x: "Gesetze macht die Legislative." },
+    { r: "Bringe die Gerichte in die richtige Reihenfolge, von unten nach oben.", s: ["Bezirksgericht", "Kantonsgericht", "Bundesgericht"] }
+  ],
+  e: [
+    { m: "Bis zu welchem Alter dürfen Bundesrichter arbeiten?", o: ["68", "60", "75", "65"] },
+    { m: "Wo hat das Bundesgericht seine Standorte?", o: ["Lausanne, Luzern, St. Gallen und Bellinzona", "Bern, Zürich, Genf und Basel", "Nur in Bern", "Chur und Sitten"] },
+    { m: "Was ist eine Instanz?", o: ["Eine Behörde, die für eine Entscheidung zuständig ist", "Ein Gesetz", "Eine Partei", "Ein Stimmzettel"] },
+    { m: "Zwei Nachbarn streiten wegen eines Baums. Wohin gehen sie zuerst?", o: ["Zum Friedensrichter", "Direkt zum Bundesgericht", "Zum Bundesrat", "Zum Ständerat"] },
+    { rf: "Man kann einzelne Instanzen einfach überspringen.", a: false, x: "Man muss den Instanzenweg einhalten." },
+    { rf: "Die Zahl der Fälle am Bundesgericht ist in den letzten Jahren gestiegen.", a: true },
+    { rf: "Die Judikative schützt die Rechte der Bürgerinnen und Bürger.", a: true },
+    { r: "Bringe den Instanzenweg in die richtige Reihenfolge.", s: ["Friedensrichter", "Bezirksgericht", "Kantons- oder Obergericht", "Bundesgericht"] }
+  ] },
+{ t: "Die Schweiz und die EU", ic: "🇪🇺", ort: "Grenze",
+  lern: ["Die Europäische Union (EU) ist ein Zusammenschluss von 27 Ländern mit rund 450 Millionen Menschen. Sie wurde 1993 gegründet und hat den Euro und ein Parlament.",
+    "Ziele der EU: Frieden, Stabilität und Wohlstand. Menschen und Waren sollen sich frei bewegen können.",
+    "Vorläufer war die Montanunion (1951), die den Handel mit Kohle und Stahl vereinfachte.",
+    "Die Schweiz ist kein EU-Mitglied, aber die EU ist ihr wichtigster Handelspartner. Wichtige Verträge: Freihandelsabkommen (1972), Bilaterale I (1999), Bilaterale II (2004).",
+    "Das Verhältnis ist nicht immer einfach: 2021 wurde ein Rahmenvertrag abgebrochen. Ein EU-Beitritt hat zurzeit keine Mehrheit."],
+  g: [
+    { m: "Wie viele Länder sind Mitglied der EU?", o: ["27", "12", "50", "26"] },
+    { m: "Ist die Schweiz Mitglied der EU?", o: ["Nein", "Ja", "Nur die Westschweiz", "Seit 2021"] },
+    { m: "Wann wurde die EU gegründet?", o: ["1993", "1848", "2016", "1971"] },
+    { m: "Wie heisst die Währung der EU?", o: ["Euro", "Franken", "Dollar", "Pfund"] },
+    { m: "Was möchte die EU fördern?", o: ["Frieden und Wohlstand in Europa", "Mehr Grenzkontrollen", "Einen gemeinsamen König", "Eine einzige Sprache"] },
+    { rf: "Die EU ist der wichtigste Handelspartner der Schweiz.", a: true },
+    { rf: "Wer von der Schweiz nach Deutschland reist, muss an der Grenze immer den Pass zeigen.", a: false, x: "Dank Verträgen mit der EU muss man den Pass an der Grenze meist nicht zeigen." },
+    { rf: "2021 wurde ein wichtiger Vertrag zwischen der Schweiz und der EU abgebrochen.", a: true }
+  ],
+  e: [
+    { m: "Wie hiess der Vorläufer der EU nach dem Zweiten Weltkrieg?", o: ["Montanunion", "NATO", "UNO", "Schengen"] },
+    { m: "Womit handelte die Montanunion vor allem?", o: ["Kohle und Stahl", "Käse und Schokolade", "Öl und Gas", "Autos"] },
+    { m: "Was erlaubt die Personenfreizügigkeit?", o: ["Schweizerinnen und Schweizer können unkompliziert in der EU eine Stelle suchen", "Man darf in der EU abstimmen", "Man bekommt automatisch einen EU-Pass", "Man muss keine Steuern zahlen"] },
+    { m: "Mit welchem Land hatte die Schweiz 2024 den grössten Exportüberschuss?", o: ["USA", "Deutschland", "China", "Grossbritannien"], x: "Exporte in die USA: 53 Mrd., Importe: 14 Mrd. Franken." },
+    { m: "Aus welchem Land importierte die Schweiz 2024 am meisten?", o: ["Deutschland", "USA", "China", "Grossbritannien"] },
+    { rf: "Ein EU-Beitritt hat in der Schweiz zurzeit eine politische Mehrheit.", a: false, x: "Ein Beitritt ist momentan nicht mehrheitsfähig." },
+    { rf: "Die EU vertritt die Interessen ihrer Mitglieder auch gegenüber anderen Ländern.", a: true },
+    { z: "Ordne jedem Vertrag das Jahr zu.", k: ["1972", "1999", "2004", "2021"], i: [["Freihandelsabkommen", 0], ["Bilaterale I", 1], ["Bilaterale II", 2], ["Abbruch des Rahmenvertrags", 3]] }
+  ] }
+];
+
+const PRO_STATION = 6;
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const mische = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const sternStr = n => "★".repeat(n) + "☆".repeat(3 - n);
+const sterneFuer = k => k >= 6 ? 3 : k >= 5 ? 2 : k >= 3 ? 1 : 0;
+const MAX = STATIONEN.length * PRO_STATION;
+let G = null, Q = null;
+
+function hoehe() { try { if (parent !== window) parent.postMessage({ seekarteHoehe: document.documentElement.scrollHeight + 8 }, "*"); } catch (e) {} }
+addEventListener("resize", hoehe);
+const zeige = html => { app.innerHTML = html; hoehe(); window.scrollTo(0, 0); try { parent.postMessage({ seekarteHoehe: document.documentElement.scrollHeight + 8 }, "*"); } catch (e) {} };
+
+function hud() {
+  if (!G) return "";
+  return `<div class="hud"><span class="t">Polit-Reise</span><div class="pills">
+    <span class="pill">${G.niv === "e" ? "Erweitert" : "Grundniveau"}</span>
+    <span class="pill red">${G.pts} Punkte</span>
+    <span class="pill">Serie ${G.serie}</span>
+    <span class="pill" title="Joker 50:50">Joker 50:50: ${G.joker}×</span></div></div>`;
+}
+
+// ---------------------------------------------------------------- Start
+let wahlNiv = "g";
+function start() {
+  G = null;
+  zeige(`<div class="card hero stack pop">
+    <div class="flag" aria-hidden="true"></div>
+    <span class="eyebrow">RZG · Politische Bildung</span>
+    <h1>Polit-Reise: So regiert sich die Schweiz</h1>
+    <p class="muted">Reise in 10 Stationen durch die Schweizer Politik, von der Gemeinde bis nach Brüssel. An jeder Station wiederholst du zuerst das Wichtigste und beantwortest danach ${PRO_STATION} Fragen. Für jede Station gibt es bis zu drei Sterne.</p>
+    <h3>Wähle dein Niveau</h3>
+    <div class="niv" role="group" aria-label="Niveau">
+      <button class="nivbtn" data-n="g" aria-pressed="${wahlNiv === "g"}"><strong>Grundniveau</strong><span class="muted">Fragen zum Grundanspruch im Heft</span></button>
+      <button class="nivbtn" data-n="e" aria-pressed="${wahlNiv === "e"}"><strong>Erweitert</strong><span class="muted">Schwierigere Fragen zum erweiterten Teil</span></button>
+    </div>
+    <p class="muted" style="font-size:.95rem">Tipp: Du hast zwei Joker «50:50». Ein Joker streicht bei einer Auswahlfrage zwei falsche Antworten.</p>
+    <div class="row"><button class="btn" id="los">Reise starten</button></div>
+  </div>`);
+  app.querySelectorAll(".nivbtn").forEach(b => b.onclick = () => { wahlNiv = b.dataset.n; start(); });
+  document.getElementById("los").onclick = () => {
+    G = { niv: wahlNiv, st: 0, res: Array(STATIONEN.length).fill(null), pts: 0, joker: 2, serie: 0, best: 0 };
+    karte();
+  };
+}
+
+// ---------------------------------------------------------------- Karte
+function karte() {
+  const items = STATIONEN.map((s, i) => {
+    const fertig = G.res[i] != null, offen = i === G.st && !fertig;
+    const cls = fertig ? "fertig" : offen ? "offen" : "zu";
+    return `<li><button class="stn ${cls}" data-i="${i}" ${offen ? "" : "disabled"} aria-label="Station ${i + 1}: ${esc(s.t)}${fertig ? ", " + G.res[i].st + " Sterne" : offen ? ", jetzt spielen" : ", noch gesperrt"}">
+      <span class="nr" aria-hidden="true">${s.ic}</span>
+      <span><span class="sub">Station ${i + 1} · ${esc(s.ort)}</span><br><span class="tt">${esc(s.t)}</span></span>
+      ${fertig ? `<span class="st" aria-hidden="true">${sternStr(G.res[i].st)}</span>` : offen ? `<span class="pill red">Los!</span>` : `<span class="lock">gesperrt</span>`}
+    </button></li>`;
+  }).join("");
+  zeige(hud() + `<div class="stack pop">
+    <div><span class="eyebrow">Deine Route</span><h2>${G.st < STATIONEN.length ? `Weiter zu Station ${G.st + 1}` : "Alle Stationen geschafft!"}</h2></div>
+    <ol class="weg">${items}</ol>
+    <div class="row"><button class="btn ghost" id="neu">Von vorne beginnen</button></div>
+  </div>`);
+  app.querySelectorAll(".stn.offen").forEach(b => b.onclick = () => lernkarte(+b.dataset.i));
+  document.getElementById("neu").onclick = () => { if (G.st === 0 || confirmNeu()) start(); };
+}
+let neuKlick = 0;
+function confirmNeu() { const n = Date.now(); if (n - neuKlick < 4000) return true; neuKlick = n; const b = document.getElementById("neu"); b.textContent = "Sicher? Nochmals tippen"; return false; }
+
+// ---------------------------------------------------------------- Lernkarte
+function lernkarte(i) {
+  const s = STATIONEN[i];
+  zeige(hud() + `<div class="card stack pop">
+    <span class="eyebrow">Station ${i + 1} · Kurz wiederholen</span>
+    <h2>${s.ic} ${esc(s.t)}</h2>
+    <ul class="lern">${s.lern.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <div class="row"><button class="btn" id="go">Bereit: ${PRO_STATION} Fragen</button><button class="btn ghost" id="zur">Zur Karte</button></div>
+  </div>`);
+  document.getElementById("go").onclick = () => station(i);
+  document.getElementById("zur").onclick = karte;
+}
+
+// ---------------------------------------------------------------- Fragen
+function station(i) {
+  const pool = STATIONEN[i][G.niv];
+  // Pro Station: mindestens eine Zuordnungs- oder Reihenfolgeaufgabe, falls vorhanden
+  const spezial = pool.filter(q => q.z || q.r), normal = pool.filter(q => !(q.z || q.r));
+  const wahl = mische(spezial).slice(0, 1).concat(mische(normal).slice(0, PRO_STATION - Math.min(1, spezial.length)));
+  Q = { i, qs: mische(wahl).slice(0, PRO_STATION), n: 0, ok: [], fertig: false };
+  frage();
+}
+function dots() {
+  return `<div class="dots" aria-hidden="true">${Q.qs.map((_, k) => `<span class="${k < Q.ok.length ? (Q.ok[k] ? "ok" : "bad") : k === Q.n ? "now" : ""}"></span>`).join("")}</div>`;
+}
+function frage() {
+  const q = Q.qs[Q.n], s = STATIONEN[Q.i];
+  let typ = "", body = "";
+  Q.fertig = false;
+  if (q.m) {
+    typ = "Wähle die richtige Antwort";
+    Q.opts = mische(q.o.map((t, k) => ({ t, ok: k === 0 })));
+    body = `<p class="frage">${esc(q.m)}</p><div class="opts">${Q.opts.map((o, k) => `<button class="opt" data-k="${k}">${esc(o.t)}</button>`).join("")}</div>
+      ${G.joker ? `<div class="row"><button class="btn ghost" id="joker">Joker 50:50 einsetzen (${G.joker} übrig)</button></div>` : ""}`;
+  } else if ("rf" in q) {
+    typ = "Richtig oder falsch?";
+    body = `<p class="frage">${esc(q.rf)}</p><div class="rfopts"><button class="opt" data-v="1">Richtig</button><button class="opt" data-v="0">Falsch</button></div>`;
+  } else if (q.z) {
+    typ = "Ordne zu";
+    Q.zw = q.i.map(() => null);
+    Q.zi = mische(q.i.map((x, k) => k));
+    body = `<p class="frage">${esc(q.z)}</p><div class="card" style="padding:8px 16px">${Q.zi.map(k => `<div class="zu-item" data-k="${k}"><p class="w">${esc(q.i[k][0])}</p>
+      <div class="chips" role="group" aria-label="${esc(q.i[k][0])}">${q.k.map((c, j) => `<button class="chip" data-j="${j}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("")}</div>
+      <div class="row"><button class="btn" id="pruefen" disabled>Prüfen</button></div>`;
+  } else if (q.r) {
+    typ = "Reihenfolge";
+    Q.rw = [];
+    Q.rm = mische(q.s.map((x, k) => k));
+    if (Q.rm.every((v, k) => v === k)) Q.rm.reverse();
+    body = `<p class="frage">${esc(q.r)}</p><p class="muted" style="font-size:.95rem">Tippe die Schritte in der richtigen Reihenfolge an.</p>
+      <div class="reihe">${Q.rm.map(k => `<button class="opt" data-k="${k}"><span class="pos"></span>${esc(q.s[k])}</button>`).join("")}</div>
+      <div class="row"><button class="btn" id="pruefen" disabled>Prüfen</button><button class="btn ghost" id="reset">Neu ordnen</button></div>`;
+  }
+  zeige(hud() + `<div class="card stack pop">
+    <div class="row" style="justify-content:space-between"><span class="eyebrow" style="margin:0">Station ${Q.i + 1} · ${esc(s.t)}</span>${dots()}</div>
+    <p class="qtyp">Frage ${Q.n + 1} von ${Q.qs.length} · ${typ}</p>
+    ${body}
+    <div id="fb" aria-live="polite"></div>
+  </div>`);
+  binde(q);
+}
+function binde(q) {
+  if (q.m) {
+    app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      const o = Q.opts[+b.dataset.k];
+      app.querySelectorAll(".opt").forEach((x, k) => { x.disabled = true; if (Q.opts[k].ok) x.classList.add("right"); });
+      if (!o.ok) b.classList.add("wrong");
+      const j = document.getElementById("joker"); if (j) j.remove();
+      ergebnis(o.ok, Q.opts.find(x => x.ok).t, q.x);
+    });
+    const j = document.getElementById("joker");
+    if (j) j.onclick = () => {
+      G.joker--; let weg = 0;
+      mische(Q.opts.map((o, k) => k)).forEach(k => { if (!Q.opts[k].ok && weg < 2) { app.querySelector(`.opt[data-k="${k}"]`).classList.add("weg5050"); weg++; } });
+      j.remove(); hoehe();
+    };
+  } else if ("rf" in q) {
+    app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      const v = b.dataset.v === "1", ok = v === q.a;
+      app.querySelectorAll(".opt").forEach(x => { x.disabled = true; if ((x.dataset.v === "1") === q.a) x.classList.add("right"); });
+      if (!ok) b.classList.add("wrong");
+      ergebnis(ok, q.a ? "Die Aussage ist richtig." : "Die Aussage ist falsch.", q.x);
+    });
+  } else if (q.z) {
+    const pr = document.getElementById("pruefen");
+    app.querySelectorAll(".zu-item").forEach(it => it.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+      if (Q.fertig) return;
+      it.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", "false"));
+      c.setAttribute("aria-pressed", "true");
+      Q.zw[+it.dataset.k] = +c.dataset.j;
+      pr.disabled = Q.zw.some(x => x === null);
+    }));
+    pr.onclick = () => {
+      let alle = true;
+      app.querySelectorAll(".zu-item").forEach(it => {
+        const k = +it.dataset.k, soll = q.i[k][1], ist = Q.zw[k];
+        it.querySelectorAll(".chip").forEach(c => { const j = +c.dataset.j; c.disabled = true; if (j === soll) c.classList.add("right"); else if (j === ist) c.classList.add("wrong"); });
+        if (ist !== soll) alle = false;
+      });
+      pr.remove();
+      ergebnis(alle, alle ? "" : "Die richtigen Zuordnungen sind grün markiert.", q.x);
+    };
+  } else if (q.r) {
+    const pr = document.getElementById("pruefen"), rs = document.getElementById("reset");
+    const nummern = () => app.querySelectorAll(".reihe .opt").forEach(b => { const p = Q.rw.indexOf(+b.dataset.k); b.querySelector(".pos").textContent = p >= 0 ? p + 1 : ""; b.classList.toggle("gewaehlt", p >= 0); });
+    app.querySelectorAll(".reihe .opt").forEach(b => b.onclick = () => {
+      if (Q.fertig) return;
+      const k = +b.dataset.k, p = Q.rw.indexOf(k);
+      if (p >= 0) Q.rw.splice(p, 1); else Q.rw.push(k);
+      nummern(); pr.disabled = Q.rw.length !== q.s.length;
+    });
+    rs.onclick = () => { if (Q.fertig) return; Q.rw = []; nummern(); pr.disabled = true; };
+    pr.onclick = () => {
+      const ok = Q.rw.every((k, p) => k === p);
+      app.querySelectorAll(".reihe .opt").forEach(b => { b.disabled = true; const k = +b.dataset.k; b.classList.add(Q.rw.indexOf(k) === k ? "right" : "wrong"); });
+      pr.remove(); rs.remove();
+      ergebnis(ok, ok ? "" : "Richtig wäre: " + q.s.map((t, p) => `${p + 1}. ${t}`).join(" → "), q.x);
+    };
+  }
+}
+function ergebnis(ok, richtig, x) {
+  Q.fertig = true;
+  Q.ok.push(ok);
+  if (ok) { G.pts++; G.serie++; G.best = Math.max(G.best, G.serie); } else G.serie = 0;
+  const lob = ["Richtig!", "Stark!", "Genau!", "Super!", "Bravo!"];
+  const letzte = Q.n + 1 >= Q.qs.length;
+  document.getElementById("fb").innerHTML = `<div class="fb ${ok ? "ok" : "bad"} pop">${ok ? lob[Math.floor(Math.random() * lob.length)] + (G.serie >= 3 ? ` ${G.serie} richtige Antworten in Folge!` : "") : "Leider falsch."}
+      ${!ok && richtig ? `<small>${esc(richtig.startsWith("Die ") || richtig.startsWith("Richtig") ? richtig : "Richtig ist: " + richtig)}</small>` : ""}${x ? `<small>${esc(x)}</small>` : ""}</div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="weiter">${letzte ? "Station abschliessen" : "Nächste Frage"}</button></div>`;
+  app.querySelector(".hud .pill.red").textContent = G.pts + " Punkte";
+  const w = document.getElementById("weiter"); w.focus({ preventScroll: true });
+  w.onclick = () => { if (letzte) stationEnde(); else { Q.n++; frage(); } };
+  hoehe();
+}
+
+// ---------------------------------------------------------------- Stationsende
+function stationEnde() {
+  const k = Q.ok.filter(Boolean).length, st = sterneFuer(k);
+  G.res[Q.i] = { k, st };
+  G.st = Q.i + 1;
+  const ende = G.st >= STATIONEN.length;
+  const text = st === 3 ? "Perfekt! Du kennst dich hier bestens aus." : st === 2 ? "Sehr gut! Fast alles gewusst." : st === 1 ? "Geschafft! Lies die Lernkarte nochmals in Ruhe durch." : "Diese Station war schwierig. Schau dir die Lernkarte und das Heft nochmals an.";
+  zeige(hud() + `<div class="card stack pop" style="text-align:center">
+    <span class="eyebrow">Station ${Q.i + 1} geschafft</span>
+    <h2>${esc(STATIONEN[Q.i].t)}</h2>
+    <p class="sterne" aria-label="${st} von 3 Sternen">${sternStr(st)}</p>
+    <p><strong>${k} von ${Q.qs.length}</strong> richtig. ${text}</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="weiter">${ende ? "Zum Schlussresultat" : "Weiter auf der Karte"}</button></div>
+  </div>`);
+  document.getElementById("weiter").onclick = () => ende ? schluss() : karte();
+}
+
+// ---------------------------------------------------------------- Schluss
+function titelFuer(p) {
+  return p >= .9 ? ["Bundesrätin / Bundesrat", "Du bist bereit für die Landesregierung!"]
+    : p >= .75 ? ["Nationalrätin / Nationalrat", "Du kennst dich im Bundeshaus richtig gut aus."]
+    : p >= .55 ? ["Kantonsrätin / Kantonsrat", "Ein solides Wissen – mit etwas Übung schaffst du es nach Bern."]
+    : p >= .35 ? ["Gemeinderätin / Gemeinderat", "Ein guter Anfang. Wiederhole die Stationen mit wenigen Sternen."]
+    : ["Stimmbürgerin / Stimmbürger in Ausbildung", "Lies die Lernkarten und das Heft nochmals und spiel dann noch einmal."];
+}
+function schluss() {
+  const [titel, satz] = titelFuer(G.pts / MAX);
+  const sterne = G.res.map(r => r ? r.st : 0);
+  zeige(`<div class="card stack pop" style="text-align:center">
+    <span class="eyebrow">Reise beendet · ${G.niv === "e" ? "Erweitert" : "Grundniveau"}</span>
+    <p class="big">${G.pts} / ${MAX}</p>
+    <p class="sterne" aria-label="${sterne.reduce((a, b) => a + b, 0)} von ${STATIONEN.length * 3} Sternen">${sterne.reduce((a, b) => a + b, 0)} ★</p>
+    <h2>Dein Titel: ${esc(titel)}</h2>
+    <p class="muted">${esc(satz)} Längste Serie: ${G.best} richtige Antworten in Folge.</p>
+    <div class="resgrid" style="text-align:left">${STATIONEN.map((s, i) => `<div>${s.ic} ${esc(s.t)}<b>${sternStr(sterne[i])}</b></div>`).join("")}</div>
+    <div class="row" style="justify-content:center"><button class="btn" id="nochmal">Nochmals spielen</button></div>
+  </div>`);
+  document.getElementById("nochmal").onclick = start;
+  try { if (parent !== window) parent.postMessage({ seekarteErgebnis: { pts: G.pts, max: MAX, res: sterne, niv: G.niv } }, "*"); } catch (e) {}
+}
+
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Themenkarte-Expedition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@600&display=swap">
+<style>
+:root {
+  --bg: #f3efe8; --surface: #ffffff; --paper: #fbfaf6; --ink: #1d232a; --muted: #5d6670; --line: #e0dad1; --border: #2b3138;
+  --land: #ffffff; --land2: #ece7de; --lake: #bfdcef; --tape: rgba(222, 205, 160, .75);
+  --red: #c8102e; --redsoft: #fbe6e9; --gold: #b7791f; --goldsoft: #fdf3dc;
+  --ok: #1f7a4d; --okbg: #e3f3ea; --bad: #b42318; --badbg: #fbe7e5; --pick: #2847c9; --picksoft: #e6ebfb;
+  --de: #f2b134; --fr: #4f86c6; --it: #5bb36a; --mx: #b36bc4;
+  --p-svp: #1f8a3a; --p-sp: #d7263d; --p-fdp: #1f5fbf; --p-mitte: #f08a1c; --p-gruene: #b7c81e; --p-glp: #d63fa0; --p-and: #9aa3ad;
+  --font-d: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-b: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-h: "Caveat", "Segoe Print", cursive;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181d; --surface: #1d232a; --paper: #222930; --ink: #eef1f4; --muted: #a2adb8; --line: #333c46; --border: #c9d1da;
+    --land: #2a323b; --land2: #20272e; --lake: #2c5470; --tape: rgba(150, 135, 90, .55);
+    --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+    --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181d; --surface: #1d232a; --paper: #222930; --ink: #eef1f4; --muted: #a2adb8; --line: #333c46; --border: #c9d1da;
+  --land: #2a323b; --land2: #20272e; --lake: #2c5470; --tape: rgba(150, 135, 90, .55);
+  --red: #ff6b7d; --redsoft: #3a1d22; --gold: #f0c060; --goldsoft: #3a2f14;
+  --ok: #5cc492; --okbg: #17332a; --bad: #ff8a80; --badbg: #3a1f1d; --pick: #8aa2ff; --picksoft: #22294a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font-b); }
+#app { max-width: 1040px; margin: 0 auto; padding: 16px 16px 32px; }
+h1, h2, h3 { font-family: var(--font-d); line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); letter-spacing: -.01em; }
+h2 { font-size: clamp(1.25rem, 3.4vw, 1.6rem); }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 11px 20px; background: var(--red); color: #fff; font-weight: 700; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.small { padding: 7px 14px; font-size: .92rem; }
+button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outline-offset: 2px; }
+.eyebrow { display: inline-block; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 4px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.muted { color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.stack > * + * { margin-top: 14px; }
+.hand { font-family: var(--font-h); font-size: 1.6rem; line-height: 1; color: var(--ink); }
+/* Kopfzeile */
+.hud { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hud .t { font-family: var(--font-d); font-weight: 800; font-size: 1.1rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem; font-weight: 700; white-space: nowrap; }
+.pill.red { background: var(--redsoft); border-color: transparent; color: var(--red); }
+.pill.gold { background: var(--goldsoft); border-color: transparent; color: var(--gold); }
+/* Startseite */
+.hero { position: relative; overflow: hidden; }
+.niv { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.nivbtn { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.nivbtn[aria-pressed="true"] { border-color: var(--red); background: var(--redsoft); }
+.nivbtn strong { display: block; font-family: var(--font-d); font-size: 1.1rem; }
+/* Karte */
+.mapwrap { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 10px; box-shadow: 0 10px 30px -18px rgba(0,0,0,.35); }
+.mapwrap svg { display: block; width: 100%; height: auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.kt { fill: var(--land); stroke: var(--border); stroke-width: 1.1; stroke-linejoin: round; transition: fill .25s, opacity .25s; }
+.lake { fill: var(--lake); stroke: none; pointer-events: none; }
+.klick .kt { cursor: pointer; }
+.klick .kt:hover { fill: var(--picksoft); }
+.kt.dim { opacity: .28; }
+.kt.found { fill: var(--goldsoft); }
+.kt.ok { fill: var(--okbg); }
+.kt.bad { fill: var(--badbg); }
+.kt.ziel { fill: var(--red); }
+.kt.optA { fill: var(--picksoft); stroke: var(--pick); stroke-width: 2.4; }
+.kt.optB { fill: var(--goldsoft); stroke: var(--gold); stroke-width: 2.4; }
+.kt.l-d { fill: var(--de); } .kt.l-f { fill: var(--fr); } .kt.l-i { fill: var(--it); } .kt.l-m { fill: var(--mx); }
+.lbl { font: 700 13px var(--font-b); fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3px; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.lbl.sm { font-size: 10.5px; }
+.lbl.big { font-size: 17px; }
+.pin { pointer-events: none; }
+.pop { animation: pop .35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .pop, .shake, .pulse { animation: none !important; } }
+@keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+.shake { animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.pulse { animation: pulse 1s ease-in-out 3; }
+@keyframes pulse { 50% { opacity: .35; } }
+/* Auftrag oben */
+.auftrag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+.auftrag .ziel { font-family: var(--font-d); font-weight: 800; font-size: clamp(1.2rem, 3.6vw, 1.7rem); }
+.zeit { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-bottom: 10px; }
+.zeit span { display: block; height: 100%; width: 100%; background: var(--red); transform-origin: left; }
+.fb { border-radius: 12px; padding: 10px 14px; font-weight: 700; margin-top: 10px; }
+.fb.ok { background: var(--okbg); color: var(--ok); }
+.fb.bad { background: var(--badbg); color: var(--bad); }
+.fb small { display: block; font-weight: 400; color: var(--ink); margin-top: 2px; font-size: .95rem; }
+/* Zettel (Missionen) */
+.zettel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; margin-top: 18px; }
+.zettel { position: relative; text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 18px 16px 14px; box-shadow: 0 8px 18px -12px rgba(0,0,0,.4); transform: rotate(var(--rot, 0deg)); transition: transform .2s; }
+.zettel:hover { transform: rotate(0deg) translateY(-2px); }
+.zettel::before { content: ""; position: absolute; top: -9px; left: 50%; width: 70px; height: 18px; margin-left: -35px; background: var(--tape); transform: rotate(-3deg); }
+.zettel .info { font-family: var(--font-h); font-size: 1.5rem; line-height: 1; color: var(--muted); }
+.zettel h3 { font-size: 1.12rem; margin: 4px 0 4px; }
+.zettel .st { color: var(--gold); letter-spacing: 2px; font-size: 1.1rem; }
+.zettel.done { border-color: var(--gold); }
+.zettel .mini { margin-top: 8px; font-size: .86rem; color: var(--muted); }
+/* Sortierer */
+.sortkarte { font-family: var(--font-d); font-weight: 800; font-size: clamp(1.3rem, 4.5vw, 2rem); text-align: center; padding: 26px 16px; background: var(--paper); border: 2px dashed var(--line); border-radius: 16px; }
+.bins { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+.bin { background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 14px 8px; font-weight: 700; text-align: center; }
+.bin small { display: block; font-weight: 400; color: var(--muted); font-size: .8rem; }
+.bin.ok { border-color: var(--ok); background: var(--okbg); }
+.bin.bad { border-color: var(--bad); background: var(--badbg); }
+@media (max-width: 620px) { .bins { grid-template-columns: 1fr 1fr; } }
+/* Wahlabend */
+.parteien { display: grid; gap: 8px; }
+.prow { display: grid; grid-template-columns: 16px 1fr auto auto auto; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; }
+.prow .sw { width: 16px; height: 16px; border-radius: 4px; }
+.prow .n { font-weight: 700; }
+.prow .n small { font-weight: 400; color: var(--muted); }
+.prow .z { min-width: 3ch; text-align: center; font-family: var(--font-d); font-weight: 800; font-size: 1.2rem; }
+.step { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+/* Memory */
+.memo { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.mk { min-height: 92px; border-radius: 12px; border: 2px solid var(--line); background: var(--red); color: #fff; font-weight: 700; padding: 8px; text-align: center; line-height: 1.25; font-size: .9rem; }
+.mk.auf { background: var(--surface); color: var(--ink); }
+.mk.weg { background: var(--okbg); color: var(--ok); border-color: var(--ok); cursor: default; }
+.mk small { overflow-wrap: anywhere; hyphens: auto; }
+.mk .k { display: block; font-family: var(--font-d); font-size: 1.15rem; }
+.mk.zu .k::after { content: "?"; }
+/* Ergebnis */
+.big { font-family: var(--font-d); font-weight: 800; font-size: clamp(2.4rem, 9vw, 3.6rem); line-height: 1; }
+.sterne { font-size: 2rem; letter-spacing: 6px; color: var(--gold); }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .88rem; margin-top: 8px; }
+.legende span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.palette { display: flex; flex-wrap: wrap; gap: 8px; }
+.farbe { border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; background: var(--surface); font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+.farbe i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); display: inline-block; }
+.farbe[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--c); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="schweiz-karte.js"></script>
+<script>
+"use strict";
+// ------------------------------------------------------------ Daten (Stand Herbst 2026)
+// [Kürzel, Name, Hauptort, E (LV95), N (LV95), Sprache d/f/i/m, Nationalratssitze 2023–2027]
+const KT = [
+  ["ZH", "Zürich", "Zürich", 2683000, 1248000, "d", 36],
+  ["BE", "Bern", "Bern", 2600500, 1199700, "m", 24],
+  ["LU", "Luzern", "Luzern", 2666200, 1211500, "d", 9],
+  ["UR", "Uri", "Altdorf", 2691000, 1192500, "d", 1],
+  ["SZ", "Schwyz", "Schwyz", 2692000, 1208000, "d", 4],
+  ["OW", "Obwalden", "Sarnen", 2661600, 1194000, "d", 1],
+  ["NW", "Nidwalden", "Stans", 2670500, 1202000, "d", 1],
+  ["GL", "Glarus", "Glarus", 2723700, 1211500, "d", 1],
+  ["ZG", "Zug", "Zug", 2681500, 1224600, "d", 3],
+  ["FR", "Freiburg", "Freiburg", 2578500, 1183800, "m", 7],
+  ["SO", "Solothurn", "Solothurn", 2607500, 1228500, "d", 6],
+  ["BS", "Basel-Stadt", "Basel", 2611300, 1267500, "d", 4],
+  ["BL", "Basel-Landschaft", "Liestal", 2622200, 1259500, "d", 7],
+  ["SH", "Schaffhausen", "Schaffhausen", 2689700, 1283700, "d", 2],
+  ["AR", "Appenzell Ausserrhoden", "Herisau", 2738500, 1250500, "d", 1],
+  ["AI", "Appenzell Innerrhoden", "Appenzell", 2749000, 1244000, "d", 1],
+  ["SG", "St. Gallen", "St. Gallen", 2746000, 1254500, "d", 12],
+  ["GR", "Graubünden", "Chur", 2759500, 1190800, "m", 5],
+  ["AG", "Aargau", "Aarau", 2645300, 1249300, "d", 16],
+  ["TG", "Thurgau", "Frauenfeld", 2709700, 1268300, "d", 6],
+  ["TI", "Tessin", "Bellinzona", 2722300, 1117000, "i", 8],
+  ["VD", "Waadt", "Lausanne", 2538000, 1152500, "f", 19],
+  ["VS", "Wallis", "Sitten", 2594000, 1120000, "m", 8],
+  ["NE", "Neuenburg", "Neuenburg", 2561500, 1204500, "f", 4],
+  ["GE", "Genf", "Genf", 2500300, 1118000, "f", 12],
+  ["JU", "Jura", "Delsberg", 2593500, 1245500, "f", 2]
+];
+const KI = Object.fromEntries(KT.map((k, i) => [k[0], i]));
+const SPR = { d: ["Deutsch", "--de"], f: ["Französisch", "--fr"], i: ["Italienisch", "--it"], m: ["mehrsprachig", "--mx"] };
+const xy = (e, n) => [(e - 2485000) / 350, (1296000 - n) / 350];
+// Bundesrat: Name, Partei, Kanton, Departement, Aufgaben (eigene Kurzform)
+const BR = [
+  ["Guy Parmelin", "SVP", "VD", "WBF", "Wirtschaft, Bildung und Forschung"],
+  ["Ignazio Cassis", "FDP", "TI", "EDA", "Beziehungen zum Ausland"],
+  ["Karin Keller-Sutter", "FDP", "SG", "EFD", "Finanzen und Steuern"],
+  ["Albert Rösti", "SVP", "BE", "UVEK", "Umwelt, Verkehr, Energie und Kommunikation"],
+  ["Elisabeth Baume-Schneider", "SP", "JU", "EDI", "Inneres: Gesundheit, Sozialversicherungen, Kultur"],
+  ["Beat Jans", "SP", "BS", "EJPD", "Justiz und Polizei"],
+  ["Martin Pfister", "Mitte", "ZG", "VBS", "Verteidigung, Bevölkerungsschutz und Sport"]
+];
+// Nationalratswahl 2023: Partei, Sitze, Wähleranteil %, Farbe, Bundesratssitze
+const PT = [
+  ["SVP", 62, 27.9, "--p-svp", 2],
+  ["SP", 41, 18.3, "--p-sp", 2],
+  ["FDP", 28, 14.3, "--p-fdp", 2],
+  ["Die Mitte", 29, 14.1, "--p-mitte", 1],
+  ["Grüne", 23, 9.8, "--p-gruene", 0],
+  ["GLP", 10, 7.6, "--p-glp", 0]
+];
+const GEW = [
+  ["Legislative", "gesetzgebend"], ["Exekutive", "ausführend"], ["Judikative", "richterlich"], ["Vierte Gewalt", "Medien"]
+];
+const SORT = [
+  ["Nationalrat", 0], ["Ständerat", 0], ["Kantonsrat", 0], ["Gemeindeversammlung", 0], ["Gemeindeparlament", 0], ["Vereinigte Bundesversammlung", 0], ["beschliesst ein neues Gesetz", 0],
+  ["Bundesrat", 1], ["Regierungsrat", 1], ["Gemeinderat", 1], ["Polizei", 1], ["Bundesverwaltung", 1], ["setzt die Gesetze um", 1],
+  ["Bundesgericht", 2], ["Bezirksgericht", 2], ["Obergericht", 2], ["Jugendgericht", 2], ["entscheidet bei einem Streitfall", 2],
+  ["Tageszeitung", 3], ["Nachrichten im Fernsehen", 3], ["Online-Newsportal", 3], ["Radionachrichten", 3], ["berichtet kritisch über die Politik", 3]
+];
+
+// ------------------------------------------------------------ Hilfen
+const $ = s => document.querySelector(s);
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const mische = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const sternStr = n => "★".repeat(n) + "☆".repeat(3 - n);
+const sterneFuer = p => p >= 90 ? 3 : p >= 75 ? 2 : p >= 50 ? 1 : 0;
+let timerId = 0;
+const stopTimer = () => { cancelAnimationFrame(timerId); timerId = 0; };
+function timer(ms, onTick, onEnd) {
+  stopTimer();
+  const t0 = performance.now();
+  const step = now => {
+    const rest = Math.max(0, 1 - (now - t0) / ms);
+    onTick(rest);
+    if (rest <= 0) { timerId = 0; onEnd(); } else timerId = requestAnimationFrame(step);
+  };
+  timerId = requestAnimationFrame(step);
+  return () => Math.max(0, 1 - (performance.now() - t0) / ms);
+}
+const warte = ms => new Promise(z => setTimeout(z, ms));
+let hoeheT = 0;
+function meldeHoehe() {
+  clearTimeout(hoeheT);
+  hoeheT = setTimeout(() => { try { if (parent !== window) parent.postMessage({ seekarteHoehe: document.documentElement.scrollHeight + 8 }, "*"); } catch (e) {} }, 60);
+}
+addEventListener("resize", meldeHoehe);
+function zeige(html) {
+  stopTimer();
+  app.innerHTML = html;
+  meldeHoehe();
+  try { if (parent !== window) { const f = parent.document.getElementById("seekarte"); if (f) f.scrollIntoView({ block: "start" }); } else scrollTo(0, 0); } catch (e) { scrollTo(0, 0); }
+}
+
+// ------------------------------------------------------------ Karte
+let KARTE_OK = false;
+let LP = null; // Label-Punkte
+function labelPunkte() {
+  if (LP) return LP;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 1000 632");
+  svg.style.cssText = "position:absolute;left:-9999px;width:1000px;height:632px";
+  document.body.appendChild(svg);
+  LP = KARTE.C.map((d, i) => {
+    let best = null, ba = 0;
+    for (const r of d.split("Z").filter(Boolean)) {
+      const p = r.slice(1).split("L").map(s => s.split(" ").map(Number));
+      let a = 0, cx = 0, cy = 0;
+      for (let k = 0; k < p.length; k++) { const [x1, y1] = p[k], [x2, y2] = p[(k + 1) % p.length], f = x1 * y2 - x2 * y1; a += f; cx += (x1 + x2) * f; cy += (y1 + y2) * f; }
+      if (Math.abs(a) > ba) { ba = Math.abs(a); best = [cx / (3 * a), cy / (3 * a)]; }
+    }
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d); svg.appendChild(path);
+    const pt = svg.createSVGPoint(); pt.x = best[0]; pt.y = best[1];
+    let ok = false; try { ok = path.isPointInFill(pt); } catch (e) { ok = true; }
+    return ok ? best : xy(KT[i][3], KT[i][4]);
+  });
+  // kleine Korrekturen, damit sich Beschriftungen nicht überlagern
+  const fix = { BL: [6, 6], AI: [2, 4], NW: [0, 3], OW: [-6, 2], ZG: [2, -2], VD: [45, 35] };
+  for (const k in fix) { const p = LP[KI[k]]; LP[KI[k]] = [p[0] + fix[k][0], p[1] + fix[k][1]]; }
+  svg.remove();
+  return LP;
+}
+function karte({ klick = false, klassen = {}, extra = "", id = "karte", titel = "Karte der Schweiz mit den Kantonen" } = {}) {
+  const C = KARTE.C.map((d, i) => `<path class="kt ${klassen[i] || ""}" id="k${i}" data-i="${i}" d="${d}"/>`).join("");
+  const L = (KARTE.L || []).map(d => `<path class="lake" d="${d}"/>`).join("");
+  return `<div class="mapwrap"><svg id="${id}" class="${klick ? "klick" : ""}" viewBox="0 0 1000 632" role="img" aria-label="${esc(titel)}"><g id="kantone">${C}</g><g>${L}</g><g id="ov">${extra}</g></svg></div>`;
+}
+function svgPunkt(svg, ev) {
+  const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+  const m = svg.getScreenCTM(); if (!m) return [0, 0];
+  const p = pt.matrixTransform(m.inverse()); return [p.x, p.y];
+}
+// Treffer mit Toleranz für kleine Kantone
+function trefferKanton(svg, ev, ziel, tol = 16) {
+  const t = ev.target.closest && ev.target.closest(".kt");
+  const i = t ? +t.dataset.i : -1;
+  if (ziel != null && i !== ziel) {
+    const [x, y] = svgPunkt(svg, ev), p = labelPunkte()[ziel];
+    if (Math.hypot(x - p[0], y - p[1]) <= tol) return ziel;
+  }
+  return i;
+}
+// Klick neben die Kantone: nächster kleiner Kanton in der Nähe
+function naechster(svg, ev, kandidaten, tol = 10) {
+  const [x, y] = svgPunkt(svg, ev); let best = -1, bd = tol;
+  kandidaten.forEach(i => { const p = labelPunkte()[i], d = Math.hypot(x - p[0], y - p[1]); if (d < bd) { bd = d; best = i; } });
+  return best;
+}
+const label = (i, text, kl = "") => { const p = labelPunkte()[i]; return `<text class="lbl ${kl}" x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}">${esc(text)}</text>`; };
+const pinSvg = (x, y, farbe = "var(--red)", text = "") => `<g class="pin"><circle cx="${x}" cy="${y}" r="7" fill="${farbe}" stroke="var(--paper)" stroke-width="2.5"/>${text ? `<text class="lbl sm" x="${(+x + 11).toFixed(1)}" y="${y}" style="text-anchor:start">${esc(text)}</text>` : ""}</g>`;
+
+// ------------------------------------------------------------ Spielstand
+const MIS = [
+  { key: "jagd", info: "Karte", t: "Kantone-Jagd", ic: "🔎", d: "Finde die Kantone auf der Karte – schnell sein bringt Punkte!", neu: "Kantonskürzel auf deiner Karte" },
+  { key: "farben", info: "Karte", t: "Sprachen-Farben", ic: "🎨", d: "Färbe die Kantone nach ihrer Sprache ein.", neu: "Sprachregionen mit Legende" },
+  { key: "pins", info: "Karte", t: "Städte-Pins", ic: "📍", d: "Setze Bundesstadt, Bundesgericht und Hauptorte so genau wie möglich.", neu: "Bern und Lausanne mit Stecknadel" },
+  { key: "gewalten", info: "Info 4", t: "Gewalten-Sortierer", ic: "⚖️", d: "Sortiere blitzschnell in Legislative, Exekutive, Judikative und vierte Gewalt.", neu: "Ausgefüllte Info 4" },
+  { key: "wahl", info: "Info 1 + 2", t: "Wahlabend", ic: "🗳️", d: "Verteile die 200 Sitze im Nationalrat und gewinne das Sitze-Duell.", neu: "Sitzzahlen in der Karte" },
+  { key: "br", info: "Info 3", t: "Bundesrats-Memory", ic: "🏛️", d: "Finde die Departemente der sieben Bundesräte und ihre Heimatkantone.", neu: "Bundesrat in der Karte" }
+];
+const SPEICHER = "themenkarte-spiel-v1";
+let G = { niv: null, best: {} };
+try { const s = JSON.parse(localStorage.getItem(SPEICHER) || "null"); if (s && (s.niv === "g" || s.niv === "e")) G = { niv: s.niv, best: s.best || {} }; } catch (e) {}
+const sichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(G)); } catch (e) {} };
+const gesamt = () => MIS.reduce((s, m) => s + (G.best[m.key] || 0), 0);
+const fertig = k => G.best[k] != null;
+const alleFertig = () => MIS.every(m => fertig(m.key));
+const E = () => G.niv === "e";
+
+// ------------------------------------------------------------ Start
+function start() {
+  if (!KARTE_OK) { zeige(`<div class="card"><h2>Die Karte konnte nicht geladen werden.</h2><p class="muted">Bitte lade die Seite neu.</p></div>`); return; }
+  if (G.niv) return hub();
+  let wahl = null;
+  zeige(`<div class="card hero stack pop">
+    <span class="eyebrow">Politische Bildung · Themenkarte</span>
+    <h1>Die Themenkarte-Expedition</h1>
+    <p>Deine Themenkarte ist noch leer. In sechs Missionen füllst du sie Stück für Stück aus: Kantone, Sprachen, Bundesstadt, Gewaltenteilung, Nationalrat und Bundesrat. Jede Mission bringt bis zu 100 Punkte und drei Sterne.</p>
+    <p class="muted">Du kannst die Missionen in beliebiger Reihenfolge spielen und jederzeit wiederholen. Es zählt dein bestes Ergebnis.</p>
+    <div class="niv" role="group" aria-label="Niveau wählen">
+      <button class="nivbtn" data-n="g" aria-pressed="false"><strong>Grundniveau</strong><span class="muted">Mehr Zeit, Hinweise und etwas weniger Aufgaben.</span></button>
+      <button class="nivbtn" data-n="e" aria-pressed="false"><strong>Erweitert</strong><span class="muted">Alle 26 Kantone, weniger Zeit, keine Hinweise.</span></button>
+    </div>
+    <div class="row"><button class="btn" id="los" disabled>Expedition starten</button></div>
+  </div>`);
+  app.querySelectorAll(".nivbtn").forEach(b => b.onclick = () => {
+    wahl = b.dataset.n;
+    app.querySelectorAll(".nivbtn").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    $("#los").disabled = false;
+  });
+  $("#los").onclick = () => { G = { niv: wahl, best: {} }; sichern(); hub(); };
+}
+
+// ------------------------------------------------------------ Themenkarte (Übersicht)
+function hubKarte() {
+  const kl = {};
+  if (fertig("farben")) KT.forEach((k, i) => kl[i] = "l-" + k[5]);
+  let ov = "";
+  if (fertig("jagd")) KT.forEach((k, i) => ov += label(i, fertig("wahl") ? `${k[0]} ${k[6]}` : k[0], ["BS", "AI", "AR", "ZG", "NW", "OW", "GL", "SH"].includes(k[0]) ? "sm" : ""));
+  else if (fertig("wahl")) KT.forEach((k, i) => ov += label(i, k[6], "sm"));
+  if (fertig("br")) BR.forEach(b => { const p = labelPunkte()[KI[b[2]]]; const nm = b[0].split(" ").slice(-1)[0]; ov += `<text class="lbl sm" x="${p[0].toFixed(1)}" y="${(p[1] + 15).toFixed(1)}" style="fill:var(--red)">${esc(nm)}</text>`; });
+  if (fertig("pins")) { const [bx, by] = xy(2600500, 1199700), [lx, ly] = xy(2538000, 1152500); ov += pinSvg(bx.toFixed(1), by.toFixed(1), "var(--red)", "Bern") + pinSvg(lx.toFixed(1), ly.toFixed(1), "var(--pick)", "Lausanne"); }
+  return karte({ klassen: kl, extra: ov, titel: "Deine Themenkarte" });
+}
+function zettelInhalt(m) {
+  if (!fertig(m.key)) return `<p class="mini">Belohnung: ${esc(m.neu)}</p>`;
+  if (m.key === "gewalten") return `<p class="mini">Legislative: Parlamente · Exekutive: Regierungen, Verwaltung, Polizei · Judikative: Gerichte · Vierte Gewalt: Medien</p>`;
+  if (m.key === "wahl") return `<p class="mini">${PT.map(p => `${p[0]} ${p[1]}`).join(" · ")} · Andere 7</p>`;
+  if (m.key === "br") return `<p class="mini">${BR.map(b => `${b[0].split(" ").slice(-1)[0]} (${b[3]})`).join(" · ")}</p>`;
+  if (m.key === "farben") return `<p class="mini">Deutsch · Französisch · Italienisch · mehrsprachig: BE, FR, VS, GR</p>`;
+  return `<p class="mini">Auf deiner Karte eingetragen: ${esc(m.neu)}</p>`;
+}
+function hub() {
+  const n = MIS.filter(m => fertig(m.key)).length, sumSt = MIS.reduce((s, m) => s + (fertig(m.key) ? sterneFuer(G.best[m.key]) : 0), 0);
+  const rot = [-1.6, 1.2, -0.8, 1.6, -1.2, 0.9];
+  zeige(`<div class="hud"><span class="t">🇨🇭 Themenkarte-Expedition</span>
+    <div class="pills"><span class="pill">${E() ? "Erweitert" : "Grundniveau"}</span><span class="pill red">${gesamt()} / 600 Punkte</span><span class="pill gold">${sumSt} ★</span><span class="pill">${n} / 6 Missionen</span></div></div>
+    <div class="pop">${hubKarte()}
+    ${fertig("farben") ? `<div class="legende">${Object.values(SPR).map(s => `<span style="--c: var(${s[1]})">${s[0]}</span>`).join("")}</div>` : ""}</div>
+    <p class="muted" style="margin-top:10px">${n === 0 ? "Deine Themenkarte ist noch leer. Wähle eine Mission – jede füllt einen Teil der Karte aus." : n < 6 ? "Jede erfüllte Mission trägt etwas in deine Themenkarte ein. Mach weiter!" : "Deine Themenkarte ist vollständig. Du kannst Missionen wiederholen und dein Ergebnis verbessern."}</p>
+    <div class="zettel-grid">${MIS.map((m, i) => `<button class="zettel ${fertig(m.key) ? "done" : ""}" style="--rot:${rot[i]}deg" data-m="${i}">
+      <span class="info">${esc(m.info)}</span>
+      <h3>${m.ic} ${esc(m.t)}</h3>
+      <p>${esc(m.d)}</p>
+      <p class="st" aria-label="${fertig(m.key) ? `${G.best[m.key]} Punkte, ${sterneFuer(G.best[m.key])} Sterne` : "noch nicht gespielt"}">${fertig(m.key) ? sternStr(sterneFuer(G.best[m.key])) + ` <span class="muted" style="letter-spacing:0;font-size:.9rem">${G.best[m.key]} P.</span>` : `<span class="muted" style="letter-spacing:0;font-size:.9rem">noch offen</span>`}</p>
+      ${zettelInhalt(m)}
+    </button>`).join("")}</div>
+    <div class="row" style="margin-top:20px;justify-content:space-between">
+      ${n === 6 ? `<button class="btn" id="schluss">🏆 Schlussbilanz</button>` : "<span></span>"}
+      <button class="btn ghost small" id="neu">Neu beginnen</button>
+    </div>`);
+  app.querySelectorAll(".zettel").forEach(b => b.onclick = () => MISSION[MIS[+b.dataset.m].key]());
+  $("#neu").onclick = () => { if (confirmNeu()) { G = { niv: null, best: {} }; sichern(); start(); } };
+  if ($("#schluss")) $("#schluss").onclick = schluss;
+}
+let neuKlick = 0;
+function confirmNeu() {
+  const b = $("#neu");
+  if (Date.now() - neuKlick < 4000) return true;
+  neuKlick = Date.now(); b.textContent = "Wirklich? Nochmals klicken"; return false;
+}
+
+// Rahmen einer Mission
+function rahmen(m, inhalt, status = "") {
+  return `<div class="hud"><span class="t">${m.ic} ${esc(m.t)}</span><div class="pills" id="status">${status}</div></div>${inhalt}
+    <div class="row" style="margin-top:14px"><button class="btn ghost small" id="abbruch">← Zur Themenkarte</button></div>`;
+}
+const bindAbbruch = () => { const b = $("#abbruch"); if (b) b.onclick = () => { stopTimer(); hub(); }; };
+function missionEnde(key, pts, details = "") {
+  stopTimer();
+  pts = Math.max(0, Math.min(100, Math.round(pts)));
+  const m = MIS.find(x => x.key === key), alt = G.best[key], rekord = alt == null || pts > alt;
+  if (rekord) G.best[key] = pts;
+  sichern();
+  const st = sterneFuer(pts);
+  zeige(`<div class="card stack pop" style="text-align:center">
+    <span class="eyebrow">${esc(m.info)} · Mission beendet</span>
+    <h2>${m.ic} ${esc(m.t)}</h2>
+    <p class="big">${pts}</p><p class="muted">von 100 Punkten</p>
+    <p class="sterne" aria-label="${st} von 3 Sternen">${sternStr(st)}</p>
+    ${details}
+    <p>${alt == null ? `Neu auf deiner Themenkarte: <strong>${esc(m.neu)}</strong>.` : rekord ? `Neuer Rekord! Vorher: ${alt} Punkte.` : `Dein Rekord bleibt bei ${alt} Punkten.`}</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="zk">Zur Themenkarte</button><button class="btn ghost" id="nochmal">Nochmals spielen</button></div>
+  </div>`);
+  $("#zk").onclick = hub;
+  $("#nochmal").onclick = () => MISSION[key]();
+  if (alleFertig()) melde();
+}
+function melde() {
+  try { if (parent !== window) parent.postMessage({ seekarteErgebnis: { pts: gesamt(), max: 600, res: MIS.map(m => sterneFuer(G.best[m.key] || 0)), niv: G.niv } }, "*"); } catch (e) {}
+}
+function schluss() {
+  const p = gesamt() / 600;
+  const titel = p >= .9 ? "Bundesrätin / Bundesrat" : p >= .75 ? "Ständerätin / Ständerat" : p >= .55 ? "Nationalrätin / Nationalrat" : p >= .35 ? "Kantonsrätin / Kantonsrat" : "Gemeinderätin / Gemeinderat";
+  zeige(`<div class="card stack pop" style="text-align:center">
+    <span class="eyebrow">Themenkarte vollständig</span>
+    <p class="big">${gesamt()} / 600</p>
+    <h2>Dein Titel: ${esc(titel)}</h2>
+    <p class="muted">${p >= .75 ? "Stark! Du kennst dich in der Schweizer Politik richtig gut aus." : "Gut gemacht! Wiederhole die Missionen mit wenigen Sternen, dann steigst du weiter auf."}</p>
+    ${hubKarte()}
+    <div class="row" style="justify-content:center"><button class="btn" id="zk">Zur Themenkarte</button></div>
+  </div>`);
+  $("#zk").onclick = hub;
+  melde();
+}
+
+// ------------------------------------------------------------ Mission 1: Kantone-Jagd
+const GRUND_JAGD = ["ZH", "BE", "LU", "UR", "GR", "TI", "VS", "VD", "GE", "BS", "SG", "AG", "FR", "JU"];
+function jagd() {
+  const m = MIS[0];
+  const runden = mische(E() ? KT.map((_, i) => i) : GRUND_JAGD.map(k => KI[k])).slice(0, E() ? 26 : 12);
+  const ms = E() ? 8000 : 12000;
+  let r = 0, summe = 0, serie = 0, bestSerie = 0, gefunden = new Set();
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted">Finde den Kanton</span><div class="ziel" id="ziel" aria-live="polite"></div></div><div class="pills"><span class="pill" id="runde"></span><span class="pill gold" id="serie"></span></div></div>
+    <div class="zeit" aria-hidden="true"><span id="bar"></span></div>${karte({ klick: true, titel: "Karte: Klicke auf den gesuchten Kanton" })}<div id="fb" aria-live="polite"></div>`,
+    `<span class="pill red" id="pkt">0 Punkte</span>`));
+  bindAbbruch();
+  const svg = $("#karte"), bar = $("#bar");
+  let fehler = 0, aktiv = false, rest = null, hinweis = false;
+  function runde() {
+    if (r >= runden.length) return missionEnde("jagd", summe / runden.length * 100, `<p>Längste Serie: ${bestSerie} Kantone ohne Fehler.</p>`);
+    const z = runden[r]; fehler = 0; aktiv = true; hinweis = false;
+    $("#ziel").textContent = KT[z][1]; $("#runde").textContent = `${r + 1} / ${runden.length}`; $("#serie").textContent = `Serie ${serie}`;
+    svg.querySelectorAll(".kt").forEach(p => { p.classList.remove("dim", "bad", "ziel"); });
+    rest = timer(ms, x => {
+      bar.style.transform = `scaleX(${x})`;
+      if (!E() && !hinweis && x < 0.5) { hinweis = true; const opt = new Set([z, ...mische(KT.map((_, i) => i).filter(i => i !== z && !gefunden.has(i))).slice(0, 3)]); svg.querySelectorAll(".kt").forEach(p => { if (!opt.has(+p.dataset.i)) p.classList.add("dim"); }); $("#fb").innerHTML = `<p class="fb ok" style="background:var(--goldsoft);color:var(--gold)">Hinweis: Es ist einer der hellen Kantone.</p>`; }
+    }, () => ende(false));
+  }
+  function ende(ok, wert = 0) {
+    aktiv = false; stopTimer();
+    const z = runden[r], p = svg.querySelector("#k" + z);
+    svg.querySelectorAll(".kt").forEach(x => x.classList.remove("dim", "bad"));
+    if (ok) { gefunden.add(z); p.classList.add("found"); serie++; bestSerie = Math.max(bestSerie, serie); summe += wert; $("#fb").innerHTML = `<p class="fb ok">Richtig: ${esc(KT[z][1])} (${KT[z][0]}) +${Math.round(wert * 100 / runden.length)}</p>`; }
+    else { serie = 0; p.classList.add("ziel", "pulse"); $("#fb").innerHTML = `<p class="fb bad">Hier liegt ${esc(KT[z][1])}.</p>`; }
+    svg.querySelector("#ov").insertAdjacentHTML("beforeend", label(z, KT[z][0], ["BS", "AI", "AR", "ZG", "NW", "OW", "GL"].includes(KT[z][0]) ? "sm" : ""));
+    $("#pkt").textContent = `${Math.round(summe / runden.length * 100)} Punkte`;
+    setTimeout(() => { p.classList.remove("ziel", "pulse"); if (!ok) p.classList.add("bad"); r++; if ($("#karte") === svg) runde(); }, ok ? 650 : 1500);
+  }
+  svg.addEventListener("click", ev => {
+    if (!aktiv) return;
+    const z = runden[r], i = trefferKanton(svg, ev, z);
+    if (i < 0) return;
+    if (i === z) return ende(true, 0.5 + 0.5 * rest());
+    fehler++;
+    const p = svg.querySelector("#k" + i); p.classList.add("bad"); setTimeout(() => p.classList.remove("bad"), 600);
+    $("#fb").innerHTML = `<p class="fb bad">Das ist ${esc(KT[i][1])}. ${fehler < 2 ? "Versuch es nochmals!" : ""}</p>`;
+    if (fehler >= 2) ende(false);
+  });
+  runde();
+}
+
+// ------------------------------------------------------------ Mission 2: Sprachen-Farben
+function farben() {
+  const m = MIS[1];
+  const ziel = E() ? KT.map((_, i) => i) : ["GE", "VD", "NE", "JU", "TI", "VS", "FR", "BE", "GR", "ZH", "UR", "SH"].map(k => KI[k]);
+  const fest = KT.map((_, i) => i).filter(i => !ziel.includes(i));
+  const farbe = {}; let sel = "d", geprueft = false;
+  const kl = {}; fest.forEach(i => kl[i] = "l-" + KT[i][5]);
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted">Wähle eine Farbe und klicke auf die Kantone</span><div class="ziel">Welche Sprache spricht man wo?</div></div></div>
+    <div class="palette" role="group" aria-label="Farbe wählen">${Object.entries(SPR).map(([k, s]) => `<button class="farbe" data-f="${k}" style="--c: var(${s[1]})" aria-pressed="${k === sel}"><i></i>${s[0]}</button>`).join("")}</div>
+    <p class="muted" style="margin:8px 0">«Mehrsprachig» heisst: In diesem Kanton sind zwei oder drei Sprachen offizielle Amtssprachen. ${E() ? "" : "Die grauen Kantone sind schon fertig eingefärbt."}</p>
+    ${karte({ klick: true, klassen: kl, titel: "Karte zum Einfärben" })}
+    <div class="row" style="margin-top:10px"><button class="btn" id="pruefen" disabled>Karte prüfen</button><span class="muted" id="zaehler"></span></div><div id="fb" aria-live="polite"></div>`));
+  bindAbbruch();
+  const svg = $("#karte");
+  fest.forEach(i => svg.querySelector("#k" + i).style.opacity = ".55");
+  const zaehle = () => { const n = ziel.filter(i => farbe[i]).length; $("#zaehler").textContent = `${n} von ${ziel.length} eingefärbt`; $("#pruefen").disabled = n < ziel.length || geprueft; };
+  app.querySelectorAll(".farbe").forEach(b => b.onclick = () => { sel = b.dataset.f; app.querySelectorAll(".farbe").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+  svg.addEventListener("click", ev => {
+    if (geprueft) return;
+    const t = ev.target.closest(".kt"), i = t ? +t.dataset.i : naechster(svg, ev, ziel); if (i < 0 || !ziel.includes(i)) return;
+    farbe[i] = sel; t.setAttribute("class", "kt l-" + sel); zaehle();
+  });
+  zaehle();
+  $("#pruefen").onclick = () => {
+    geprueft = true; let ok = 0; const falsch = [];
+    ziel.forEach(i => { const p = svg.querySelector("#k" + i); if (farbe[i] === KT[i][5]) ok++; else { falsch.push(i); p.setAttribute("class", "kt l-" + KT[i][5]); p.classList.add("pulse"); svg.querySelector("#ov").insertAdjacentHTML("beforeend", label(i, "✗ " + KT[i][0])); } });
+    $("#pruefen").disabled = true;
+    $("#fb").innerHTML = `<p class="fb ${falsch.length ? "bad" : "ok"}">${ok} von ${ziel.length} richtig.${falsch.length ? `<small>Korrigiert: ${falsch.map(i => `${KT[i][1]} = ${SPR[KT[i][5]][0]}`).join(", ")}</small>` : ""}</p><div class="row" style="margin-top:10px"><button class="btn" id="weiter">Auswertung</button></div>`;
+    meldeHoehe();
+    $("#weiter").onclick = () => missionEnde("farben", ok / ziel.length * 100);
+  };
+}
+
+// ------------------------------------------------------------ Mission 3: Städte-Pins
+function pins() {
+  const m = MIS[2];
+  const fixe = [["Bern", 1, "Bundesstadt – hier tagen Parlament und Bundesrat.", 2600500, 1199700], ["Lausanne", 21, "Sitz des Bundesgerichts.", 2538000, 1152500]];
+  const pool = KT.map((k, i) => [k[2], i, `Hauptort des Kantons ${k[1]}.`, k[3], k[4]]).filter(x => !["Bern", "Lausanne"].includes(x[0]));
+  const grundPool = pool.filter(x => ["Zürich", "Genf", "Basel", "Chur", "Luzern", "St. Gallen", "Bellinzona", "Sitten"].includes(x[0]));
+  const runden = [...fixe, ...mische(E() ? pool : grundPool).slice(0, E() ? 6 : 4)];
+  const faktor = E() ? 2.5 : 1.8;
+  let r = 0, summe = 0, aktiv = false;
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted" id="rolle"></span><div class="ziel" id="ziel" aria-live="polite"></div></div><div class="pills"><span class="pill" id="runde"></span></div></div>
+    ${karte({ klick: true, titel: "Karte: Klicke dorthin, wo die Stadt liegt" })}<div id="fb" aria-live="polite"></div>`, `<span class="pill red" id="pkt">0 Punkte</span>`));
+  bindAbbruch();
+  const svg = $("#karte"), ov = svg.querySelector("#ov");
+  function runde() {
+    if (r >= runden.length) return missionEnde("pins", summe / runden.length);
+    const c = runden[r]; aktiv = true;
+    $("#ziel").textContent = c[0]; $("#rolle").textContent = c[2]; $("#runde").textContent = `${r + 1} / ${runden.length}`;
+    $("#fb").innerHTML = `<p class="muted" style="margin-top:8px">Klicke so genau wie möglich auf die Stelle, wo ${esc(c[0])} liegt.</p>`;
+  }
+  svg.addEventListener("click", ev => {
+    if (!aktiv) return; aktiv = false;
+    const c = runden[r], [x, y] = svgPunkt(svg, ev), [rx, ry] = xy(c[3], c[4]);
+    const km = Math.round(Math.hypot(x - rx, y - ry) * 0.35), p = Math.max(0, Math.round(100 - km * faktor));
+    summe += p;
+    ov.insertAdjacentHTML("beforeend", `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${rx.toFixed(1)}" y2="${ry.toFixed(1)}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4" class="pin"/>` + pinSvg(x.toFixed(1), y.toFixed(1), "var(--muted)") + pinSvg(rx.toFixed(1), ry.toFixed(1), p >= 60 ? "var(--ok)" : "var(--red)", c[0]));
+    $("#pkt").textContent = `${Math.round(summe / runden.length)} Punkte`;
+    $("#fb").innerHTML = `<p class="fb ${p >= 60 ? "ok" : "bad"}">${km <= 3 ? "Volltreffer!" : `${km} km daneben.`} +${p}<small>${esc(c[0])}: ${esc(c[2])}</small></p><div class="row" style="margin-top:10px"><button class="btn" id="weiter">${r + 1 < runden.length ? "Nächste Stadt" : "Auswertung"}</button></div>`;
+    meldeHoehe();
+    $("#weiter").onclick = () => { r++; runde(); };
+    $("#weiter").focus({ preventScroll: true });
+  });
+  runde();
+}
+
+// ------------------------------------------------------------ Mission 4: Gewalten-Sortierer
+function gewalten() {
+  const m = MIS[3];
+  const n = E() ? 18 : 12, ms = E() ? 5000 : 7500;
+  // jede Gewalt mindestens dreimal
+  const proGew = [0, 1, 2, 3].map(g => mische(SORT.filter(s => s[1] === g)));
+  let karten = proGew.flatMap(l => l.slice(0, 3));
+  karten = mische([...karten, ...mische(proGew.flatMap(l => l.slice(3))).slice(0, n - karten.length)]);
+  let r = 0, summe = 0, serie = 0, aktiv = false, rest = null;
+  zeige(rahmen(m, `<div class="zeit" aria-hidden="true"><span id="bar"></span></div>
+    <div class="sortkarte" id="karte" aria-live="polite"></div>
+    <div class="bins">${GEW.map((g, i) => `<button class="bin" data-g="${i}"><span class="muted" style="font-size:.8rem">Taste ${i + 1}</span><br>${g[0]}<small>${g[1]}</small></button>`).join("")}</div>
+    <div id="fb" aria-live="polite"></div>`, `<span class="pill" id="runde"></span><span class="pill gold" id="serie">Serie 0</span><span class="pill red" id="pkt">0 Punkte</span>`));
+  bindAbbruch();
+  const bar = $("#bar");
+  function runde() {
+    if (r >= karten.length) { removeEventListener("keydown", taste); return missionEnde("gewalten", summe / karten.length * 100, `<p>Längste Serie: ${bestSerie} richtig in Folge.</p>`); }
+    aktiv = true;
+    const k = $("#karte"); k.textContent = karten[r][0]; k.classList.remove("pop"); void k.offsetWidth; k.classList.add("pop");
+    app.querySelectorAll(".bin").forEach(b => b.classList.remove("ok", "bad"));
+    $("#runde").textContent = `${r + 1} / ${karten.length}`;
+    rest = timer(ms, x => bar.style.transform = `scaleX(${x})`, () => wahl(-1));
+  }
+  let bestSerie = 0;
+  function wahl(g) {
+    if (!aktiv) return; aktiv = false; stopTimer();
+    const richtig = karten[r][1], ok = g === richtig, w = ok ? 0.6 + 0.4 * rest() : 0;
+    summe += w; serie = ok ? serie + 1 : 0; bestSerie = Math.max(bestSerie, serie);
+    app.querySelector(`.bin[data-g="${richtig}"]`).classList.add("ok");
+    if (!ok && g >= 0) app.querySelector(`.bin[data-g="${g}"]`).classList.add("bad");
+    $("#fb").innerHTML = ok ? `<p class="fb ok">Richtig! +${Math.round(w * 100 / karten.length)}</p>` : `<p class="fb bad">${g < 0 ? "Zeit abgelaufen." : "Leider falsch."} «${esc(karten[r][0])}» gehört zur ${GEW[richtig][0]}.</p>`;
+    $("#serie").textContent = `Serie ${serie}`; $("#pkt").textContent = `${Math.round(summe / karten.length * 100)} Punkte`;
+    setTimeout(() => { r++; if ($("#karte")) runde(); }, ok ? 650 : 1600);
+  }
+  const taste = e => { if (!$("#karte") || !$(".bins")) { removeEventListener("keydown", taste); return; } if (e.key >= "1" && e.key <= "4") wahl(+e.key - 1); };
+  addEventListener("keydown", taste);
+  app.querySelectorAll(".bin").forEach(b => b.onclick = () => wahl(+b.dataset.g));
+  runde();
+}
+
+// ------------------------------------------------------------ Mission 5: Wahlabend
+const SITZFOLGE = [4, 1, 5, 3, 2, 0]; // Sitzordnung von links nach rechts: Grüne, SP, GLP, Mitte, FDP, SVP
+function saalPunkte() {
+  const pts = [], reihen = 8, r0 = 70, r1 = 190;
+  const radien = Array.from({ length: reihen }, (_, k) => r0 + (r1 - r0) * k / (reihen - 1));
+  const sum = radien.reduce((a, b) => a + b, 0);
+  let rest = 200;
+  const anz = radien.map((r, k) => { const n = k === reihen - 1 ? rest : Math.round(200 * r / sum); rest -= n; return n; });
+  radien.forEach((r, k) => { for (let j = 0; j < anz[k]; j++) { const a = Math.PI - Math.PI * (j + 0.5) / anz[k]; pts.push([200 + r * Math.cos(a), 205 - r * Math.sin(a), a]); } });
+  return pts.sort((a, b) => b[2] - a[2]);
+}
+const SAAL = saalPunkte();
+function saalSvg(werte) {
+  const farben = [];
+  SITZFOLGE.forEach(pi => { for (let k = 0; k < werte[pi]; k++) farben.push(`var(${PT[pi][3]})`); });
+  while (farben.length < 200) farben.push("var(--p-and)");
+  return `<svg viewBox="0 0 400 215" role="img" aria-label="Nationalratssaal mit 200 Sitzen">${SAAL.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="6" fill="${farben[i] || "var(--line)"}"/>`).join("")}<text class="lbl" x="200" y="200">200 Sitze</text></svg>`;
+}
+function wahl() {
+  const m = MIS[4];
+  const werte = PT.map(() => 20);
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted">Teil 1 von 2 · Info 2</span><div class="ziel">Wie viele Sitze hat jede Partei im Nationalrat?</div></div></div>
+    <p class="muted" style="margin-bottom:10px">Verteile die 200 Sitze so, wie sie nach der Wahl 2023 verteilt sind. ${E() ? "" : "Tipp: Der Wähleranteil hilft dir – 1 % entspricht etwa 2 Sitzen."} Kleine Parteien zählen als «Andere».</p>
+    <div class="grid2"><div class="mapwrap" id="saal">${saalSvg(werte)}</div>
+    <div class="parteien">${PT.map((p, i) => `<div class="prow"><span class="sw" style="background:var(${p[3]})"></span><span class="n">${esc(p[0])}${E() ? "" : ` <small>${p[2].toLocaleString("de-CH")} %</small>`}</span>
+      <button class="step" data-i="${i}" data-d="-1" aria-label="${esc(p[0])} ein Sitz weniger">−</button><span class="z" id="z${i}" aria-live="polite">${werte[i]}</span><button class="step" data-i="${i}" data-d="1" aria-label="${esc(p[0])} ein Sitz mehr">+</button></div>`).join("")}
+      <div class="prow"><span class="sw" style="background:var(--p-and)"></span><span class="n">Andere</span><span></span><span class="z" id="zand"></span><span></span></div>
+      <p class="muted" style="font-size:.88rem">Tipp: Taste gedrückt halten zählt schneller.</p>
+      <button class="btn" id="zaehlen">Auszählen!</button></div></div>
+    <div id="fb" aria-live="polite"></div>`));
+  bindAbbruch();
+  const upd = () => { const s = werte.reduce((a, b) => a + b, 0); werte.forEach((w, i) => $("#z" + i).textContent = w); $("#zand").textContent = 200 - s; $("#zand").style.color = s > 200 ? "var(--bad)" : ""; $("#saal").innerHTML = saalSvg(werte); $("#zaehlen").disabled = s > 200; };
+  let halt = 0;
+  app.querySelectorAll(".step").forEach(b => {
+    const tick = () => { const i = +b.dataset.i, d = +b.dataset.d, s = werte.reduce((a, c) => a + c, 0); if (d > 0 && s >= 200) return; werte[i] = Math.max(0, Math.min(90, werte[i] + d)); upd(); };
+    b.onclick = tick;
+    b.onpointerdown = () => { clearInterval(halt); halt = setTimeout(() => { halt = setInterval(tick, 70); }, 380); };
+    ["pointerup", "pointerleave", "pointercancel"].forEach(t => b.addEventListener(t, () => { clearTimeout(halt); clearInterval(halt); }));
+  });
+  upd();
+  $("#zaehlen").onclick = () => {
+    clearInterval(halt);
+    const fehler = PT.reduce((s, p, i) => s + Math.abs(p[1] - werte[i]), 0);
+    const ptsA = Math.max(0, 100 - fehler * (E() ? 1.5 : 1.2));
+    app.querySelectorAll(".step").forEach(b => b.disabled = true); $("#zaehlen").disabled = true;
+    $("#saal").innerHTML = saalSvg(PT.map(p => p[1]));
+    PT.forEach((p, i) => $("#z" + i).innerHTML = `${p[1]} <small class="muted" style="font-size:.75rem">(du: ${werte[i]})</small>`); $("#zand").textContent = 7;
+    $("#fb").innerHTML = `<p class="fb ${ptsA >= 60 ? "ok" : "bad"}">Das echte Resultat 2023 ist jetzt im Saal. Du lagst insgesamt ${fehler} Sitze daneben. +${Math.round(ptsA)}<small>Die SVP ist die grösste Fraktion. SVP, SP, FDP und Die Mitte stellen zusammen den Bundesrat (Zauberformel 2-2-2-1).</small></p><div class="row" style="margin-top:10px"><button class="btn" id="weiter">Weiter zum Sitze-Duell</button></div>`;
+    meldeHoehe();
+    $("#weiter").onclick = () => duell(ptsA);
+  };
+}
+function duell(ptsA) {
+  const m = MIS[4];
+  const n = E() ? 8 : 6, paare = [];
+  while (paare.length < n) { const a = Math.floor(Math.random() * 26), b = Math.floor(Math.random() * 26); if (a !== b && KT[a][6] !== KT[b][6] && !paare.some(p => p.includes(a) && p.includes(b))) paare.push([a, b]); }
+  let r = 0, ok = 0, aktiv = false;
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted">Teil 2 von 2 · Sitze-Duell</span><div class="ziel">Welcher Kanton hat mehr Sitze im Nationalrat?</div></div><div class="pills"><span class="pill" id="runde"></span></div></div>
+    ${karte({ klick: true, titel: "Karte mit zwei markierten Kantonen" })}
+    <div class="row" style="margin-top:10px" id="knoepfe"></div><div id="fb" aria-live="polite"></div>`, `<span class="pill red" id="pkt"></span>`));
+  bindAbbruch();
+  const svg = $("#karte"), ov = svg.querySelector("#ov");
+  function runde() {
+    if (r >= paare.length) { const ptsB = ok / paare.length * 100; return missionEnde("wahl", (ptsA + ptsB) / 2, `<p>Sitzverteilung: ${Math.round(ptsA)} Punkte · Sitze-Duell: ${ok} von ${paare.length} richtig</p>`); }
+    aktiv = true; const [a, b] = paare[r];
+    svg.querySelectorAll(".kt").forEach(p => p.setAttribute("class", "kt"));
+    svg.querySelector("#k" + a).classList.add("optA"); svg.querySelector("#k" + b).classList.add("optB");
+    ov.innerHTML = label(a, KT[a][0], "big") + label(b, KT[b][0], "big");
+    $("#knoepfe").innerHTML = [a, b].map(i => `<button class="btn ghost" data-i="${i}">${esc(KT[i][1])}</button>`).join("");
+    $("#knoepfe").querySelectorAll("button").forEach(x => x.onclick = () => tipp(+x.dataset.i));
+    $("#runde").textContent = `${r + 1} / ${paare.length}`; $("#pkt").textContent = `${ok} richtig`;
+    $("#fb").innerHTML = "";
+  }
+  function tipp(i) {
+    const [a, b] = paare[r]; if (!aktiv || (i !== a && i !== b)) return; aktiv = false;
+    const sieger = KT[a][6] > KT[b][6] ? a : b, richtig = i === sieger; if (richtig) ok++;
+    ov.innerHTML = label(a, `${KT[a][0]} ${KT[a][6]}`, "big") + label(b, `${KT[b][0]} ${KT[b][6]}`, "big");
+    $("#fb").innerHTML = `<p class="fb ${richtig ? "ok" : "bad"}">${richtig ? "Richtig!" : "Leider nein."} ${esc(KT[a][1])}: ${KT[a][6]} Sitze · ${esc(KT[b][1])}: ${KT[b][6]} Sitze<small>Je mehr Menschen in einem Kanton leben, desto mehr Sitze hat er im Nationalrat. Im Ständerat hat jeder Kanton gleich viele Sitze.</small></p>`;
+    $("#pkt").textContent = `${ok} richtig`; meldeHoehe();
+    setTimeout(() => { r++; if ($("#karte") === svg) runde(); }, 2300);
+  }
+  svg.addEventListener("click", ev => { const [a, b] = paare[r] || []; const t = ev.target.closest(".kt"); if (t && (+t.dataset.i === a || +t.dataset.i === b)) tipp(+t.dataset.i); });
+  runde();
+}
+
+// ------------------------------------------------------------ Mission 6: Bundesrats-Memory
+function br() {
+  const m = MIS[5];
+  const karten = mische(BR.flatMap((b, i) => [{ p: i, t: "n" }, { p: i, t: "d" }]));
+  let offen = [], zuege = 0, paare = 0, sperre = false;
+  const inhalt = k => k.t === "n" ? `<span class="k">${esc(BR[k.p][0].split(" ").slice(-1)[0])}</span>${esc(BR[k.p][0].split(" ").slice(0, -1).join(" "))}<br><small>${esc(BR[k.p][1])}</small>` : `<span class="k">${esc(BR[k.p][3])}</span><small>${esc(BR[k.p][4])}</small>`;
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted">Teil 1 von 2 · Info 3</span><div class="ziel">Welche Person führt welches Departement?</div></div><div class="pills"><span class="pill" id="zuege">0 Züge</span></div></div>
+    <p class="muted" style="margin-bottom:10px">Decke immer zwei Karten auf. Findest du eine Person und ihr Departement, bleiben beide offen. Je weniger Züge, desto mehr Punkte.</p>
+    <div class="memo">${karten.map((k, i) => `<button class="mk zu" data-i="${i}" aria-label="Karte ${i + 1}, verdeckt"><span class="k"></span></button>`).join("")}</div><div id="fb" aria-live="polite"></div>`));
+  bindAbbruch();
+  const knopf = i => app.querySelector(`.mk[data-i="${i}"]`);
+  app.querySelectorAll(".mk").forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    if (sperre || offen.includes(i) || b.classList.contains("weg")) return;
+    b.classList.remove("zu"); b.classList.add("auf"); b.innerHTML = inhalt(karten[i]); b.setAttribute("aria-label", b.textContent);
+    offen.push(i);
+    if (offen.length < 2) return;
+    zuege++; $("#zuege").textContent = `${zuege} ${zuege === 1 ? "Zug" : "Züge"}`;
+    const [x, y] = offen;
+    if (karten[x].p === karten[y].p) {
+      paare++; [x, y].forEach(j => { knopf(j).classList.add("weg"); }); offen = [];
+      $("#fb").innerHTML = `<p class="fb ok">${esc(BR[karten[x].p][0])} (${esc(BR[karten[x].p][1])}) leitet das ${esc(BR[karten[x].p][3])}.</p>`;
+      meldeHoehe();
+      if (paare === BR.length) setTimeout(() => herkunft(Math.max(0, 100 - Math.max(0, zuege - 9) * (E() ? 6 : 4.5))), 900);
+    } else {
+      sperre = true;
+      setTimeout(() => { [x, y].forEach(j => { const k = knopf(j); if (!k) return; k.classList.remove("auf"); k.classList.add("zu"); k.innerHTML = `<span class="k"></span>`; k.setAttribute("aria-label", `Karte ${j + 1}, verdeckt`); }); offen = []; sperre = false; }, 1100);
+    }
+  });
+}
+function herkunft(ptsA) {
+  const m = MIS[5];
+  const reihe = mische(BR.map((_, i) => i));
+  let r = 0, ok = 0, aktiv = false, opt = null;
+  zeige(rahmen(m, `<div class="auftrag"><div><span class="muted">Teil 2 von 2 · Woher kommen sie?</span><div class="ziel" id="ziel" aria-live="polite"></div></div><div class="pills"><span class="pill" id="runde"></span></div></div>
+    <p class="muted" style="margin-bottom:8px" id="tipp"></p>
+    ${karte({ klick: true, titel: "Karte: Klicke auf den Heimatkanton" })}<div id="fb" aria-live="polite"></div>`, `<span class="pill red" id="pkt"></span>`));
+  bindAbbruch();
+  const svg = $("#karte"), ov = svg.querySelector("#ov");
+  function runde() {
+    if (r >= reihe.length) { const ptsB = ok / reihe.length * 100; return missionEnde("br", (ptsA + ptsB) / 2, `<p>Memory: ${Math.round(ptsA)} Punkte · Heimatkantone: ${ok} von 7 richtig</p>`); }
+    aktiv = true; const b = BR[reihe[r]], z = KI[b[2]];
+    $("#ziel").textContent = `${b[0]} (${b[1]}, ${b[3]})`; $("#runde").textContent = `${r + 1} / 7`; $("#pkt").textContent = `${ok} richtig`;
+    svg.querySelectorAll(".kt").forEach(p => p.setAttribute("class", "kt"));
+    if (!E()) {
+      opt = new Set([z, ...mische(KT.map((_, i) => i).filter(i => i !== z)).slice(0, 2)]);
+      svg.querySelectorAll(".kt").forEach(p => { if (!opt.has(+p.dataset.i)) p.classList.add("dim"); });
+      ov.innerHTML = [...opt].map(i => label(i, KT[i][0])).join("");
+      $("#tipp").textContent = "Aus welchem der drei hellen Kantone kommt diese Person?";
+    } else { opt = null; ov.innerHTML = ""; $("#tipp").textContent = "Klicke auf den Kanton, aus dem diese Person kommt."; }
+    $("#fb").innerHTML = "";
+  }
+  svg.addEventListener("click", ev => {
+    if (!aktiv) return;
+    const b = BR[reihe[r]], z = KI[b[2]], i = trefferKanton(svg, ev, z, 12);
+    if (i < 0 || (opt && !opt.has(i))) return;
+    aktiv = false; const richtig = i === z; if (richtig) ok++;
+    svg.querySelectorAll(".kt").forEach(p => p.classList.remove("dim"));
+    svg.querySelector("#k" + z).classList.add("ok"); if (!richtig) svg.querySelector("#k" + i).classList.add("bad");
+    ov.innerHTML = label(z, KT[z][0], "big");
+    $("#fb").innerHTML = `<p class="fb ${richtig ? "ok" : "bad"}">${richtig ? "Richtig!" : "Leider nein."} ${esc(b[0])} kommt aus dem Kanton ${esc(KT[z][1])}.</p>`;
+    $("#pkt").textContent = `${ok} richtig`; meldeHoehe();
+    setTimeout(() => { r++; if ($("#karte") === svg) runde(); }, 1700);
+  });
+  runde();
+}
+
+const MISSION = { jagd, farben, pins, gewalten, wahl, br };
+app.innerHTML = `<p class="muted" style="padding:20px">Karte wird geladen …</p>`;
+Promise.resolve(window.KARTE_LADEN).catch(() => {}).then(() => {
+  KARTE_OK = !!(window.KARTE && Array.isArray(window.KARTE.C) && window.KARTE.C.length === 26);
+  start();
+});
+</script>
+</body>
+</html>
