@@ -147,6 +147,33 @@ button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outlin
 .farbe i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); display: inline-block; }
 .farbe[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--c); }
 /* Berufsspiele */
+:root { --zone: #f4f1ea; --wand: #4b5563; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --zone: #2a323b; --wand: #9aa3ad; } }
+:root[data-theme="dark"] { --zone: #2a323b; --wand: #9aa3ad; }
+.szene { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 10px 30px -18px rgba(0,0,0,.4); }
+.szene svg { display: block; width: 100%; height: auto; }
+.planwrap { padding: 8px; }
+.plan { display: block; width: 100%; height: auto; }
+.plan .hot { cursor: pointer; }
+.plan .hot rect { stroke: var(--wand); stroke-width: 2; transition: filter .15s; }
+.plan .hot:hover rect, .plan .hot:focus rect { filter: brightness(.94); stroke: var(--pick); stroke-width: 3; }
+.plan .hot:focus { outline: none; }
+.plan .hot.done rect { stroke: var(--gold); stroke-width: 3; }
+.plan .hot.next rect { stroke: var(--red); stroke-width: 3.5; }
+.plan .deko rect { stroke: var(--wand); stroke-width: 1.5; }
+.plan .zl { font: 700 17px var(--font-d); fill: var(--ink); text-anchor: middle; }
+.plan .zi { font-size: 30px; text-anchor: middle; }
+.plan .zu { font: 700 13px var(--font-b); fill: var(--muted); text-anchor: middle; }
+.plan .farbig .zl { fill: #1d232a; } .plan .farbig .zu { fill: #4b5563; }
+.plan .pin { fill: var(--red); stroke: #fff; stroke-width: 3; }
+@media (prefers-reduced-motion: no-preference) { .plan .pin { animation: puls 1.2s ease-in-out infinite; } @keyframes puls { 50% { opacity: .35; } } }
+.plan .deko text { font: 600 14px var(--font-b); fill: var(--muted); text-anchor: middle; }
+.plan .pfeil { stroke: var(--red); stroke-width: 3; stroke-dasharray: 8 7; fill: none; opacity: .55; }
+.sprecher { display: flex; gap: 14px; align-items: flex-start; }
+.sprecher .ava { flex: none; width: 58px; height: 58px; border-radius: 50%; background: var(--goldsoft); display: grid; place-items: center; font-size: 2rem; }
+.blase { position: relative; margin-top: 6px; background: var(--bg); border-radius: 14px; padding: 10px 14px; font-size: 1.05rem; }
+.blase::before { content: ""; position: absolute; left: -8px; top: 14px; border: 8px solid transparent; border-right-color: var(--bg); border-left: 0; }
+.uhrpill { background: var(--ink) !important; color: var(--surface); border-color: transparent !important; }
 .frage { font-family: var(--font-d); font-weight: 700; font-size: clamp(1.1rem, 3.2vw, 1.35rem); }
 .opts { display: grid; gap: 10px; }
 .opt { text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; }
@@ -195,6 +222,71 @@ button:focus-visible, .kt:focus-visible { outline: 3px solid var(--pick); outlin
 <div id="app"></div>
 <script src="spielbasis.js"></script>
 <script>
+// Szenen und Grundriss für «Ein Tag auf der Station»
+const SZ = {
+  person(x, y, kittel = "#ffffff", s = 1, haut = "#e8b98f", haar = "#5b3a29") {
+    return `<g transform="translate(${x} ${y}) scale(${s})"><circle cx="0" cy="-58" r="11" fill="${haut}"/><path d="M-11 -62a11 11 0 0 1 22 0v-2a11 11 0 0 0-22 0z" fill="${haar}"/><path d="M-11 -63a11 11 0 0 1 22 0z" fill="${haar}"/>
+      <rect x="-14" y="-46" width="28" height="40" rx="7" fill="${kittel}" stroke="#94a3b8"/><rect x="-11" y="-8" width="9" height="26" rx="3" fill="#cbd5e1"/><rect x="2" y="-8" width="9" height="26" rx="3" fill="#cbd5e1"/>
+      <rect x="-13" y="16" width="12" height="6" rx="2" fill="#fff" stroke="#94a3b8"/><rect x="2" y="16" width="12" height="6" rx="2" fill="#fff" stroke="#94a3b8"/><rect x="4" y="-36" width="8" height="5" fill="#0f7c8c"/></g>`;
+  },
+  aussen(abend) {
+    return `<svg viewBox="0 0 1000 430" role="img" aria-label="${abend ? "Das Pflegeheim Seeblick am Abend" : "Das Pflegeheim Seeblick am Morgen am See"}">
+      <defs><linearGradient id="ph${abend ? "a" : "m"}" x1="0" y1="0" x2="0" y2="1">${abend ? '<stop offset="0" stop-color="#2d3561"/><stop offset=".6" stop-color="#c06c84"/><stop offset="1" stop-color="#f8b195"/>' : '<stop offset="0" stop-color="#9fd0ee"/><stop offset=".75" stop-color="#ffe0b8"/><stop offset="1" stop-color="#fff1dc"/>'}</linearGradient></defs>
+      <rect width="1000" height="430" fill="url(#ph${abend ? "a" : "m"})"/>
+      ${abend ? '<circle cx="850" cy="80" r="24" fill="#fff6d5"/>' : '<circle cx="170" cy="120" r="40" fill="#ffb347"/><circle cx="170" cy="120" r="58" fill="#ffb347" opacity=".25"/>'}
+      <path d="M0 230 L110 140 L190 200 L300 110 L420 210 L540 150 L640 215 L760 130 L880 205 L1000 160 V260 H0z" fill="${abend ? "#4a4e69" : "#8fa3b8"}"/><path d="M300 110 L330 135 L270 135z M760 130 L790 155 L730 155z" fill="#fff" opacity=".85"/>
+      <rect y="250" width="1000" height="55" fill="${abend ? "#3d5a80" : "#5aa3d6"}"/><path d="M40 270h60M160 285h80M420 268h50M700 280h90" stroke="#fff" stroke-width="3" opacity=".6"/>
+      <rect y="300" width="1000" height="130" fill="${abend ? "#5b7a5a" : "#8cc084"}"/><path d="M560 430 Q600 360 640 330" stroke="#d6cbb3" stroke-width="34" fill="none"/>
+      <rect x="380" y="110" width="520" height="220" fill="#f4ede1" stroke="#b9ad97" stroke-width="2"/><rect x="370" y="100" width="540" height="16" fill="#9a5b3c"/>
+      ${[0, 1, 2].map(r => [0, 1, 2, 3, 4, 5].map(c => `<rect x="${405 + c * 82}" y="${130 + r * 62}" width="50" height="36" fill="${abend ? (r + c) % 3 ? "#ffe8a3" : "#6b7280" : "#cfe6f5"}" stroke="#8a7f6c"/>${r < 2 ? `<rect x="${398 + c * 82}" y="${168 + r * 62}" width="64" height="6" fill="#9a5b3c"/>` : ""}`).join("")).join("")}
+      <rect x="590" y="262" width="80" height="68" fill="#0f7c8c"/><rect x="600" y="272" width="26" height="40" fill="#cfe6f5"/><rect x="634" y="272" width="26" height="40" fill="#cfe6f5"/><rect x="570" y="250" width="120" height="14" rx="3" fill="#9a5b3c"/>
+      <rect x="470" y="70" width="340" height="40" rx="6" fill="#0f7c8c"/><text x="640" y="98" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="23" fill="#fff" text-anchor="middle">PFLEGEHEIM SEEBLICK</text>
+      <g><rect x="250" y="250" width="14" height="70" fill="#7c5a3a"/><circle cx="257" cy="235" r="42" fill="${abend ? "#3f5f3d" : "#4c9a4c"}"/><rect x="930" y="250" width="12" height="60" fill="#7c5a3a"/><circle cx="936" cy="238" r="34" fill="${abend ? "#3f5f3d" : "#4c9a4c"}"/></g>
+      ${SZ.person(abend ? 520 : 560, 400, "#ffffff", 1.1)}
+      <rect x="20" y="20" width="120" height="44" rx="10" fill="#1d232a" opacity=".85"/><text x="80" y="50" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="24" fill="#fff" text-anchor="middle">${abend ? "16:30" : "06:45"}</text></svg>`;
+  },
+  banner(inhalt, farbe = "#f3ece2") { return `<svg viewBox="0 0 1000 260" role="img" aria-hidden="true"><rect width="1000" height="260" fill="${farbe}"/><rect y="218" width="1000" height="42" fill="#cdbfa8"/>${inhalt}</svg>`; },
+  bett(x, y, s = 1, person = true) {
+    return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="0" y="40" width="260" height="60" rx="8" fill="#e5e7eb" stroke="#9ca3af"/><rect x="-6" y="0" width="14" height="130" rx="4" fill="#9ca3af"/><rect x="252" y="20" width="14" height="110" rx="4" fill="#9ca3af"/>
+      <rect x="10" y="28" width="60" height="22" rx="10" fill="#fff" stroke="#cbd5e1"/>${person ? '<circle cx="45" cy="22" r="14" fill="#f1c9a5"/><path d="M31 18a14 14 0 0 1 28 0z" fill="#e5e7eb"/>' : ""}<rect x="60" y="30" width="190" height="34" rx="10" fill="#bfdbfe"/><circle cx="20" cy="138" r="8" fill="#4b5563"/><circle cx="240" cy="138" r="8" fill="#4b5563"/></g>`;
+  },
+  umkleide() {
+    let s = ""; for (let i = 0; i < 7; i++) s += `<rect x="${40 + i * 70}" y="40" width="62" height="178" rx="4" fill="${i % 2 ? "#9dd3d9" : "#86c5cc"}" stroke="#4a8f97"/><rect x="${55 + i * 70}" y="60" width="32" height="5" fill="#4a8f97"/><circle cx="${90 + i * 70}" cy="130" r="4" fill="#fff"/>`;
+    s += `<rect x="560" y="50" width="150" height="110" rx="6" fill="#fff" stroke="#9ca3af"/><circle cx="635" cy="95" r="28" fill="#cfe6f5" stroke="#9ca3af"/><text x="635" y="148" font-family="sans-serif" font-size="13" text-anchor="middle">Spiegel</text>
+      <rect x="740" y="60" width="50" height="90" rx="8" fill="#e0f2fe" stroke="#0f7c8c"/><rect x="752" y="45" width="26" height="16" fill="#0f7c8c"/><text x="765" y="115" font-size="22" text-anchor="middle">🧴</text><text x="765" y="170" font-family="sans-serif" font-size="12" text-anchor="middle">Desinfektion</text>
+      <rect x="820" y="60" width="150" height="95" rx="6" fill="#fff" stroke="#9ca3af"/><text x="895" y="85" font-family="sans-serif" font-weight="800" font-size="14" text-anchor="middle" fill="#0f7c8c">VOR DEM DIENST</text><text x="895" y="110" font-size="18" text-anchor="middle">💍❌ ⌚❌</text><text x="895" y="138" font-family="sans-serif" font-size="12" text-anchor="middle">Nägel kurz · Haare zusammen</text>`;
+    return SZ.banner(s + SZ.person(560, 218, "#ffffff", 1.1));
+  },
+  stationszimmer() {
+    return SZ.banner(`<rect x="40" y="40" width="300" height="150" rx="6" fill="#fff" stroke="#9ca3af"/><text x="190" y="66" font-family="sans-serif" font-weight="800" font-size="16" text-anchor="middle">Tagesplan Station 2</text>${["07:00 Vitalzeichen", "08:00 Körperpflege", "10:00 Hygiene-Audit", "12:00 Mittagessen", "15:00 …"].map((t, i) => `<text x="60" y="${92 + i * 20}" font-family="sans-serif" font-size="13">${t}</text>`).join("")}
+      <rect x="380" y="130" width="220" height="12" fill="#9a5b3c"/><rect x="390" y="142" width="10" height="76" fill="#9a5b3c"/><rect x="580" y="142" width="10" height="76" fill="#9a5b3c"/><rect x="420" y="95" width="90" height="36" rx="4" fill="#1d232a"/><rect x="520" y="105" width="50" height="25" rx="4" fill="#e5e7eb"/>
+      <g transform="translate(660 70)"><rect x="0" y="0" width="90" height="120" rx="10" fill="#e0f2fe" stroke="#0f7c8c"/><circle cx="45" cy="45" r="25" fill="#fff" stroke="#0f7c8c" stroke-width="3"/><path d="M45 45 L45 28 M45 45 L58 52" stroke="#c8102e" stroke-width="3"/><text x="45" y="100" font-family="sans-serif" font-size="12" text-anchor="middle">Blutdruck</text></g>
+      ${SZ.person(840, 218, "#ffffff", 1.1, "#c68b5a", "#1f1f1f")}${SZ.person(900, 218, "#ffffff", 1.1)}`);
+  },
+  zimmer() { return SZ.banner(`<rect x="620" y="40" width="180" height="120" fill="#cfe6f5" stroke="#9ca3af" stroke-width="3"/><path d="M710 40v120M620 100h180" stroke="#9ca3af" stroke-width="3"/><path d="M560 40 Q590 120 560 200 L600 200 Q615 120 600 40z" fill="#fca5a5" opacity=".8"/>${SZ.bett(150, 80, 1)}<rect x="440" y="140" width="60" height="78" fill="#d6b38a"/><text x="470" y="132" font-size="22" text-anchor="middle">🖼️</text><rect x="830" y="120" width="110" height="98" rx="6" fill="#e5e7eb" stroke="#9ca3af"/><text x="885" y="175" font-size="28" text-anchor="middle">🧼</text>${SZ.person(540, 218, "#ffffff", 1.1)}`); },
+  gang() { return SZ.banner(`${[0, 1, 2, 3].map(i => `<rect x="${60 + i * 230}" y="50" width="80" height="168" fill="#d6b38a" stroke="#9a7b56"/><text x="${100 + i * 230}" y="42" font-family="sans-serif" font-weight="700" font-size="14" text-anchor="middle">Zimmer ${12 + i}</text><circle cx="${128 + i * 230}" cy="140" r="4" fill="#4b5563"/><rect x="${155 + i * 230}" y="90" width="26" height="46" rx="5" fill="#e0f2fe" stroke="#0f7c8c"/><text x="${168 + i * 230}" y="120" font-size="16" text-anchor="middle">🧴</text>`).join("")}<rect x="0" y="200" width="1000" height="8" fill="#9ca3af"/>${SZ.person(470, 218, "#ffffff", 1.1)}${SZ.person(540, 218, "#e0f2fe", 1.1, "#c68b5a", "#1f1f1f")}<rect x="760" y="160" width="60" height="50" rx="6" fill="#9ca3af"/><text x="790" y="192" font-size="22" text-anchor="middle">🧺</text>`, "#eef2f3"); },
+  speisesaal() { return SZ.banner(`<rect x="0" y="30" width="1000" height="90" fill="#9fd0ee"/><path d="M0 95 L150 60 L300 90 L450 50 L600 88 L800 55 L1000 90 V120 H0z" fill="#8fa3b8"/><rect y="105" width="1000" height="15" fill="#5aa3d6"/>${[0, 1, 2].map(i => `<g transform="translate(${90 + i * 300} 150)"><rect x="0" y="0" width="200" height="14" rx="4" fill="#9a5b3c"/><rect x="20" y="14" width="10" height="54" fill="#9a5b3c"/><rect x="170" y="14" width="10" height="54" fill="#9a5b3c"/><text x="50" y="-4" font-size="22">🍽️</text><text x="120" y="-4" font-size="22">🥤</text></g>`).join("")}${SZ.person(360, 218, "#ffffff", 1.1)}`, "#fbf7ef"); },
+  notfall() { return SZ.banner(`${SZ.bett(560, 80, 1, false)}<g transform="translate(250 205)"><circle cx="0" cy="0" r="14" fill="#f1c9a5"/><rect x="14" y="-10" width="120" height="22" rx="10" fill="#93c5fd"/><rect x="134" y="-8" width="60" height="16" rx="7" fill="#64748b"/></g><text x="900" y="80" font-size="40" text-anchor="middle">🔔</text><text x="900" y="120" font-family="sans-serif" font-weight="800" font-size="16" fill="#c8102e" text-anchor="middle">Zimmer 7</text>${SZ.person(120, 218, "#ffffff", 1.1)}<rect x="40" y="40" width="160" height="60" rx="6" fill="#fee2e2" stroke="#c8102e"/><text x="120" y="66" font-family="sans-serif" font-weight="800" font-size="15" text-anchor="middle" fill="#c8102e">NOTRUF 144</text><text x="120" y="88" font-family="sans-serif" font-size="12" text-anchor="middle">Notfallteam: 222</text>`); }
+};
+
+const STATION_PLAN = {
+  w: 1000, h: 620, titel: "Grundriss 2. Stock, Pflegeheim Seeblick",
+  unter: `<rect x="0" y="0" width="1000" height="620" fill="var(--bg)"/><rect x="30" y="30" width="940" height="560" rx="10" fill="none" stroke="var(--wand)" stroke-width="6"/>
+    <rect x="975" y="200" width="25" height="300" fill="#5aa3d6" opacity=".6"/><text x="988" y="190" font-size="12" text-anchor="middle" fill="var(--muted)">See</text>`,
+  zonen: [
+    { k: "dienst", x: 40, y: 430, w: 200, h: 150, label: "Umkleideraum", f: "#ccfbf1" },
+    { x: 250, y: 430, w: 110, h: 150, label: "Lift", ty: 80 },
+    { k: "vital", x: 40, y: 40, w: 200, h: 170, label: "Stationszimmer" },
+    { x: 250, y: 40, w: 120, h: 170, label: "Zimmer 14–18", ty: 95 },
+    { k: "pflege", x: 380, y: 40, w: 170, h: 170, label: "Zimmer 12", f: "#e0f2fe" },
+    { k: "notfall", x: 560, y: 40, w: 160, h: 170, label: "Zimmer 7", f: "#fee2e2" },
+    { k: "hygiene", x: 40, y: 220, w: 680, h: 200, label: "Gang · 2. Stock", ty: 40 },
+    { x: 370, y: 430, w: 170, h: 150, label: "Zimmer 8–11", ty: 80 },
+    { x: 550, y: 430, w: 170, h: 150, label: "Pflegebad", ty: 80 },
+    { k: "trinken", x: 730, y: 40, w: 230, h: 540, label: "Speisesaal mit Seesicht", f: "#fef3c7" }
+  ],
+  ueber: `<text x="42" y="610" font-size="14" fill="var(--muted)">Tippe auf einen Raum. Der rote Punkt zeigt, wohin du als Nächstes gehst.</text>`
+};
 // Berufsspiel FaGe: Ein Tag auf der Station
 function dienstbeginn() {
   const pool = [
@@ -305,16 +397,26 @@ function notfall() {
 
 starteSpiel({
   titel: "Ein Tag auf der Station", ic: "🏥", beruf: "Fachfrau/Fachmann Gesundheit EFZ", speicher: "station-spiel-v1",
-  intro: "Du arbeitest heute deinen ersten Tag im Pflegeheim «Seeblick». Mach dich bereit, miss Vitalzeichen, hilf bei der Körperpflege, denk an die Hygiene, führe das Trinkprotokoll und bleib im Notfall ruhig.",
-  hubText: "Dein Dienst beginnt. Wähle eine Station – am besten der Reihe nach.",
+  intro: "Heute ist dein erster Arbeitstag im Pflegeheim Seeblick. Du erlebst einen ganzen Frühdienst: vom Umkleideraum über die Morgenrunde bis zum Notfall am Nachmittag.",
+  hubText: "Das ist der Grundriss des 2. Stocks. Dein Dienst beginnt im Umkleideraum. Tippe auf den rot markierten Raum.",
+  ankunft: { uhr: "06:45", titel: "Willkommen im Pflegeheim Seeblick", svg: SZ.aussen, knopf: "Zum Personaleingang und in den Umkleideraum",
+    text: ["Die Sonne geht über dem See auf. Hinter den Fenstern brennt schon Licht, die Bewohnerinnen und Bewohner werden bald wach.", "Deine Berufsbildnerin, Frau Rossi, wartet um 06:50 im Umkleideraum im 2. Stock auf dich. Heute arbeitest du im Frühdienst bis 16:30 Uhr."] },
+  feierabend: { uhr: "16:30", text: "Der Spätdienst übernimmt. Frau Rossi lächelt: «Du hast heute viel gelernt. Frau Ammann hat schon gefragt, ob du morgen wieder kommst.»" },
+  plan: STATION_PLAN,
   titelFuer: p => p >= .9 ? "FaGe-Profi" : p >= .75 ? "Lernende/r im 3. Lehrjahr" : p >= .55 ? "Lernende/r im 2. Lehrjahr" : p >= .35 ? "Lernende/r im 1. Lehrjahr" : "Schnupperlernende/r",
   phasen: [
-    { key: "dienst", uhr: "06:45", ic: "🧴", t: "Dienstbeginn", d: "Bereit für die Arbeit? Hygiene und Berufskleidung", run: dienstbeginn, merke: "Keine Ringe, keine Uhr, kurze Nägel. Händedesinfektion vor dem ersten Kontakt." },
-    { key: "vital", uhr: "07:00", ic: "🩺", t: "Vitalzeichen", d: "Werte einschätzen: normal oder melden?", run: vitalzeichen, merke: "Auffällige Werte sofort melden und alles dokumentieren." },
-    { key: "pflege", uhr: "08:00", ic: "🛁", t: "Körperpflege", d: "Reihenfolge, Intimsphäre und Ressourcen", run: koerperpflege, merke: "Von sauber nach weniger sauber waschen, Intimsphäre schützen, Ressourcen fördern." },
-    { key: "hygiene", uhr: "10:00", ic: "🙌", t: "Hygiene-Runde", d: "Die 5 Momente der Händedesinfektion", run: hygiene, merke: "Vor und nach Klientenkontakt, vor aseptischen Tätigkeiten, nach Körperflüssigkeiten und nach Kontakt mit der Umgebung." },
-    { key: "trinken", uhr: "12:00", ic: "🥤", t: "Mittag und Trinkprotokoll", d: "Flüssigkeit berechnen und Situationen lösen", run: trinken, merke: "Flüssigkeitsbilanz = Einfuhr minus Ausfuhr." },
-    { key: "notfall", uhr: "15:00", ic: "🚑", t: "Notfall", d: "Ruhig bleiben, Hilfe holen, richtig handeln", run: notfall, merke: "Eigene Sicherheit, ansprechen, Hilfe rufen, Atmung prüfen. Sanität 144." }
+    { key: "dienst", uhr: "06:50", ort: "Umkleideraum", ic: "🧴", t: "Dienstbeginn", d: "Umziehen, Schmuck weg, Hände desinfizieren", run: dienstbeginn, bild: SZ.umkleide,
+      person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Willkommen im Seeblick! Bevor du auf die Station gehst: Berufskleidung anziehen, Schmuck in den Spind, Hände desinfizieren. Zeig mir, was du schon weisst.", lage: "Im Umkleideraum hängt dein Spind. Neben dem Spiegel steht der Desinfektionsmittelspender.", merke: "Keine Ringe, keine Uhr, kurze Nägel. Händedesinfektion vor dem ersten Kontakt." },
+    { key: "vital", uhr: "07:15", ort: "Stationszimmer und Zimmer 14–18", ic: "🩺", t: "Morgenrunde: Vitalzeichen", d: "Werte einschätzen: normal oder melden?", run: vitalzeichen, bild: SZ.stationszimmer,
+      person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Der Rapport ist vorbei. Nimm das Blutdruckgerät und das Thermometer und mach die Morgenrunde. Alles Auffällige meldest du mir sofort.", merke: "Auffällige Werte sofort melden und alles dokumentieren." },
+    { key: "pflege", uhr: "08:00", ort: "Zimmer 12", ic: "🛁", t: "Körperpflege", d: "Reihenfolge, Intimsphäre und Ressourcen", run: koerperpflege, bild: SZ.zimmer,
+      person: ["👵", "Frau Ammann, 84 Jahre"], sagt: "Guten Morgen! Sie sind die Neue? Schön. Ich kann noch vieles selbst, nur nicht so schnell. Und den Rücken, den schaffe ich nicht mehr allein.", merke: "Von sauber nach weniger sauber waschen, Intimsphäre schützen, Ressourcen fördern." },
+    { key: "hygiene", uhr: "10:00", ort: "Gang 2. Stock", ic: "🙌", t: "Hygiene-Runde", d: "Die 5 Momente der Händedesinfektion", run: hygiene, bild: SZ.gang,
+      person: ["🧑‍⚕️", "Herr Demir, Hygieneverantwortlicher"], sagt: "Heute ist Hygiene-Audit. Ich begleite dich auf deiner Runde durch die Zimmer und schaue genau hin: Wann desinfizierst du die Hände?", merke: "Vor und nach Klientenkontakt, vor aseptischen Tätigkeiten, nach Körperflüssigkeiten und nach Kontakt mit der Umgebung." },
+    { key: "trinken", uhr: "12:00", ort: "Speisesaal mit Seesicht", ic: "🥤", t: "Mittag und Trinkprotokoll", d: "Flüssigkeit berechnen und Situationen lösen", run: trinken, bild: SZ.speisesaal,
+      person: ["👩‍⚕️", "Frau Rossi, Berufsbildnerin"], sagt: "Mittagszeit! Viele ältere Menschen trinken zu wenig. Führ heute das Trinkprotokoll und achte auch auf besondere Wünsche beim Essen.", merke: "Flüssigkeitsbilanz = Einfuhr minus Ausfuhr." },
+    { key: "notfall", uhr: "15:00", ort: "Zimmer 7", ic: "🚑", t: "Notfall", d: "Ruhig bleiben, Hilfe holen, richtig handeln", run: notfall, bild: SZ.notfall,
+      person: ["🔔", "Die Klingel in Zimmer 7"], sagt: "Die Klingel läutet Sturm. Du öffnest die Tür: Herr Lang liegt neben seinem Bett am Boden und bewegt sich nicht.", lage: "Jetzt zählt jede Sekunde – aber zuerst atmest du einmal tief durch.", merke: "Eigene Sicherheit, ansprechen, Hilfe rufen, Atmung prüfen. Sanität 144." }
   ]
 });
 </script>

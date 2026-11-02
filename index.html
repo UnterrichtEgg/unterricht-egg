@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="stufen.js"></script>
 <script src="sprache.js"></script>
+<script src="beruf-extra.js"></script>
 <script src="beruf.js"></script>
 <style>
 /* Layout: Werkstatt-Übersicht mit Rubrik-Filter → Hörstation (Video oben, Fragebogen darunter) */
@@ -207,6 +208,11 @@ details p { margin: 6px 0 0; color: var(--muted); }
 .sptext { font: inherit; width: 100%; min-height: 5.5em; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
 .sptext.right { border-color: var(--ok); }
 .spunit { margin-left: 2px; }
+.mtext { line-height: 2.1; }
+.mtok { font: inherit; border: 1px dashed var(--muted); background: var(--surface); color: var(--ink); padding: 1px 6px; border-radius: 6px; cursor: pointer; }
+.mtok[aria-pressed="true"] { background: var(--midbg); border-style: solid; border-color: var(--mid); }
+.mtok.right { background: var(--okbg); border-color: var(--ok); border-style: solid; } .mtok.wrong { background: var(--badbg); border-color: var(--bad); border-style: solid; }
+.mtok.fehlt { outline: 2px dashed var(--ok); }
 .lernbox { background: var(--surface); border-left: 4px solid var(--r, var(--accent)); padding: 10px 14px; border-radius: 8px; margin: 10px 0; }
 .gap { display: inline-block; width: 18px; height: 1.7em; vertical-align: middle; margin: 0 1px; padding: 0; border: 1px dashed var(--line); border-radius: 5px; background: none; color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
 .gap[aria-pressed="true"] { border-style: solid; border-color: var(--mid); background: var(--midbg); }
@@ -2662,7 +2668,7 @@ const pillClass = r => { const p = r.punkte / r.total; return p >= .8 ? "good" :
 
 // ---------------------------------------------------------------- Station
 // ---------------------------------------------------------------- Sprache im Fokus (Übungen)
-const SP_ANL = { wahl: "Wähle das richtige Wort.", luecke: "Setze richtig ein.", fehler: "In jedem Satz ist ein Wort falsch. Tippe es an.", zuordnen: "Ordne zu.", umformen: "Schreibe den Satz um.", komma: "Tippe zwischen die Wörter, wo ein Komma fehlt.", reihe: "Bringe die Schritte in die richtige Reihenfolge. Tippe sie nacheinander an.", paare: "Wähle zu jedem Begriff die passende Erklärung.", rechnen: "Rechne und schreibe nur die Zahl ins Feld.", offen: "Schreibe deine Antwort in ganzen Sätzen." };
+const SP_ANL = { wahl: "Wähle das richtige Wort.", luecke: "Setze richtig ein.", fehler: "In jedem Satz ist ein Wort falsch. Tippe es an.", zuordnen: "Ordne zu.", umformen: "Schreibe den Satz um.", komma: "Tippe zwischen die Wörter, wo ein Komma fehlt.", reihe: "Bringe die Schritte in die richtige Reihenfolge. Tippe sie nacheinander an.", paare: "Wähle zu jedem Begriff die passende Erklärung.", rechnen: "Rechne und schreibe nur die Zahl ins Feld.", offen: "Schreibe deine Antwort in ganzen Sätzen.", mehrfach: "Hier sind mehrere Antworten richtig. Kreuze alle richtigen an.", markieren: "Tippe im Text alle passenden Stellen an." };
 const spZahl = v => { const m = String(v ?? "").replace(/'/g, "").replace(/(\d)\s+(?=\d{3}\b)/g, "$1").replace(",", ".").match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : NaN; };
 const spTok = s => String(s).split(/\s+/).filter(Boolean);
 const spNorm = s => String(s ?? "").replace(/ß/g, "ss").replace(/[„“”"«»‹›]/g, "").replace(/[’`]/g, "'").replace(/\s+/g, " ").replace(/\s+([,.!?:;])/g, "$1").trim().replace(/[.!?]+$/, "").trim();
@@ -2681,6 +2687,7 @@ function spOk(b, it, v) {
   if (b.t === "reihe") return v.length === it.o.length && v.every((x, i) => x === i);
   if (b.t === "rechnen") { const z = spZahl(v); return !isNaN(z) && Math.abs(z - it.k) <= (it.tol || 0) + 1e-9; }
   if (b.t === "offen") return String(v).trim().length >= 10;
+  if (b.t === "mehrfach" || b.t === "markieren") return v.length === it.k.length && it.k.every(k => v.includes(k));
   return false;
 }
 function spFrage(b, it) {
@@ -2689,6 +2696,8 @@ function spFrage(b, it) {
   if (b.t === "zuordnen") return spPlain(it.s).trim() === it.s ? it.s : it.s.replace(/\*(.+?)\*/g, "«$1»");
   if (b.t === "umformen") return it.s + " → " + it.h;
   if (b.t === "reihe") return it.s + " (" + it.m.map(j => it.o[j]).join(" / ") + ")";
+  if (b.t === "mehrfach") return it.s + " (" + it.o.join(" / ") + ")";
+  if (b.t === "markieren") return it.seg.map(g => g.t).join("");
   return it.s;
 }
 function spRichtig(b, it) {
@@ -2702,6 +2711,8 @@ function spRichtig(b, it) {
   if (b.t === "reihe") return it.o.map((x, i) => (i + 1) + ". " + x).join("  ");
   if (b.t === "rechnen") return String(it.k).replace(".", ",") + (it.e ? " " + it.e : "");
   if (b.t === "offen") return it.l || "eigene Antwort, deine Lehrperson schaut sie an";
+  if (b.t === "mehrfach") return it.k.map(k => it.o[k]).join(" · ");
+  if (b.t === "markieren") return it.k.map(k => "«" + it.seg[k].t + "»").join(" · ");
   return "";
 }
 function spGegeben(b, it, v) {
@@ -2715,6 +2726,8 @@ function spGegeben(b, it, v) {
   if (b.t === "paare") return b.o[v] ?? "";
   if (b.t === "reihe") return v.map((x, i) => (i + 1) + ". " + it.o[x]).join("  ");
   if (b.t === "rechnen" || b.t === "offen") return String(v);
+  if (b.t === "mehrfach") return v.map(k => it.o[k]).join(" · ");
+  if (b.t === "markieren") return v.map(k => "«" + it.seg[k].t + "»").join(" · ");
   return "";
 }
 function spItemHtml(u, b, bi, it, ii, n) {
@@ -2756,6 +2769,14 @@ function spItemHtml(u, b, bi, it, ii, n) {
     return `<div class="q sp" data-sp="${key}"><label for="${id}"><strong>${n}.</strong> ${esc(it.s)}</label>
       <p><input type="text" inputmode="decimal" class="spin" id="${id}" autocomplete="off" aria-label="Ergebnis ${n}">${it.e ? `<span class="spunit">${esc(it.e)}</span>` : ""}</p>${fb}</div>`;
   }
+  if (b.t === "mehrfach") {
+    return `<fieldset class="q sp" data-sp="${key}"><legend>${n}. ${esc(it.s)}</legend>
+      <div class="rf">${it.o.map((o, j) => `<label class="opt"><input type="checkbox" id="${id}-${j}" value="${j}"><span>${esc(o)}</span></label>`).join("")}</div>${fb}</fieldset>`;
+  }
+  if (b.t === "markieren") {
+    return `<fieldset class="q sp" data-sp="${key}"><legend>${n}. ${esc(it.titel || "Text")}</legend>
+      <p class="mtext">${it.seg.map((g, j) => g.m == null ? esc(g.t) : `<button type="button" class="mtok" data-j="${j}" aria-pressed="false">${esc(g.t)}</button>`).join("")}</p>${fb}</fieldset>`;
+  }
   if (b.t === "offen") {
     return `<div class="q sp" data-sp="${key}"><label for="${id}"><strong>${n}. ${esc(it.s)}</strong></label>
       ${it.h ? `<p class="sphint">${esc(it.h)}</p>` : ""}<textarea class="sptext" id="${id}"></textarea>${fb}</div>`;
@@ -2774,6 +2795,8 @@ function spRead(u) {
     if (b.t === "reihe") return [...q.querySelectorAll(".rstep[data-pos]")].sort((a, c) => a.dataset.pos - c.dataset.pos).map(x => +x.dataset.j);
     if (b.t === "rechnen") return q.querySelector("input").value.trim();
     if (b.t === "offen") return q.querySelector("textarea").value.trim();
+    if (b.t === "mehrfach") return [...q.querySelectorAll("input:checked")].map(x => +x.value);
+    if (b.t === "markieren") return [...q.querySelectorAll('.mtok[aria-pressed="true"]')].map(x => +x.dataset.j);
     return null;
   }));
 }
@@ -2797,6 +2820,8 @@ function spCheck(u) {
     if (b.t === "paare") { const el = q.querySelector("select"); el.classList.remove("right", "wrong"); el.classList.add(ok ? "right" : "wrong"); }
     if (b.t === "rechnen") { const el = q.querySelector("input"); el.classList.remove("right", "wrong"); el.classList.add(ok ? "right" : "wrong"); }
     if (b.t === "offen") { const el = q.querySelector("textarea"); el.classList.toggle("right", ok); }
+    if (b.t === "mehrfach") q.querySelectorAll(".opt").forEach((l, j) => { l.classList.remove("right", "wrong"); const soll = it.k.includes(j), ist = (v || []).includes(j); if (soll) l.classList.add("right"); else if (ist) l.classList.add("wrong"); });
+    if (b.t === "markieren") q.querySelectorAll(".mtok").forEach(t => { const j = +t.dataset.j, soll = it.k.includes(j), ist = (v || []).includes(j); t.classList.remove("right", "wrong", "fehlt"); if (soll && ist) t.classList.add("right"); else if (soll) t.classList.add("fehlt"); else if (ist) t.classList.add("wrong"); });
     if (b.t === "reihe") q.querySelectorAll(".rstep").forEach(t => { t.classList.remove("right", "wrong"); if (t.dataset.pos) t.classList.add(+t.dataset.pos === +t.dataset.j + 1 ? "right" : "wrong"); });
     const fb = q.querySelector(".feedback");
     fb.textContent = b.t === "offen" ? (ok ? "Danke für deine Antwort." : "Bitte schreibe eine Antwort (mindestens ein ganzer Satz).") + (it.x ? " Tipp: " + it.x : "")
@@ -2852,6 +2877,7 @@ function renderSprache(u0) {
     try { localStorage.setItem("stufe:" + u0.id, String(k)); } catch (e) {}
     renderUnit(u0);
   });
+  app.querySelectorAll(".mtext").forEach(p => p.addEventListener("click", e => { const t = e.target.closest(".mtok"); if (t) t.setAttribute("aria-pressed", String(t.getAttribute("aria-pressed") !== "true")); }));
   app.querySelectorAll(".reihe").forEach(p => {
     const fs = p.closest("fieldset");
     p.addEventListener("click", e => {
@@ -2935,6 +2961,7 @@ function spPdf(u, filled) {
       if (filled) text("Antwort: " + (spLeer(b, v) ? "–" : spGegeben(b, it, v)), 10, "normal", 5);
       else if (b.t === "umformen" || b.t === "fehler" || b.t === "rechnen") linie();
       else if (b.t === "offen") { linie(); linie(); }
+      else if (b.t === "mehrfach") text("Mehrere Antworten möglich.", 9, "normal", 5);
       else if (b.t === "paare" && ii === b.i.length - 1) text("Erklärungen: " + b.o.join(" · "), 9, "normal", 5);
       y += 1;
     });

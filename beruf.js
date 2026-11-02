@@ -16,15 +16,21 @@
     if (t === "paare") { const defs = mische(b[2].map(p => p[1]), key); return { t, a, o: defs, i: b[2].map(p => ({ s: p[0], k: defs.indexOf(p[1]), x: p[2] })) }; }
     if (t === "rechnen") return { t, a, i: b[2].map(x => ({ s: x[0], k: x[1], e: x[2] || "", tol: x[3] || 0, x: x[4] })) };
     if (t === "offen") return { t, a, i: b[2].map(x => ({ s: x[0], h: x[1], x: x[2], l: x[3] })) };
+    if (t === "mehrfach") return { t, a, i: b[2].map(x => ({ s: x[0], o: x[1], k: x[2], x: x[3] })) };
+    if (t === "markieren") return { t, a, i: b[2].map(x => { const seg = []; let last = 0; const re = /\[([+-])([^\]]+)\]/g; let m;
+      while ((m = re.exec(x[1]))) { if (m.index > last) seg.push({ t: x[1].slice(last, m.index), m: null }); seg.push({ t: m[2], m: m[1] === "+" }); last = re.lastIndex; }
+      if (last < x[1].length) seg.push({ t: x[1].slice(last), m: null });
+      return { titel: x[0], seg, k: seg.map((g, j) => g.m ? j : -1).filter(j => j >= 0), x: x[2] }; }) };
     throw new Error("Unbekannter Aufgabentyp " + t);
   }
   function U(id, r, titel, kurz, kanal, D) {
-    const lv = n => { const aufg = D["l" + n].map((b, i) => block(b, id + n + i)); return { regel: D.regel, regelTitel: "Lerntext", bsp: D.bsp || [], aufg, mc: [], rf: [], offen: [], dauer: aufg.reduce((s, b) => s + b.i.length, 0) + " Aufgaben" }; };
+    const lv = n => { const aufg = D["l" + n].concat((EX[id] || {})[n] || []).map((b, i) => block(b, id + n + i)); return { regel: D.regel, regelTitel: "Lerntext", bsp: D.bsp || [], aufg, mc: [], rf: [], offen: [], dauer: aufg.reduce((s, b) => s + b.i.length, 0) + " Aufgaben" }; };
     units.push(Object.assign({ id, r, typ: "sprache", titel, kurz, kanal }, lv(1)));
     window.STUFEN = window.STUFEN || {};
     window.STUFEN[id] = { 2: lv(2), 3: lv(3) };
   }
   const RF = ["richtig", "falsch"];
+  const EX = window.BERUF_EXTRA || {};
   const LOG = "Logistiker/in EFZ", FAGE = "Fachfrau/Fachmann Gesundheit EFZ";
 
   // ================================================================ LOGISTIK
