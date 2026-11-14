@@ -2985,7 +2985,7 @@ function spPdf(u, filled, loes) {
     y += 2;
   });
   if (filled) { const res = spScore(u, sp); text(`Ergebnis: ${res.pts} von ${res.total} Punkten`, 11, "bold"); }
-  doc.save((loes ? "Loesungen_" : filled ? "Antworten_" : "Arbeitsblatt_") + KUERZEL[u.id] + (name ? "_" + name.replace(/[^\wäöüÄÖÜ-]+/g, "_") : "") + ".pdf");
+  doc.save((loes ? "Loesungen_" : filled ? "Antworten_" : "Arbeitsblatt_") + KUERZEL[u.id] + "_Niveau" + (u.stufe || 1) + (name ? "_" + name.replace(/[^\wäöüÄÖÜ-]+/g, "_") : "") + ".pdf");
 }
 
 function renderUnit(u0) {
