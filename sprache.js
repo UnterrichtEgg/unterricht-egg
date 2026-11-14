@@ -7,6 +7,12 @@
     if (b.t === "fehler") { const t = x[0].split(/\s+/); return { s: x[0].replace(/\*/g, ""), f: t.findIndex(w => w.includes("*")), r: x[1], x: x[2] }; }
     if (b.t === "zuordnen") return { s: x[0], k: x[1], x: x[2] };
     if (b.t === "umformen") return { s: x[0], h: x[1], k: [].concat(x[2]), x: x[3] };
+    if (b.t === "paare") return { s: x[0], k: x[1], x: x[2] };
+    if (b.t === "mehrfach") return { s: x[0], o: x[1], k: x[2], x: x[3] };
+    if (b.t === "markieren") { const seg = []; let last = 0, m; const re = /\[([+-])([^\]]+)\]/g;
+      while ((m = re.exec(x[1]))) { if (m.index > last) seg.push({ t: x[1].slice(last, m.index), m: null }); seg.push({ t: m[2], m: m[1] === "+" }); last = re.lastIndex; }
+      if (last < x[1].length) seg.push({ t: x[1].slice(last), m: null });
+      return { titel: x[0], seg, k: seg.map((g, j) => g.m ? j : -1).filter(j => j >= 0), x: x[2] }; }
     if (b.t === "komma") { const t = x[0].split(/\s+/), k = []; t.forEach((w, j) => { if (/,$/.test(w)) k.push(j); }); return { s: t.map(w => w.replace(/,$/, "")).join(" "), k, x: x[1] }; }
   }) }));
   function U(id, r, titel, kurz, L) {
@@ -901,6 +907,281 @@
           ["Die Fenster wurden geputzt.", 1],
           ["Der Rasen ist gemäht worden.", 2],
           ["Die Briefe werden sortiert.", 0]
+        ] }
+      ]
+    }
+  });
+
+  // ======================================================= PRÄTERITUM
+  const PP = ["Präsens", "Präteritum"], RU = ["regelmässig", "unregelmässig"];
+
+  U("sp-praet1", "rgramm", "Präteritum 1: regelmässige Verben", "ich spielte, wir lachten, er wartete: So bildest du das Präteritum der regelmässigen Verben.", {
+    1: {
+      regel: "Das Präteritum braucht man vor allem beim Erzählen und Schreiben von Geschichten und Berichten.\n\nRegelmässige Verben: Stamm + -te. spielen → spiel → ich spielte.\n\nDer Wortstamm bleibt gleich, es kommt nur «-te» dazu.",
+      bsp: [["spielen", "ich spielte"], ["lachen", "sie lachte"], ["kaufen", "er kaufte"], ["machen", "wir machten"]],
+      aufg: [
+        { t: "zuordnen", a: "Steht das Verb im Präsens oder im Präteritum?", o: PP, i: [
+          ["Ich *spiele* Gitarre.", 0],
+          ["Ich *spielte* Gitarre.", 1],
+          ["Sie *lachte* laut.", 1],
+          ["Er *kauft* ein Brot.", 0],
+          ["Wir *machten* Hausaufgaben.", 1],
+          ["Ihr *wohnt* in Wetzikon.", 0],
+          ["Der Hund *bellte* die ganze Nacht.", 1],
+          ["Du *hörst* Musik.", 0]
+        ] },
+        { t: "wahl", a: "Welche Form ist das Präteritum?", i: [
+          ["Gestern {} ich lange.", ["spielte", "spiele"], 0],
+          ["Letzte Woche {} wir einen Kuchen.", ["machen", "machten"], 1],
+          ["Früher {} er in Uster.", ["wohnte", "wohnt"], 0],
+          ["Am Montag {} sie Schuhe.", ["kauft", "kaufte"], 1],
+          ["Im Sommer {} ich viel.", ["reiste", "reise"], 0],
+          ["Gestern Abend {} wir einen Film.", ["schauen", "schauten"], 1],
+          ["Vor einem Jahr {} er noch klein.", ["lebte", "lebt"], 0],
+          ["Am Wochenende {} sie ihr Zimmer auf.", ["räumt", "räumte"], 1]
+        ] },
+        { t: "luecke", a: "Setze das Verb im Präteritum ein (ich / er / sie).", i: [
+          ["Gestern {} ich mit Lea. (telefonieren)", "telefonierte"],
+          ["Der Lehrer {} eine Frage. (stellen)", "stellte"],
+          ["Ich {} mein Velo. (putzen)", "putzte"],
+          ["Sie {} ein Bild. (malen)", "malte"],
+          ["Er {} die Tür zu. (machen)", "machte"],
+          ["Das Telefon {}. (klingeln)", "klingelte"],
+          ["Ich {} den Tisch. (decken)", "deckte"],
+          ["Mia {} laut. (lachen)", "lachte"]
+        ] }
+      ]
+    },
+    2: {
+      regel: "Endungen im Präteritum: ich spielte, du spieltest, er/sie/es spielte, wir spielten, ihr spieltet, sie spielten.\n\nEndet der Stamm auf -t oder -d (oder ist er sonst schwer auszusprechen), kommt ein «e» dazu: warten → ich wartete, reden → er redete, öffnen → sie öffnete, rechnen → wir rechneten.",
+      bsp: [["du", "du spieltest"], ["ihr", "ihr spieltet"], ["-t / -d", "ich wartete, er redete"], ["-n nach Konsonant", "sie öffnete, wir rechneten"]],
+      aufg: [
+        { t: "luecke", a: "Setze die passende Präteritumform ein.", i: [
+          ["Du {} gestern sehr lange. (lernen)", "lerntest"],
+          ["Ihr {} im Garten. (arbeiten)", "arbeitetet"],
+          ["Wir {} auf den Bus. (warten)", "warteten"],
+          ["Sie {} die Tür. (öffnen)", "öffnete"],
+          ["Er {} mit seinem Chef. (reden)", "redete"],
+          ["Du {} die Aufgabe richtig. (rechnen)", "rechnetest"],
+          ["Die Kinder {} im Schnee. (spielen)", "spielten"],
+          ["Ihr {} viel. (lachen)", "lachtet"]
+        ] },
+        { t: "wahl", a: "-te oder -ete? Wähle die richtige Form.", i: [
+          ["Ich {} eine halbe Stunde.", ["warte", "wartete"], 1],
+          ["Er {} ein Zimmer im Hotel.", ["buchte", "buchete"], 0],
+          ["Sie {} den Hund an der Leine.", ["führte", "führete"], 0],
+          ["Wir {} lange mit dem Lehrer.", ["redeten", "redten"], 0],
+          ["Der Zug {} pünktlich.", ["startete", "startte"], 0],
+          ["Ich {} das Geld.", ["zählete", "zählte"], 1]
+        ] },
+        { t: "fehler", a: "In jedem Satz ist eine Präteritumform falsch. Tippe sie an.", i: [
+          ["Gestern *wartte* ich lange auf dich.", "wartete"],
+          ["Du *spielte* sehr gut im Match.", "spieltest"],
+          ["Wir *lachte* über den Witz.", "lachten"],
+          ["Ihr *arbeitetet* gestern, aber er *arbeitet* nicht mit.", "arbeitete"],
+          ["Er *öffnte* das Fenster.", "öffnete"],
+          ["Die Schüler *lernt* für die Prüfung.", "lernten"]
+        ] }
+      ]
+    },
+    3: {
+      regel: "Trennbare Verben: Die Vorsilbe steht am Satzende. aufräumen → Ich räumte mein Zimmer auf. einkaufen → Wir kauften im Coop ein.\n\nVerben auf -ieren sind regelmässig: telefonieren → telefonierte, reparieren → reparierte.\n\nTipp: Beim Umschreiben einer Geschichte ins Präteritum musst du jedes Verb prüfen.",
+      bsp: [["aufräumen", "Ich räumte auf."], ["einkaufen", "Wir kauften ein."], ["reparieren", "Er reparierte das Velo."]],
+      aufg: [
+        { t: "umformen", a: "Schreibe den Satz im Präteritum.", i: [
+          ["Ich räume mein Zimmer auf.", "Präteritum", "Ich räumte mein Zimmer auf."],
+          ["Wir kaufen im Coop ein.", "Präteritum", "Wir kauften im Coop ein."],
+          ["Er repariert sein Velo.", "Präteritum", "Er reparierte sein Velo."],
+          ["Du machst das Licht aus.", "Präteritum", "Du machtest das Licht aus."],
+          ["Ihr wartet am Bahnhof.", "Präteritum", "Ihr wartetet am Bahnhof."],
+          ["Die Lernenden stellen sich vor.", "Präteritum", "Die Lernenden stellten sich vor."]
+        ] },
+        { t: "markieren", a: "Tippe alle Verben im Präteritum an.", i: [
+          ["Ein Morgen im Lager", "Um 6.45 Uhr [+erreichte] Luca das Lager. Er [+holte] seine Arbeitskleider und [+zog] sich um. Dann [+prüfte] er die Lieferscheine. Heute [-ist] er müde, aber gestern [+arbeitete] er sehr konzentriert."],
+          ["Der Ausflug", "Die Klasse [+wanderte] auf den Bachtel. Oben [+machten] alle eine Pause. Wir [-wandern] gern, [+sagte] Nora. Dann [+regnete] es plötzlich."]
+        ] },
+        { t: "mehrfach", a: "Welche Formen sind richtig gebildet? (mehrere Antworten)", i: [
+          ["warten, Präteritum", ["ich wartete", "ich wartte", "wir warteten", "du wartetest"], [0, 2, 3]],
+          ["einkaufen, Präteritum", ["ich kaufte ein", "ich einkaufte", "wir kauften ein", "er kaufte ein"], [0, 2, 3]],
+          ["öffnen, Präteritum", ["sie öffnete", "sie öffnte", "ihr öffnetet", "wir öffneten"], [0, 2, 3]],
+          ["telefonieren, Präteritum", ["ich telefonierte", "du telefoniertest", "er telefonierete", "sie telefonierten"], [0, 1, 3]]
+        ] }
+      ]
+    }
+  });
+
+  U("sp-praet2", "rgramm", "Präteritum 2: unregelmässige Verben", "ging, kam, sah, schrieb: Bei den unregelmässigen Verben ändert sich der Stammvokal. Diese Formen musst du lernen.", {
+    1: {
+      regel: "Bei den unregelmässigen (starken) Verben ändert sich im Präteritum der Wortstamm, oft der Vokal: gehen → ging, kommen → kam, sehen → sah, schreiben → schrieb.\n\nBei «ich» und «er/sie/es» gibt es keine Endung: ich ging, er ging.\n\nIn der Schweiz schreibt man ss statt ß: essen → ass, sitzen → sass.",
+      bsp: [["gehen", "ich ging"], ["kommen", "er kam"], ["sehen", "sie sah"], ["essen", "ich ass"]],
+      aufg: [
+        { t: "paare", a: "Wähle zu jedem Verb die Präteritumform (ich / er).", o: ["fand", "las", "ging", "trank", "kam", "schrieb", "sah", "fuhr"], i: [
+          ["gehen", 2], ["kommen", 4], ["sehen", 6], ["fahren", 7], ["schreiben", 5], ["lesen", 1], ["trinken", 3], ["finden", 0]
+        ] },
+        { t: "luecke", a: "Setze das Verb im Präteritum ein (ich / er / sie).", i: [
+          ["Gestern {} ich früh ins Bett. (gehen)", "ging"],
+          ["Er {} eine Nachricht. (schreiben)", "schrieb"],
+          ["Sie {} mit dem Zug nach Zürich. (fahren)", "fuhr"],
+          ["Ich {} einen Apfel. (essen)", "ass"],
+          ["Lara {} ein spannendes Buch. (lesen)", "las"],
+          ["Der Bus {} zu spät. (kommen)", "kam"],
+          ["Ich {} einen Film. (sehen)", "sah"],
+          ["Er {} ein Glas Wasser. (trinken)", "trank"]
+        ] },
+        { t: "wahl", a: "Welche Präteritumform ist richtig?", i: [
+          ["Gestern {} ich nach Hause.", ["gehte", "ging"], 1],
+          ["Sie {} mir ein Geschenk.", ["gab", "gebte"], 0],
+          ["Er {} den Ball.", ["nahm", "nehmte"], 0],
+          ["Ich {} lange.", ["schlafte", "schlief"], 1],
+          ["Der Hund {} schnell.", ["lief", "laufte"], 0],
+          ["Wir {} im Garten. (sitzen)", ["sitzten", "sassen"], 1]
+        ] }
+      ]
+    },
+    2: {
+      regel: "Endungen bei unregelmässigen Verben: ich ging, du gingst, er/sie/es ging, wir gingen, ihr gingt, sie gingen.\n\nRegelmässig oder unregelmässig? Ändert sich der Stamm (singen → sang), ist das Verb unregelmässig. Bleibt er gleich und kommt -te dazu (spielen → spielte), ist es regelmässig.",
+      bsp: [["du", "du gingst, du kamst"], ["wir", "wir gingen, wir kamen"], ["ihr", "ihr gingt, ihr kamt"], ["unregelmässig", "singen → sang"]],
+      aufg: [
+        { t: "luecke", a: "Setze die passende Präteritumform ein.", i: [
+          ["Du {} gestern sehr schnell. (laufen)", "liefst"],
+          ["Wir {} um 7 Uhr. (kommen)", "kamen"],
+          ["Ihr {} viel Pizza. (essen)", "asst"],
+          ["Die Gäste {} lange. (bleiben)", "blieben"],
+          ["Du {} mir sehr. (helfen)", "halfst"],
+          ["Wir {} unsere Freunde im Park. (treffen)", "trafen"],
+          ["Ihr {} ein Lied. (singen)", "sangt"],
+          ["Die Kinder {} laut. (rufen)", "riefen"]
+        ] },
+        { t: "zuordnen", a: "Ist das Verb regelmässig oder unregelmässig?", o: RU, i: [
+          ["*spielte* (spielen)", 0],
+          ["*sang* (singen)", 1],
+          ["*kaufte* (kaufen)", 0],
+          ["*fiel* (fallen)", 1],
+          ["*wartete* (warten)", 0],
+          ["*begann* (beginnen)", 1],
+          ["*lernte* (lernen)", 0],
+          ["*lag* (liegen)", 1]
+        ] },
+        { t: "fehler", a: "In jedem Satz ist eine Präteritumform falsch. Tippe sie an.", i: [
+          ["Gestern *gehte* ich ins Training.", "ging"],
+          ["Er *schreibte* einen langen Brief.", "schrieb"],
+          ["Wir *fahrten* mit dem Velo zur Schule.", "fuhren"],
+          ["Du *kamt* zu spät.", "kamst"],
+          ["Sie *findete* ihren Schlüssel nicht.", "fand"],
+          ["Ich *trinkte* einen Tee.", "trank"]
+        ] }
+      ]
+    },
+    3: {
+      regel: "Weitere wichtige unregelmässige Verben: fallen → fiel, beginnen → begann, liegen → lag, stehen → stand, tun → tat, ziehen → zog, fliegen → flog, verlieren → verlor, vergessen → vergass, werden → wurde, schliessen → schloss, sprechen → sprach.\n\nTrennbare unregelmässige Verben: anfangen → Das Spiel fing an. aufstehen → Ich stand früh auf.",
+      bsp: [["aufstehen", "Ich stand um 6 Uhr auf."], ["anfangen", "Die Schule fing an."], ["vergessen", "Er vergass sein Heft."]],
+      aufg: [
+        { t: "umformen", a: "Schreibe den Satz im Präteritum.", i: [
+          ["Ich stehe um 6 Uhr auf.", "Präteritum", "Ich stand um 6 Uhr auf."],
+          ["Das Spiel fängt um 15 Uhr an.", "Präteritum", "Das Spiel fing um 15 Uhr an."],
+          ["Er vergisst sein Turnzeug.", "Präteritum", "Er vergass sein Turnzeug."],
+          ["Wir fliegen nach Spanien.", "Präteritum", "Wir flogen nach Spanien."],
+          ["Sie spricht mit der Lehrerin.", "Präteritum", "Sie sprach mit der Lehrerin."],
+          ["Die Kinder ziehen ihre Jacken an.", "Präteritum", "Die Kinder zogen ihre Jacken an."]
+        ] },
+        { t: "markieren", a: "Tippe alle unregelmässigen Verben im Präteritum an.", i: [
+          ["Ein schlechter Tag", "Am Morgen [+verlor] Jan seinen Schlüssel. Er [-suchte] überall. Dann [+fand] er ihn unter dem Bett. Er [+lief] zum Bahnhof, aber der Zug [+fuhr] gerade ab. Er [-wartete] zehn Minuten."],
+          ["Im Schwimmbad", "Wir [+gingen] ins Schwimmbad. Mira [+sprang] vom Dreimeterbrett. Ich [-kaufte] ein Glace. Später [+lagen] wir in der Sonne und [+tranken] Eistee."]
+        ] },
+        { t: "luecke", a: "Setze die richtige Präteritumform ein.", i: [
+          ["Das Glas {} auf den Boden. (fallen)", "fiel"],
+          ["Der Film {} um 20 Uhr. (beginnen)", "begann"],
+          ["Ich {} neben der Tür. (stehen)", "stand"],
+          ["Es {} langsam dunkel. (werden)", "wurde"],
+          ["Du {} das Fenster. (schliessen)", "schlossest", "schlosst"],
+          ["Ihr {} nichts. (tun)", "tatet"]
+        ].map(x => x.length > 3 ? [x[0], [x[1], x[2]]] : x) }
+      ]
+    }
+  });
+
+  U("sp-praet3", "rgramm", "Präteritum 3: sein, haben, Modalverben, Mischverben", "war, hatte, konnte, musste, dachte, brachte: Die wichtigsten Präteritumformen auch für das Sprechen.", {
+    1: {
+      regel: "Diese Formen braucht man auch beim Sprechen sehr oft:\nsein → ich war, du warst, er war, wir waren, ihr wart, sie waren.\nhaben → ich hatte, du hattest, er hatte, wir hatten, ihr hattet, sie hatten.\n\nModalverben verlieren im Präteritum den Umlaut: können → konnte, müssen → musste, dürfen → durfte, mögen → mochte. Dazu: wollen → wollte, sollen → sollte.",
+      bsp: [["sein", "ich war, wir waren"], ["haben", "ich hatte, wir hatten"], ["können", "ich konnte"], ["müssen", "er musste"]],
+      aufg: [
+        { t: "wahl", a: "«war» oder «hatte»? Wähle die passende Form.", i: [
+          ["Gestern {} ich krank.", ["war", "hatte"], 0],
+          ["Wir {} keine Zeit.", ["waren", "hatten"], 1],
+          ["Das Wetter {} schön.", ["war", "hatte"], 0],
+          ["Du {} Glück.", ["warst", "hattest"], 1],
+          ["Ihr {} sehr müde.", ["wart", "hattet"], 0],
+          ["Sie {} Hunger.", ["waren", "hatten"], 1],
+          ["Ich {} am Montag im Lager.", ["war", "hatte"], 0],
+          ["Er {} einen Termin beim Arzt.", ["war", "hatte"], 1]
+        ] },
+        { t: "luecke", a: "Setze das Modalverb im Präteritum ein.", i: [
+          ["Ich {} nicht kommen. (können)", "konnte"],
+          ["Er {} früh aufstehen. (müssen)", "musste"],
+          ["Wir {} länger bleiben. (dürfen)", "durften"],
+          ["Sie {} ein Eis. (wollen)", "wollte"],
+          ["Du {} das Zimmer aufräumen. (sollen)", "solltest"],
+          ["Ich {} Spinat nicht. (mögen)", "mochte"],
+          ["Ihr {} sehr gut singen. (können)", "konntet"],
+          ["Die Lernenden {} Sicherheitsschuhe tragen. (müssen)", "mussten"]
+        ] }
+      ]
+    },
+    2: {
+      regel: "Mischverben ändern den Stamm wie unregelmässige Verben, bekommen aber die Endung -te wie regelmässige Verben:\ndenken → dachte, bringen → brachte, wissen → wusste, kennen → kannte, rennen → rannte, nennen → nannte, senden → sandte (oder sendete).",
+      bsp: [["denken", "ich dachte"], ["bringen", "er brachte"], ["wissen", "sie wusste"], ["kennen", "wir kannten"]],
+      aufg: [
+        { t: "luecke", a: "Setze das Mischverb im Präteritum ein.", i: [
+          ["Ich {} an dich. (denken)", "dachte"],
+          ["Er {} mir das Buch. (bringen)", "brachte"],
+          ["Sie {} die Antwort nicht. (wissen)", "wusste"],
+          ["Wir {} den Weg nicht. (kennen)", "kannten"],
+          ["Du {} zum Bus. (rennen)", "ranntest"],
+          ["Man {} ihn «Ben». (nennen)", "nannte"],
+          ["Ihr {} alle Antworten. (wissen)", "wusstet"],
+          ["Die Lernenden {} die Pakete ins Lager. (bringen)", "brachten"]
+        ] },
+        { t: "fehler", a: "In jedem Satz ist eine Form falsch. Tippe sie an.", i: [
+          ["Ich *denkte* lange nach.", "dachte"],
+          ["Er *bringte* Brötchen mit.", "brachte"],
+          ["Wir *wissten* die Lösung.", "wussten"],
+          ["Sie *könnte* gestern nicht kommen.", "konnte"],
+          ["Du *müsstest* gestern lange warten.", "musstest"],
+          ["Ihr *ward* sehr mutig.", "wart"]
+        ] },
+        { t: "paare", a: "Wähle zu jedem Verb die Präteritumform.", o: ["brachte", "konnte", "war", "wusste", "hatte", "dachte"], i: [
+          ["sein", 2], ["haben", 4], ["denken", 5], ["bringen", 0], ["wissen", 3], ["können", 1]
+        ] }
+      ]
+    },
+    3: {
+      regel: "Achtung Verwechslung: «konnte» (Präteritum, Vergangenheit) und «könnte» (Konjunktiv, Möglichkeit) sind verschieden. Gestern konnte ich nicht kommen. – Ich könnte morgen kommen.\nGenauso: musste / müsste, durfte / dürfte.\n\nIn einem Bericht stehen alle Verben, die Vergangenes erzählen, im Präteritum.",
+      bsp: [["konnte", "Gestern konnte ich nicht."], ["könnte", "Morgen könnte ich vielleicht."], ["musste", "Er musste warten."]],
+      aufg: [
+        { t: "umformen", a: "Schreibe den Satz im Präteritum.", i: [
+          ["Ich bin im Lager und habe viel Arbeit.", "Präteritum", "Ich war im Lager und hatte viel Arbeit."],
+          ["Wir müssen die Pakete zählen.", "Präteritum", "Wir mussten die Pakete zählen."],
+          ["Er weiss die Antwort.", "Präteritum", "Er wusste die Antwort."],
+          ["Sie kann den Stapler nicht fahren.", "Präteritum", "Sie konnte den Stapler nicht fahren."],
+          ["Du bringst die Lieferung zur Rampe.", "Präteritum", "Du brachtest die Lieferung zur Rampe."],
+          ["Ihr dürft früher gehen.", "Präteritum", "Ihr durftet früher gehen."]
+        ] },
+        { t: "wahl", a: "Präteritum oder Möglichkeit? Wähle die passende Form.", i: [
+          ["Gestern {} ich leider nicht kommen.", ["konnte", "könnte"], 0],
+          ["Morgen {} ich vielleicht helfen.", ["konnte", "könnte"], 1],
+          ["Letzte Woche {} er jeden Tag früh aufstehen.", ["musste", "müsste"], 0],
+          ["Eigentlich {} ich mehr lernen.", ["musste", "müsste"], 1],
+          ["Als Kind {} ich lange aufbleiben.", ["durfte", "dürfte"], 0],
+          ["Das {} schwierig werden.", ["durfte", "dürfte"], 1]
+        ] },
+        { t: "mehrfach", a: "Welche Formen sind richtig? (mehrere Antworten)", i: [
+          ["sein, Präteritum", ["ich war", "wir waren", "ihr ward", "du warst"], [0, 1, 3]],
+          ["denken, Präteritum", ["ich dachte", "ich denkte", "wir dachten", "sie dachten"], [0, 2, 3]],
+          ["können, Präteritum", ["ich konnte", "du konntest", "er könnte", "wir konnten"], [0, 1, 3]],
+          ["wissen, Präteritum", ["er wusste", "er wisste", "ihr wusstet", "sie wussten"], [0, 2, 3]]
+        ] },
+        { t: "markieren", a: "Tippe alle Verben im Präteritum an.", i: [
+          ["Mein erster Schnuppertag", "Ich [+war] sehr nervös. Ich [+wusste] nicht, was mich erwartet. Mein Betreuer [+hatte] viel Geduld. Ich [+durfte] Pakete scannen und [+brachte] sie ins Regal. Ich [-würde] gern wieder kommen."]
         ] }
       ]
     }

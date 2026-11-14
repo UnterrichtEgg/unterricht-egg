@@ -380,7 +380,7 @@ const THEMEN_BV = [
   { key: "fage", name: "Fachfrau/Fachmann Gesundheit EFZ", kurz: "Pflegen, betreuen, Hygiene und Vitalzeichen: 9 Stationen und die Lernwelt «Ein Tag auf der Station» mit allen Aufträgen und Karteikarten." }
 ];
 const FAECHER = [
-  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt und Biologie. Lesen: 38 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen. Jeweils mit Fragebogen. Sprache im Fokus: 12 Übungen zu Rechtschreibung und Grammatik.", kompetenzen: KOMPETENZEN },
+  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt und Biologie. Lesen: 38 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen. Jeweils mit Fragebogen. Sprache im Fokus: 15 Übungen zu Rechtschreibung und Grammatik, neu mit drei Übungen zum Präteritum.", kompetenzen: KOMPETENZEN },
   { key: "franz", name: "Französisch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: 10 einfache Videos zu Frankreich und zur Westschweiz. Lesen: 8 kurze Texte. Fragen auf Deutsch.", kompetenzen: KOMPETENZEN },
   { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" },
   { key: "bv", name: "Berufliche Vorbereitung", untertitel: "Fit für die Lehre", kurz: "Logistiker/in EFZ und Fachfrau/Fachmann Gesundheit EFZ: Stationen nach Bildungsplan, je ein Berufsspiel und Karteikarten. Für den Start in die Lehre, ohne Vorkenntnisse.", kompetenzen: THEMEN_BV, ebene: "Beruf" }
@@ -2882,6 +2882,7 @@ function renderSprache(u0) {
         <div class="actions">
           <button class="btn ghost" id="pdf">Meine Antworten als PDF</button>
           <button class="btn ghost" id="pdfleer">Leeres Arbeitsblatt als PDF</button>
+          ${S.isTeacher ? `<button class="btn ghost" id="pdfloes">Lösungsblatt als PDF</button>` : ""}
         </div>
       </section>
     </div>`;
@@ -2913,6 +2914,7 @@ function renderSprache(u0) {
   if (sub) sub.onclick = () => spSubmit(u, sub);
   document.getElementById("pdf").onclick = () => spPdf(u, true);
   document.getElementById("pdfleer").onclick = () => spPdf(u, false);
+  const pl = document.getElementById("pdfloes"); if (pl) pl.onclick = () => spPdf(u, false, true);
   window.scrollTo(0, 0);
 }
 async function spSubmit(u, btn) {
@@ -2942,7 +2944,7 @@ function spDetail(u, a) {
     return `<li class="${ok ? "ok" : "bad"}"><span>${esc(spFrage(b, it))}</span><span>${spLeer(b, v) ? "keine Antwort" : esc(spGegeben(b, it, v))}${ok ? "" : ` → richtig: ${esc(spRichtig(b, it))}`}</span></li>`;
   }).join("")).join("");
 }
-function spPdf(u, filled) {
+function spPdf(u, filled, loes) {
   if (!window.jspdf) { document.getElementById("score").textContent = "Der PDF-Export konnte nicht geladen werden. Bitte Seite neu laden."; return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -2958,7 +2960,7 @@ function spPdf(u, filled) {
   };
   const linie = () => { need(9); y += 7; doc.setDrawColor(170); doc.line(M + 5, y, M + CW, y); y += 3; };
   text("Unterricht Egg · " + fachName(fachVon(u.r)) + " · " + kompName(kompVon(u.r)) + " · " + rubrikName(u.r) + " · " + KUERZEL[u.id], 9);
-  text(u.titel + "  (Niveau " + (u.stufe || 1) + " von 3: " + STUFE_NAMEN[u.stufe || 1] + ")", 16, "bold");
+  text((loes ? "LÖSUNGEN · " : "") + u.titel + "  (Niveau " + (u.stufe || 1) + " von 3: " + STUFE_NAMEN[u.stufe || 1] + ")", 16, "bold");
   text("Name: " + (name || "______________________________") + "      Datum: " + (filled ? new Date().toLocaleDateString("de-CH") : "______________"), 11);
   y += 2;
   text(u.regelTitel || "Regel", 12, "bold");
@@ -2972,7 +2974,8 @@ function spPdf(u, filled) {
     b.i.forEach((it, ii) => {
       const v = filled ? sp[bi][ii] : null;
       text(`${++n}. ${spFrage(b, it)}`, 11);
-      if (filled) text("Antwort: " + (spLeer(b, v) ? "–" : spGegeben(b, it, v)), 10, "normal", 5);
+      if (loes) text("Lösung: " + spRichtig(b, it), 10, "bold", 5);
+      else if (filled) text("Antwort: " + (spLeer(b, v) ? "–" : spGegeben(b, it, v)), 10, "normal", 5);
       else if (b.t === "umformen" || b.t === "fehler" || b.t === "rechnen") linie();
       else if (b.t === "offen") { linie(); linie(); }
       else if (b.t === "mehrfach") text("Mehrere Antworten möglich.", 9, "normal", 5);
@@ -2982,7 +2985,7 @@ function spPdf(u, filled) {
     y += 2;
   });
   if (filled) { const res = spScore(u, sp); text(`Ergebnis: ${res.pts} von ${res.total} Punkten`, 11, "bold"); }
-  doc.save((filled ? "Antworten_" : "Arbeitsblatt_") + KUERZEL[u.id] + (name ? "_" + name.replace(/[^\wäöüÄÖÜ-]+/g, "_") : "") + ".pdf");
+  doc.save((loes ? "Loesungen_" : filled ? "Antworten_" : "Arbeitsblatt_") + KUERZEL[u.id] + (name ? "_" + name.replace(/[^\wäöüÄÖÜ-]+/g, "_") : "") + ".pdf");
 }
 
 function renderUnit(u0) {
