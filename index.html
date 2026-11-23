@@ -11,6 +11,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="stufen.js"></script>
+<script src="themen2-hoeren.js"></script>
+<script src="themen2-lesen.js"></script>
 <script src="sprache.js"></script>
 <script src="beruf-extra.js"></script>
 <script src="beruf.js"></script>
@@ -380,7 +382,7 @@ const THEMEN_BV = [
   { key: "fage", name: "Fachfrau/Fachmann Gesundheit EFZ", kurz: "Pflegen, betreuen, Hygiene und Vitalzeichen: 9 Stationen und die Lernwelt «Ein Tag auf der Station» mit allen Aufträgen und Karteikarten." }
 ];
 const FAECHER = [
-  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt und Biologie. Lesen: 38 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen. Jeweils mit Fragebogen. Sprache im Fokus: 15 Übungen zu Rechtschreibung und Grammatik, neu mit drei Übungen zum Präteritum.", kompetenzen: KOMPETENZEN },
+  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt, Biologie sowie Autos, Motorsport und Gaming. Lesen: 46 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen, neu auch MPA, Sprachen und Flaggen, Autos, Motorrad, Formel 1 und GTA 6. Jeweils mit Fragebogen. Sprache im Fokus: 15 Übungen zu Rechtschreibung und Grammatik, neu mit drei Übungen zum Präteritum.", kompetenzen: KOMPETENZEN },
   { key: "franz", name: "Französisch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: 10 einfache Videos zu Frankreich und zur Westschweiz. Lesen: 8 kurze Texte. Fragen auf Deutsch.", kompetenzen: KOMPETENZEN },
   { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" },
   { key: "bv", name: "Berufliche Vorbereitung", untertitel: "Fit für die Lehre", kurz: "Logistiker/in EFZ und Fachfrau/Fachmann Gesundheit EFZ: Stationen nach Bildungsplan, je ein Berufsspiel und Karteikarten. Für den Start in die Lehre, ohne Vorkenntnisse.", kompetenzen: THEMEN_BV, ebene: "Beruf" }
@@ -392,6 +394,7 @@ const RUBRIKEN = [
   { key: "geschichte", name: "Geschichte" },
   { key: "welt", name: "Wunder der Welt & Region" },
   { key: "biologie", name: "Biologie & Natur" },
+  { key: "motor", name: "Autos, Motorsport & Gaming", kuerzel: "MO" },
   { key: "expg", name: "Europäische Expansion · Grundniveau", fach: "rzg", kompetenz: "expansion", kuerzel: "EG", karten: "expansion", seekarte: "seekarte.html" },
   { key: "expe", name: "Europäische Expansion · Erweitert", fach: "rzg", kompetenz: "expansion", kuerzel: "EE", karten: "expansion", seekarte: "seekarte.html" },
   { key: "polit", name: "Politische Bildung · So regiert sich die Schweiz", fach: "rzg", kompetenz: "politik", kuerzel: "PB", karten: "politik", seekarte: "politik.html" },
@@ -410,6 +413,7 @@ const RUBRIKEN = [
   { key: "wwelt", name: "Klassenthemen: Länder & Städte", fach: "deutsch", kompetenz: "lesen", kuerzel: "KL" },
   { key: "wstyle", name: "Klassenthemen: Lifestyle & Autos", fach: "deutsch", kompetenz: "lesen", kuerzel: "KY" },
   { key: "wtech", name: "Klassenthemen: Weltall, Tiere & Internet", fach: "deutsch", kompetenz: "lesen", kuerzel: "KT" },
+  { key: "wmotor", name: "Klassenthemen: Autos, Motorrad, Formel 1 & GTA", fach: "deutsch", kompetenz: "lesen", kuerzel: "KM" },
   { key: "rrecht", name: "Rechtschreibung", fach: "deutsch", kompetenz: "sprache", kuerzel: "RS" },
   { key: "rgramm", name: "Grammatik", fach: "deutsch", kompetenz: "sprache", kuerzel: "GR" }
 ];
@@ -2300,6 +2304,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const KONFIGURIERT = CONFIG.SUPABASE_URL.startsWith("https://");
 const sb = KONFIGURIERT && window.supabase ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null;
 
+if (window.THEMEN2_UNITS) UNITS.push(...window.THEMEN2_UNITS);
 if (window.SPRACHE_UNITS) UNITS.push(...window.SPRACHE_UNITS);
 if (window.BERUF_UNITS) UNITS.push(...window.BERUF_UNITS);
 if (window.BERUF_KARTEN) Object.assign(KARTEN, window.BERUF_KARTEN);
