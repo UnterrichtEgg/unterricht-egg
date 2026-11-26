@@ -334,6 +334,14 @@ code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
 .heat td.hc { min-width: 28px; height: 26px; text-align: center; border-radius: 4px; font-variant-numeric: tabular-nums;
   background: color-mix(in srgb, var(--accent) calc(var(--a) * 100%), color-mix(in srgb, var(--line) 30%, transparent)); }
 .heat td.hc.dk { color: #fff; font-weight: 700; }
+.vtab { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.vtab th { text-align: left; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.vtab td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vtab td.vz, .vtab td.vp { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vtab td.vf { color: var(--muted); white-space: nowrap; }
+.vtab td.vp.good { color: var(--good, #1f7a5c); font-weight: 700; }
+.vtab td.vp.low { color: var(--bad, #b3261e); font-weight: 700; }
+.vtag h3 { margin-bottom: 0; }
 .heat td.hsum { font-weight: 700; padding-left: 8px; font-variant-numeric: tabular-nums; }
 .rbar { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 52px; gap: 12px; align-items: center; }
 .rname { font-weight: 700; font-size: .92rem; }
@@ -3279,57 +3287,50 @@ const WTAG = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 function renderVerlauf() {
   const body = document.getElementById("tabbody");
   if (!body) return;
-  const tage = S.vTage || 14, mass = S.vMass || "abgaben";
-  const mem = membersInSel(), mails = new Set(mem.map(m => m.email));
-  const days = [];
-  for (let i = tage - 1; i >= 0; i--) { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i); days.push({ key: tagKey(d), d }); }
-  const dset = new Set(days.map(x => x.key));
-  const es = S.ergebnisse.filter(e => mails.has(e.email) && dset.has(tagKey(e.created_at)));
-  const wert = list => mass === "aufgaben" ? list.reduce((s, e) => s + (e.total || 0), 0)
-    : mass === "punkte" ? list.reduce((s, e) => s + (e.punkte || 0), 0)
-    : mass === "minuten" ? aktivMin(list) : list.length;
-  function aktivMin(list) { // grobe Schätzung: Zeit zwischen Abgaben am selben Tag, Lücken über 30 Min. zählen nicht, pro Abgabe mind. 5 Min.
-    const byP = {}; list.forEach(e => (byP[e.email + tagKey(e.created_at)] = byP[e.email + tagKey(e.created_at)] || []).push(new Date(e.created_at).getTime()));
-    return Math.round(Object.values(byP).reduce((sum, ts) => { ts.sort((x, y) => x - y); let m = 5; for (let i = 1; i < ts.length; i++) { const g = (ts[i] - ts[i - 1]) / 60000; m += g <= 30 ? g : 5; } return sum + m; }, 0));
-  }
-  const perDay = days.map(x => { const l = es.filter(e => tagKey(e.created_at) === x.key); return { ...x, list: l, v: wert(l), aktiv: new Set(l.map(e => e.email)).size }; });
-  const max = Math.max(1, ...perDay.map(x => x.v));
-  const heute = perDay[perDay.length - 1];
-  const gestern = perDay[perDay.length - 2] || { v: 0, aktiv: 0 };
-  const einheit = { abgaben: "Abgaben", aufgaben: "Aufgaben", punkte: "Punkte", minuten: "Min." }[mass];
-  const lbl = x => WTAG[x.d.getDay()] + " " + x.d.getDate() + "." + (x.d.getMonth() + 1) + ".";
-  const bars = perDay.map(x => `<div class="vbar" title="${lbl(x)}: ${x.v} ${einheit}, ${x.aktiv} aktiv">
-      <span class="vval">${x.v || ""}</span>
-      <span class="vcol"><span class="vfill ${x.key === heute.key ? "heute" : ""}" style="height:${Math.round(100 * x.v / max)}%"></span></span>
-      <span class="vlab ${[0, 6].includes(x.d.getDay()) ? "we" : ""}">${lbl(x)}</span></div>`).join("");
-  const rows = mem.map(m => { const l = es.filter(e => e.email === m.email); return { m, cells: perDay.map(x => wert(l.filter(e => tagKey(e.created_at) === x.key))), sum: wert(l) }; })
-    .sort((a, b) => b.sum - a.sum || a.m.name.localeCompare(b.m.name, "de"));
-  const cmax = Math.max(1, ...rows.flatMap(r => r.cells));
-  const heat = rows.map(r => `<tr><th scope="row">${esc(r.m.name)}</th>${r.cells.map((c, i) => `<td class="hc ${c / cmax > 0.55 ? "dk" : ""}" style="--a:${c ? (0.18 + 0.82 * c / cmax).toFixed(2) : 0}" title="${esc(r.m.name)}, ${lbl(perDay[i])}: ${c} ${einheit}">${c || ""}</td>`).join("")}<td class="hsum">${r.sum}</td></tr>`).join("");
-  const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? "selected" : ""}>${l}</option>`;
+  const tage = S.vTage || 7;
+  const mem = membersInSel(), byMail = Object.fromEntries(mem.map(m => [m.email, m]));
+  const person = S.vPerson && byMail[S.vPerson] ? S.vPerson : "alle";
+  const grenze = new Date(); grenze.setHours(0, 0, 0, 0); grenze.setDate(grenze.getDate() - (tage - 1));
+  const es = S.ergebnisse.filter(e => byMail[e.email] && (person === "alle" || e.email === person) && new Date(e.created_at) >= grenze)
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  const info = e => {
+    const u = UNITS.find(x => x.id === e.unit_id);
+    if (u) return { fach: fachName(fachVon(u.r)), titel: (KUERZEL[u.id] ? KUERZEL[u.id] + " · " : "") + u.titel };
+    const g = (typeof SPIELE !== "undefined" ? SPIELE : []).find(x => x.id === e.unit_id);
+    if (g) return { fach: "Spiel", titel: g.name };
+    return { fach: "", titel: e.unit_id };
+  };
+  const heuteK = tagKey(new Date()), gestK = tagKey(new Date(Date.now() - 86400000));
+  const tagTitel = k => { const d = new Date(k + "T12:00:00"); const t = d.toLocaleDateString("de-CH", { weekday: "long", day: "numeric", month: "long" }); return k === heuteK ? "Heute, " + t : k === gestK ? "Gestern, " + t : t; };
+  const groups = [];
+  es.forEach(e => { const k = tagKey(e.created_at); let g = groups.find(x => x.k === k); if (!g) groups.push(g = { k, list: [] }); g.list.push(e); });
+  const tagHtml = g => {
+    const leute = new Set(g.list.map(e => e.email)).size;
+    const rows = g.list.map(e => {
+      const m = byMail[e.email], i = info(e), st = e.antworten && e.antworten.stufe;
+      const pct = e.total ? Math.round(100 * e.punkte / e.total) : null;
+      return `<tr><td class="vz">${new Date(e.created_at).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}</td>
+        <td>${esc(m.name)}</td><td class="vf">${esc(i.fach)}</td><td>${esc(i.titel)}${st ? ` <span class="hint">(${"★".repeat(st)})</span>` : ""}</td>
+        <td class="vp ${pctClass(pct)}">${e.punkte}/${e.total}</td></tr>`;
+    }).join("");
+    return `<section class="block vtag"><h3>${esc(tagTitel(g.k))}</h3>
+      <p class="hint">${leute} ${leute === 1 ? "Person" : "Personen"} · ${g.list.length} ${g.list.length === 1 ? "Abgabe" : "Abgaben"}</p>
+      <div class="hwrap"><table class="vtab"><thead><tr><th>Zeit</th><th>Name</th><th>Fach</th><th>Übung</th><th>Punkte</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+  };
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${String(cur) === String(v) ? "selected" : ""}>${esc(l)}</option>`;
   body.innerHTML = `
     <div class="toolbar">
       <label for="gsel">Gruppe</label><select id="gsel">${groupSelectHtml()}</select>
-      <label for="vtage">Zeitraum</label><select id="vtage">${opt(7, "7 Tage", tage)}${opt(14, "14 Tage", tage)}${opt(30, "30 Tage", tage)}${opt(60, "60 Tage", tage)}</select>
-      <label for="vmass">Anzeigen</label><select id="vmass">${opt("abgaben", "Abgaben", mass)}${opt("aufgaben", "gelöste Aufgaben", mass)}${opt("punkte", "erreichte Punkte", mass)}${opt("minuten", "Arbeitszeit (geschätzt)", mass)}</select>
+      <label for="vpers">Person</label><select id="vpers">${opt("alle", "Alle", person)}${[...mem].sort((a, b) => a.name.localeCompare(b.name, "de")).map(m => opt(m.email, m.name, person)).join("")}</select>
+      <label for="vtage">Zeitraum</label><select id="vtage">${opt(1, "nur heute", tage)}${opt(7, "letzte 7 Tage", tage)}${opt(14, "letzte 14 Tage", tage)}${opt(30, "letzte 30 Tage", tage)}</select>
       <button class="btn ghost" id="reload">Aktualisieren</button>
     </div>
-    <p class="hint">Live: aktualisiert sich jede Minute automatisch, solange dieser Reiter offen ist. Stand ${new Date().toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr.</p>
-    <div class="kpis">
-      <div class="kpi"><span class="kv">${heute.v}<small> ${einheit}</small></span><span class="kl">heute (gestern ${gestern.v})</span></div>
-      <div class="kpi"><span class="kv">${heute.aktiv}<small> / ${mem.length}</small></span><span class="kl">heute aktiv</span></div>
-      <div class="kpi"><span class="kv">${wert(es)}<small> ${einheit}</small></span><span class="kl">in ${tage} Tagen</span></div>
-      <div class="kpi"><span class="kv">${perDay.filter(x => x.v).length}</span><span class="kl">Tage mit Aktivität</span></div>
-    </div>
-    <section class="block"><h3>Zuwachs pro Tag: ${einheit === "Min." ? "Arbeitszeit in Minuten (geschätzt)" : einheit}</h3>
-      <div class="vchart" role="img" aria-label="Säulendiagramm ${einheit} pro Tag">${bars}</div></section>
-    <section class="block"><h3>Wer hat wann gearbeitet?</h3>
-      ${rows.length ? `<div class="hwrap"><table class="heat"><thead><tr><th>Name</th>${perDay.map(x => `<th class="${[0, 6].includes(x.d.getDay()) ? "we" : ""}">${WTAG[x.d.getDay()]}<br>${x.d.getDate()}.${x.d.getMonth() + 1}.</th>`).join("")}<th>Total</th></tr></thead><tbody>${heat}</tbody></table></div>` : `<p class="note">In dieser Auswahl gibt es keine Schülerinnen und Schüler.</p>`}
-      <p class="hint">Je dunkler ein Feld, desto mehr wurde an diesem Tag gearbeitet. «Gelöste Aufgaben» zählt alle Fragen der abgegebenen Übungen. Die Arbeitszeit ist eine Schätzung aus den Abgabezeiten (Pausen über 30 Minuten zählen nicht); die Plattform misst keine echte Bildschirmzeit.</p></section>`;
+    <p class="hint">Neueste Abgaben zuoberst. Die Liste aktualisiert sich jede Minute von selbst. Stand ${new Date().toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr.</p>
+    ${groups.length ? groups.map(tagHtml).join("") : `<p class="note">In diesem Zeitraum wurde nichts abgegeben.</p>`}`;
   const reload = async () => { await loadTeacherData(); renderVerlauf(); };
-  body.querySelector("#gsel").onchange = e => { S.gruppeSel = e.target.value; renderVerlauf(); };
+  body.querySelector("#gsel").onchange = e => { S.gruppeSel = e.target.value; S.vPerson = "alle"; renderVerlauf(); };
+  body.querySelector("#vpers").onchange = e => { S.vPerson = e.target.value; renderVerlauf(); };
   body.querySelector("#vtage").onchange = e => { S.vTage = +e.target.value; renderVerlauf(); };
-  body.querySelector("#vmass").onchange = e => { S.vMass = e.target.value; renderVerlauf(); };
   body.querySelector("#reload").onclick = reload;
   if (!S.vTimer) S.vTimer = setInterval(() => { if (S.tab !== "verlauf" || !document.getElementById("tabbody") || !location.hash.includes("lehrperson")) { clearInterval(S.vTimer); S.vTimer = null; return; } reload(); }, 60000);
 }
