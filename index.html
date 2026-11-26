@@ -319,6 +319,22 @@ code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
 .kpi.warn { border-color: var(--bad); }
 .kv.good { color: var(--ok); } .kv.mid { color: var(--mid); } .kv.low { color: var(--bad); }
 .rbars { display: grid; gap: 10px; }
+.vchart { display: flex; align-items: stretch; gap: 4px; height: 220px; overflow-x: auto; padding-bottom: 4px; }
+.vbar { flex: 1 0 26px; display: grid; grid-template-rows: 18px 1fr 34px; text-align: center; font-size: .74rem; }
+.vval { color: var(--muted); font-variant-numeric: tabular-nums; }
+.vcol { display: flex; align-items: flex-end; background: color-mix(in srgb, var(--line) 35%, transparent); border-radius: 6px 6px 0 0; }
+.vfill { display: block; width: 100%; background: var(--accent); border-radius: 6px 6px 0 0; min-height: 0; }
+.vfill.heute { background: var(--good, #1f7a5c); }
+.vlab { color: var(--muted); line-height: 1.15; padding-top: 4px; }
+.vlab.we, .heat th.we { opacity: .55; }
+.hwrap { overflow-x: auto; }
+.heat { border-collapse: separate; border-spacing: 3px; font-size: .8rem; }
+.heat th { font-weight: 600; color: var(--muted); text-align: center; white-space: nowrap; padding: 2px 4px; }
+.heat tbody th { text-align: left; color: var(--ink); position: sticky; left: 0; background: var(--bg); padding-right: 10px; }
+.heat td.hc { min-width: 28px; height: 26px; text-align: center; border-radius: 4px; font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--accent) calc(var(--a) * 100%), color-mix(in srgb, var(--line) 30%, transparent)); }
+.heat td.hc.dk { color: #fff; font-weight: 700; }
+.heat td.hsum { font-weight: 700; padding-left: 8px; font-variant-numeric: tabular-nums; }
 .rbar { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 52px; gap: 12px; align-items: center; }
 .rname { font-weight: 700; font-size: .92rem; }
 .rval { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
@@ -3221,7 +3237,7 @@ async function loadTeacherData() {
   const [g, m, e] = await Promise.all([
     sb.from("gruppen").select("id,name").order("name"),
     sb.from("mitglieder").select("email,name,gruppe_id,created_at").order("name"),
-    sb.from("ergebnisse").select("id,email,unit_id,punkte,total,antworten,created_at").order("created_at", { ascending: false })
+    (async () => { let all = [], from = 0; for (;;) { const r = await sb.from("ergebnisse").select("id,email,unit_id,punkte,total,antworten,created_at").order("created_at", { ascending: false }).range(from, from + 999); if (r.error) return r; all = all.concat(r.data || []); if (!r.data || r.data.length < 1000) return { data: all }; from += 1000; } })()
   ]);
   const err = g.error || m.error || e.error;
   S.gruppen = g.data || []; S.mitglieder = m.data || []; S.ergebnisse = e.data || [];
@@ -3233,7 +3249,8 @@ async function renderTeacher(msg = "") {
   app.innerHTML = topbar() + `<p class="hint">Daten werden geladen …</p>`;
   bindTop();
   const err = await loadTeacherData();
-  const tabs = [["dashboard", "Dashboard"], ["fortschritt", "Tabelle"], ["gruppen", "Gruppen & Mitglieder"]]
+  if (S.vTimer) { clearInterval(S.vTimer); S.vTimer = null; }
+  const tabs = [["dashboard", "Dashboard"], ["verlauf", "Verlauf"], ["fortschritt", "Tabelle"], ["gruppen", "Gruppen & Mitglieder"]]
     .map(([k, l]) => `<button class="chip" data-tab="${k}" aria-pressed="${S.tab === k}">${l}</button>`).join("");
   app.innerHTML = topbar() + `
     <header class="top">
@@ -3247,13 +3264,74 @@ async function renderTeacher(msg = "") {
     <div id="tabbody"></div>`;
   bindTop();
   app.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; S.detail = null; renderTeacher(); });
-  if (S.tab === "dashboard") renderDashboard(); else if (S.tab === "fortschritt") renderFortschritt(); else renderGruppen();
+  if (S.tab === "dashboard") renderDashboard(); else if (S.tab === "verlauf") renderVerlauf(); else if (S.tab === "fortschritt") renderFortschritt(); else renderGruppen();
 }
 
 function membersInSel() {
   if (S.gruppeSel === "alle") return S.mitglieder;
   if (S.gruppeSel === "ohne") return S.mitglieder.filter(m => !m.gruppe_id);
   return S.mitglieder.filter(m => m.gruppe_id === S.gruppeSel);
+}
+
+// ---------------------------------------------------------------- Verlauf (Tagesübersicht, live)
+const tagKey = d => { const x = new Date(d); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
+const WTAG = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+function renderVerlauf() {
+  const body = document.getElementById("tabbody");
+  if (!body) return;
+  const tage = S.vTage || 14, mass = S.vMass || "abgaben";
+  const mem = membersInSel(), mails = new Set(mem.map(m => m.email));
+  const days = [];
+  for (let i = tage - 1; i >= 0; i--) { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i); days.push({ key: tagKey(d), d }); }
+  const dset = new Set(days.map(x => x.key));
+  const es = S.ergebnisse.filter(e => mails.has(e.email) && dset.has(tagKey(e.created_at)));
+  const wert = list => mass === "aufgaben" ? list.reduce((s, e) => s + (e.total || 0), 0)
+    : mass === "punkte" ? list.reduce((s, e) => s + (e.punkte || 0), 0)
+    : mass === "minuten" ? aktivMin(list) : list.length;
+  function aktivMin(list) { // grobe Schätzung: Zeit zwischen Abgaben am selben Tag, Lücken über 30 Min. zählen nicht, pro Abgabe mind. 5 Min.
+    const byP = {}; list.forEach(e => (byP[e.email + tagKey(e.created_at)] = byP[e.email + tagKey(e.created_at)] || []).push(new Date(e.created_at).getTime()));
+    return Math.round(Object.values(byP).reduce((sum, ts) => { ts.sort((x, y) => x - y); let m = 5; for (let i = 1; i < ts.length; i++) { const g = (ts[i] - ts[i - 1]) / 60000; m += g <= 30 ? g : 5; } return sum + m; }, 0));
+  }
+  const perDay = days.map(x => { const l = es.filter(e => tagKey(e.created_at) === x.key); return { ...x, list: l, v: wert(l), aktiv: new Set(l.map(e => e.email)).size }; });
+  const max = Math.max(1, ...perDay.map(x => x.v));
+  const heute = perDay[perDay.length - 1];
+  const gestern = perDay[perDay.length - 2] || { v: 0, aktiv: 0 };
+  const einheit = { abgaben: "Abgaben", aufgaben: "Aufgaben", punkte: "Punkte", minuten: "Min." }[mass];
+  const lbl = x => WTAG[x.d.getDay()] + " " + x.d.getDate() + "." + (x.d.getMonth() + 1) + ".";
+  const bars = perDay.map(x => `<div class="vbar" title="${lbl(x)}: ${x.v} ${einheit}, ${x.aktiv} aktiv">
+      <span class="vval">${x.v || ""}</span>
+      <span class="vcol"><span class="vfill ${x.key === heute.key ? "heute" : ""}" style="height:${Math.round(100 * x.v / max)}%"></span></span>
+      <span class="vlab ${[0, 6].includes(x.d.getDay()) ? "we" : ""}">${lbl(x)}</span></div>`).join("");
+  const rows = mem.map(m => { const l = es.filter(e => e.email === m.email); return { m, cells: perDay.map(x => wert(l.filter(e => tagKey(e.created_at) === x.key))), sum: wert(l) }; })
+    .sort((a, b) => b.sum - a.sum || a.m.name.localeCompare(b.m.name, "de"));
+  const cmax = Math.max(1, ...rows.flatMap(r => r.cells));
+  const heat = rows.map(r => `<tr><th scope="row">${esc(r.m.name)}</th>${r.cells.map((c, i) => `<td class="hc ${c / cmax > 0.55 ? "dk" : ""}" style="--a:${c ? (0.18 + 0.82 * c / cmax).toFixed(2) : 0}" title="${esc(r.m.name)}, ${lbl(perDay[i])}: ${c} ${einheit}">${c || ""}</td>`).join("")}<td class="hsum">${r.sum}</td></tr>`).join("");
+  const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? "selected" : ""}>${l}</option>`;
+  body.innerHTML = `
+    <div class="toolbar">
+      <label for="gsel">Gruppe</label><select id="gsel">${groupSelectHtml()}</select>
+      <label for="vtage">Zeitraum</label><select id="vtage">${opt(7, "7 Tage", tage)}${opt(14, "14 Tage", tage)}${opt(30, "30 Tage", tage)}${opt(60, "60 Tage", tage)}</select>
+      <label for="vmass">Anzeigen</label><select id="vmass">${opt("abgaben", "Abgaben", mass)}${opt("aufgaben", "gelöste Aufgaben", mass)}${opt("punkte", "erreichte Punkte", mass)}${opt("minuten", "Arbeitszeit (geschätzt)", mass)}</select>
+      <button class="btn ghost" id="reload">Aktualisieren</button>
+    </div>
+    <p class="hint">Live: aktualisiert sich jede Minute automatisch, solange dieser Reiter offen ist. Stand ${new Date().toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })} Uhr.</p>
+    <div class="kpis">
+      <div class="kpi"><span class="kv">${heute.v}<small> ${einheit}</small></span><span class="kl">heute (gestern ${gestern.v})</span></div>
+      <div class="kpi"><span class="kv">${heute.aktiv}<small> / ${mem.length}</small></span><span class="kl">heute aktiv</span></div>
+      <div class="kpi"><span class="kv">${wert(es)}<small> ${einheit}</small></span><span class="kl">in ${tage} Tagen</span></div>
+      <div class="kpi"><span class="kv">${perDay.filter(x => x.v).length}</span><span class="kl">Tage mit Aktivität</span></div>
+    </div>
+    <section class="block"><h3>Zuwachs pro Tag: ${einheit === "Min." ? "Arbeitszeit in Minuten (geschätzt)" : einheit}</h3>
+      <div class="vchart" role="img" aria-label="Säulendiagramm ${einheit} pro Tag">${bars}</div></section>
+    <section class="block"><h3>Wer hat wann gearbeitet?</h3>
+      ${rows.length ? `<div class="hwrap"><table class="heat"><thead><tr><th>Name</th>${perDay.map(x => `<th class="${[0, 6].includes(x.d.getDay()) ? "we" : ""}">${WTAG[x.d.getDay()]}<br>${x.d.getDate()}.${x.d.getMonth() + 1}.</th>`).join("")}<th>Total</th></tr></thead><tbody>${heat}</tbody></table></div>` : `<p class="note">In dieser Auswahl gibt es keine Schülerinnen und Schüler.</p>`}
+      <p class="hint">Je dunkler ein Feld, desto mehr wurde an diesem Tag gearbeitet. «Gelöste Aufgaben» zählt alle Fragen der abgegebenen Übungen. Die Arbeitszeit ist eine Schätzung aus den Abgabezeiten (Pausen über 30 Minuten zählen nicht); die Plattform misst keine echte Bildschirmzeit.</p></section>`;
+  const reload = async () => { await loadTeacherData(); renderVerlauf(); };
+  body.querySelector("#gsel").onchange = e => { S.gruppeSel = e.target.value; renderVerlauf(); };
+  body.querySelector("#vtage").onchange = e => { S.vTage = +e.target.value; renderVerlauf(); };
+  body.querySelector("#vmass").onchange = e => { S.vMass = e.target.value; renderVerlauf(); };
+  body.querySelector("#reload").onclick = reload;
+  if (!S.vTimer) S.vTimer = setInterval(() => { if (S.tab !== "verlauf" || !document.getElementById("tabbody") || !location.hash.includes("lehrperson")) { clearInterval(S.vTimer); S.vTimer = null; return; } reload(); }, 60000);
 }
 
 // ---------------------------------------------------------------- Dashboard
