@@ -13,6 +13,7 @@
 <script src="stufen.js"></script>
 <script src="themen2-hoeren.js"></script>
 <script src="themen2-lesen.js"></script>
+<script src="mathe.js"></script>
 <script src="sprache.js"></script>
 <script src="beruf-extra.js"></script>
 <script src="beruf.js"></script>
@@ -54,6 +55,7 @@
   --wtech: #2847c9;
   --rrecht: #0f6f78;
   --rgramm: #b0306a;
+  --mathe: #1f7a5c; --mzv: #2f5fd0; --mfr: #b5562a; --mgf: #1f7a5c;
   --ok: #1f7a4d;
   --bad: #b42318;
   --okbg: #e3f3ea;
@@ -67,13 +69,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12171d; --surface: #1b222a; --ink: #e8edf2; --muted: #9aa7b4; --line: #2e3843;
-    --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd;
+    --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd; --mathe: #5cc492; --mzv: #8aa2ff; --mfr: #f0965e; --mgf: #5cc492;
     --ok: #5cc492; --bad: #ff8a80; --okbg: #17332a; --badbg: #3a1f1d; --mid: #f0c060; --midbg: #3a2f14; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #12171d; --surface: #1b222a; --ink: #e8edf2; --muted: #9aa7b4; --line: #2e3843;
-  --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd;
+  --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd; --mathe: #5cc492; --mzv: #8aa2ff; --mfr: #f0965e; --mgf: #5cc492;
   --ok: #5cc492; --bad: #ff8a80; --okbg: #17332a; --badbg: #3a1f1d; --mid: #f0c060; --midbg: #3a2f14; color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -373,6 +375,11 @@ const KOMPETENZEN = [
   { key: "schreiben", name: "Schreiben", kurz: "Eigene Texte planen und schreiben." },
   { key: "sprache", name: "Sprache im Fokus", kurz: "Grammatik, Wortschatz und Rechtschreibung." }
 ];
+const KOMP_MATHE = [
+  { key: "zv", name: "Zahl und Variable", kurz: "Potenzen und Wurzeln, Terme, Gleichungen und Prozente." },
+  { key: "fr", name: "Form und Raum", kurz: "Ähnliche Figuren und Massstab, Zylinder, Kegel und Kugel, Körper und Pythagoras." },
+  { key: "gfdz", name: "Grössen, Funktionen, Daten und Zufall", kurz: "Lineare Funktionen, Zins, Kredit und Leasing, Geschwindigkeit, Wahrscheinlichkeit und Statistik." }
+];
 const THEMEN_RZG = [
   { key: "expansion", name: "Europäische Expansion", kurz: "10 Kapitel zum Themenheft «Zeit•», im Grundniveau und erweitert, mit Seekarte, Spiel und Karteikarten." },
   { key: "politik", name: "Politische Bildung", kurz: "Zum Heft «So regiert sich die Schweiz»: Polit-Reise, Themenkarte-Expedition und Karteikarten.", stat: "2 Spiele · Karteikarten" }
@@ -384,6 +391,7 @@ const THEMEN_BV = [
 const FAECHER = [
   { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt, Biologie sowie Autos, Motorsport und Gaming. Lesen: 46 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen, neu auch MPA, Sprachen und Flaggen, Autos, Motorrad, Formel 1 und GTA 6. Jeweils mit Fragebogen. Sprache im Fokus: 15 Übungen zu Rechtschreibung und Grammatik, neu mit drei Übungen zum Präteritum.", kompetenzen: KOMPETENZEN },
   { key: "franz", name: "Französisch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: 10 einfache Videos zu Frankreich und zur Westschweiz. Lesen: 8 kurze Texte. Fragen auf Deutsch.", kompetenzen: KOMPETENZEN },
+  { key: "mathe", name: "Mathematik", untertitel: "Zahl und Variable · Form und Raum · Grössen, Funktionen, Daten und Zufall", kurz: "Aufgaben für die 3. Sek nach den Bereichen von Lehrplan 21 und Stellwerk, Themen wie in «Mathematik 3». Jede Übung in drei Niveaus und als Arbeitsblatt zum Ausdrucken.", kompetenzen: KOMP_MATHE, ebene: "Bereich" },
   { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" },
   { key: "bv", name: "Berufliche Vorbereitung", untertitel: "Fit für die Lehre", kurz: "Logistiker/in EFZ und Fachfrau/Fachmann Gesundheit EFZ: Stationen nach Bildungsplan, je ein Berufsspiel und Karteikarten. Für den Start in die Lehre, ohne Vorkenntnisse.", kompetenzen: THEMEN_BV, ebene: "Beruf" }
 ];
@@ -415,7 +423,10 @@ const RUBRIKEN = [
   { key: "wtech", name: "Klassenthemen: Weltall, Tiere & Internet", fach: "deutsch", kompetenz: "lesen", kuerzel: "KT" },
   { key: "wmotor", name: "Klassenthemen: Autos, Motorrad, Formel 1 & GTA", fach: "deutsch", kompetenz: "lesen", kuerzel: "KM" },
   { key: "rrecht", name: "Rechtschreibung", fach: "deutsch", kompetenz: "sprache", kuerzel: "RS" },
-  { key: "rgramm", name: "Grammatik", fach: "deutsch", kompetenz: "sprache", kuerzel: "GR" }
+  { key: "rgramm", name: "Grammatik", fach: "deutsch", kompetenz: "sprache", kuerzel: "GR" },
+  { key: "mzv", name: "Zahl und Variable", fach: "mathe", kompetenz: "zv", kuerzel: "ZV" },
+  { key: "mfr", name: "Form und Raum", fach: "mathe", kompetenz: "fr", kuerzel: "FR" },
+  { key: "mgf", name: "Grössen, Funktionen, Daten und Zufall", fach: "mathe", kompetenz: "gfdz", kuerzel: "GF" }
 ];
 const KARTEN = {
   politik: { titel: "Fachbegriffe: Politische Bildung", karten: [["Demokratie", "«Volksherrschaft»: Die Bewohnerinnen und Bewohner eines Landes bestimmen politisch mit."], ["Direkte Demokratie", "Das Volk wählt nicht nur Politiker, sondern stimmt auch direkt über Sachfragen ab."], ["Diktatur", "Eine Person oder kleine Gruppe herrscht mit Gewalt, ohne freie Wahlen."], ["Pluralismus", "In der Politik gibt es viele Parteien und Interessengruppen."], ["Partei", "Politischer Verein von Menschen mit ähnlichen Meinungen und Zielen."], ["Parlament", "Versammlung gewählter Politikerinnen und Politiker, die über Gesetze diskutieren und abstimmen."], ["Bundesverfassung", "Grundordnung der Schweiz seit 1848; regelt das Zusammenleben im Land."], ["Amtssprache", "Offizielle Sprache eines Landes. Die Schweiz hat vier: Deutsch, Französisch, Italienisch, Rätoromanisch."], ["Röstigraben", "Bezeichnung für die Sprach- und Kulturgrenze zwischen Deutsch- und Westschweiz."], ["Bundesstaat", "Mehrere Gliedstaaten (Kantone) haben sich zu einem Bund zusammengeschlossen. Die Schweiz seit 1848."], ["Volksinitiative", "Mit 100 000 Unterschriften in 18 Monaten eine Verfassungsänderung verlangen; danach stimmt das Volk ab."], ["Referendum", "Abstimmung des Volkes über einen Beschluss des Parlaments. Fakultativ: 50 000 Unterschriften."], ["Ständemehr", "Mehrheit der Kantone (Stände) bei einer Abstimmung."], ["Frauenstimmrecht", "Stimm- und Wahlrecht für Frauen; auf Bundesebene seit 1971."], ["Föderalismus", "Die politische Macht ist auf Gemeinden, Kantone und Bund verteilt."], ["Gemeinde", "Dorf oder Stadt; tiefste politische Stufe der Schweiz."], ["Budget", "Aufstellung der geplanten Einnahmen und Ausgaben."], ["Gewaltenteilung", "Die Macht ist auf Legislative, Exekutive und Judikative verteilt. Niemand gehört zwei Gewalten an."], ["Legislative", "Gesetzgebende Gewalt, z. B. National- und Ständerat, Kantonsrat, Gemeindeversammlung."], ["Exekutive", "Ausführende Gewalt: setzt Gesetze um, z. B. Bundesrat, Regierungsrat, Gemeinderat, Polizei."], ["Judikative", "Richterliche Gewalt: Gerichte urteilen bei Streitfällen und kontrollieren die Anwendung der Gesetze."], ["Vierte Gewalt", "Die Medien: kein offizieller Teil, kontrollieren aber Politik und Gerichte durch ihre Berichte."], ["Gesetzesentwurf", "Ein Gesetz, das noch nicht fertig und noch nicht gültig ist."], ["Vernehmlassung", "Organisationen und Interessengruppen werden zu einem Gesetzesentwurf befragt."], ["Nationalrat", "Grosse Kammer mit 200 Sitzen; grosse Kantone haben mehr Sitze."], ["Ständerat", "Kleine Kammer mit 46 Sitzen; zwei pro Kanton, Halbkantone je einen."], ["Vereinigte Bundesversammlung", "National- und Ständerat zusammen; wählt z. B. den Bundesrat und die Bundesrichter."], ["Zweikammersystem", "Ein Parlament mit zwei Räten; schützt auch die Mitsprache kleiner Kantone."], ["Bundesrat", "Regierung der Schweiz mit sieben gleichberechtigten Mitgliedern."], ["Departement", "Aufgabenbereich, den ein Mitglied des Bundesrats leitet (in anderen Ländern: Ministerium)."], ["Zauberformel", "Inoffizielle Verteilung der Bundesratssitze: SVP, SP, FDP je zwei, Die Mitte einen."], ["Kollegialitätsprinzip", "Der Bundesrat entscheidet gemeinsam; alle vertreten nach aussen die Mehrheitsmeinung."], ["Bundesgericht", "Höchstes Gericht der Schweiz, Hauptsitz in Lausanne; sein Urteil ist endgültig."], ["Instanz", "Behörde oder Gericht, das für eine Entscheidung zuständig ist."], ["Europäische Union (EU)", "Zusammenschluss von 27 Ländern für Frieden, Stabilität und Wohlstand; die Schweiz ist kein Mitglied."], ["Bilaterale Verträge", "Abkommen zwischen der Schweiz und der EU, z. B. Bilaterale I (1999) und II (2004)."], ["Personenfreizügigkeit", "Erlaubt Schweizerinnen und Schweizern, unkompliziert in der EU zu arbeiten, und umgekehrt."]] },
@@ -2306,6 +2317,7 @@ const sb = KONFIGURIERT && window.supabase ? window.supabase.createClient(CONFIG
 
 if (window.THEMEN2_UNITS) UNITS.push(...window.THEMEN2_UNITS);
 if (window.SPRACHE_UNITS) UNITS.push(...window.SPRACHE_UNITS);
+if (window.MATHE_UNITS) UNITS.push(...window.MATHE_UNITS);
 if (window.BERUF_UNITS) UNITS.push(...window.BERUF_UNITS);
 if (window.BERUF_KARTEN) Object.assign(KARTEN, window.BERUF_KARTEN);
 // Kürzel pro Station, z. B. «SP1», «GE2»
@@ -2494,7 +2506,8 @@ const rubrikenIn = (k, komp) => RUBRIKEN.filter(r => (r.fach || "deutsch") === k
 const unitsIn = (k, komp) => UNITS.filter(u => fachVon(u.r) === k && (komp === undefined || kompVon(u.r) === komp));
 const statText = us => {
   const done = us.filter(u => bestOf(S.myResults, u.id)).length;
-  return !us.length ? "Inhalte folgen" : S.isTeacher ? `${us.length} Stationen` : `${done} von ${us.length} Stationen abgegeben`;
+  const wort = us.length && us.every(u => fachVon(u.r) === "mathe") ? "Übungen" : "Stationen";
+  return !us.length ? "Inhalte folgen" : S.isTeacher ? `${us.length} ${wort}` : `${done} von ${us.length} ${wort} abgegeben`;
 };
 const cardHtml = (attr, color, tag, titel, kurz, us, stat) => `
       <button class="card fcard ${us.length || stat ? "" : "empty"}" ${attr} style="--r: var(--${color})">
@@ -2577,6 +2590,7 @@ function renderFach(k, komp) {
     </section>`).join("");
   const lead = komp === "hoeren" ? "Wähle ein Thema, schau dir das Video an und beantworte danach die Fragen. Mit «Abgeben» werden deine Antworten für deine Lehrperson gespeichert."
     : komp === "lesen" ? "Wähle einen Text, lies ihn genau und beantworte danach die Fragen. Unbekannte Wörter findest du über dem Text. Mit «Abgeben» werden deine Antworten für deine Lehrperson gespeichert."
+    : komp === "zv" || komp === "fr" || komp === "gfdz" ? "Wähle ein Thema und ein Niveau: ★ einfach, ★★ mittel, ★★★ schwierig. Lies zuerst das Merkwissen, dann löse die Aufgaben. Unten kannst du die Aufgaben als Arbeitsblatt ausdrucken. Mit «Abgeben» werden deine Antworten für deine Lehrperson gespeichert."
     : komp === "sprache" ? "Wähle eine Übung und ein Niveau: ★ einfach, ★★ mittel, ★★★ schwierig. Lies zuerst die Regel, dann löse die Aufgaben. Mit «Abgeben» werden deine Antworten für deine Lehrperson gespeichert."
     : komp === "logistik" || komp === "fage" ? "Du brauchst keine Vorkenntnisse. Lies zuerst den Lerntext, dann löse die Aufgaben. Wähle ein Niveau: ★ einfach, ★★ mittel, ★★★ schwierig. Starte mit dem Grundlagen-Check oder mit Station 1. Mit «Abgeben» werden deine Antworten für deine Lehrperson gespeichert."
     : komp === "politik" ? "Wiederhole die Inhalte des Hefts mit den Spielen und den Karteikarten. Wenn du ein Spiel bis zum Ende spielst, wird dein Ergebnis für deine Lehrperson gespeichert."
@@ -2949,6 +2963,12 @@ function spDetail(u, a) {
     return `<li class="${ok ? "ok" : "bad"}"><span>${esc(spFrage(b, it))}</span><span>${spLeer(b, v) ? "keine Antwort" : esc(spGegeben(b, it, v))}${ok ? "" : ` → richtig: ${esc(spRichtig(b, it))}`}</span></li>`;
   }).join("")).join("");
 }
+const PDF_HOCH = { "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9", "⁻": "-" };
+const pdfSafe = s => String(s ?? "")
+  .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+/g, m => /[⁰⁴⁵⁶⁷⁸⁹⁻]/.test(m) || m.length > 1 ? "^" + [...m].map(c => PDF_HOCH[c]).join("") : m)
+  .replace(/[₀-₉]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x2080 + 48))
+  .replace(/√/g, "Wurzel ").replace(/π/g, "pi").replace(/−/g, "-").replace(/≤/g, "<=").replace(/≥/g, ">=").replace(/≈/g, "~").replace(/≠/g, "ungleich")
+  .replace(/→/g, "->").replace(/✓/g, "(ok)").replace(/★/g, "*").replace(/[‘’]/g, "'").replace(/[“”„]/g, '"').replace(/…/g, "...").replace(/[–—]/g, "-");
 function spPdf(u, filled, loes) {
   if (!window.jspdf) { document.getElementById("score").textContent = "Der PDF-Export konnte nicht geladen werden. Bitte Seite neu laden."; return; }
   const { jsPDF } = window.jspdf;
@@ -2960,11 +2980,11 @@ function spPdf(u, filled, loes) {
   const need = h => { if (y + h > 280) { doc.addPage(); y = 20; } };
   const text = (s, size = 11, style = "normal", indent = 0) => {
     doc.setFont("helvetica", style); doc.setFontSize(size);
-    const lines = doc.splitTextToSize(String(s), CW - indent), lh = size * 0.45;
+    const lines = doc.splitTextToSize(pdfSafe(s), CW - indent), lh = size * 0.45;
     need(lines.length * lh); doc.text(lines, M + indent, y); y += lines.length * lh + 1.5;
   };
   const linie = () => { need(9); y += 7; doc.setDrawColor(170); doc.line(M + 5, y, M + CW, y); y += 3; };
-  text("Unterricht Egg · " + fachName(fachVon(u.r)) + " · " + kompName(kompVon(u.r)) + " · " + rubrikName(u.r) + " · " + KUERZEL[u.id], 9);
+  text(["Unterricht Egg", fachName(fachVon(u.r)), kompName(kompVon(u.r)), rubrikName(u.r), KUERZEL[u.id]].filter((x, i, a) => a.indexOf(x) === i).join(" · "), 9);
   text((loes ? "LÖSUNGEN · " : "") + u.titel + "  (Niveau " + (u.stufe || 1) + " von 3: " + STUFE_NAMEN[u.stufe || 1] + ")", 16, "bold");
   text("Name: " + (name || "______________________________") + "      Datum: " + (filled ? new Date().toLocaleDateString("de-CH") : "______________"), 11);
   y += 2;
@@ -3155,7 +3175,7 @@ function makePdf(u, filled) {
   const need = h => { if (y + h > 280) { doc.addPage(); y = 20; } };
   const text = (s, size = 11, style = "normal", indent = 0) => {
     doc.setFont("helvetica", style); doc.setFontSize(size);
-    const lines = doc.splitTextToSize(s, CW - indent);
+    const lines = doc.splitTextToSize(pdfSafe(s), CW - indent);
     const lh = size * 0.45;
     need(lines.length * lh);
     doc.text(lines, M + indent, y); y += lines.length * lh + 1.5;
