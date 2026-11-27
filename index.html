@@ -54,7 +54,7 @@
   --wstyle: #b0306a;
   --wtech: #2847c9;
   --rrecht: #0f6f78;
-  --rgramm: #b0306a;
+  --rgramm: #b0306a; --rwort: #7a4bc4;
   --mathe: #1f7a5c; --mzv: #2f5fd0; --mfr: #b5562a; --mgf: #1f7a5c;
   --ok: #1f7a4d;
   --bad: #b42318;
@@ -69,13 +69,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #12171d; --surface: #1b222a; --ink: #e8edf2; --muted: #9aa7b4; --line: #2e3843;
-    --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd; --mathe: #5cc492; --mzv: #8aa2ff; --mfr: #f0965e; --mgf: #5cc492;
+    --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd; --rwort: #b79af0; --mathe: #5cc492; --mzv: #8aa2ff; --mfr: #f0965e; --mgf: #5cc492;
     --ok: #5cc492; --bad: #ff8a80; --okbg: #17332a; --badbg: #3a1f1d; --mid: #f0c060; --midbg: #3a2f14; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #12171d; --surface: #1b222a; --ink: #e8edf2; --muted: #9aa7b4; --line: #2e3843;
-  --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd; --mathe: #5cc492; --mzv: #8aa2ff; --mfr: #f0965e; --mgf: #5cc492;
+  --accent: #8aa2ff; --sport: #5cc492; --gesellschaft: #f0965e; --geschichte: #e88a98; --biologie: #5ccbd4; --beruf: #b79cff; --welt: #e4b54a; --deutsch: #8aa2ff; --franz: #7fb8ff; --rzg: #7fd08c; --bv: #f0b44c; --blog: #f0b44c; --bfage: #5ccbd4; --expg: #7fd08c; --expe: #f08d4f; --polit: #ff6b7d; --frankreich: #7fb8ff; --romandie: #f29b8f; --decouvertes: #b79cff; --histoires: #5ccbb8; --lsport: #5cc492; --lberuf: #b79cff; --lgesell: #f0965e; --lnatur: #5ccbd4; --wsport: #f0857a; --wwelt: #e4b54a; --wstyle: #f08dbd; --wtech: #8aa2ff; --rrecht: #5ccbd4; --rgramm: #f08dbd; --rwort: #b79af0; --mathe: #5cc492; --mzv: #8aa2ff; --mfr: #f0965e; --mgf: #5cc492;
   --ok: #5cc492; --bad: #ff8a80; --okbg: #17332a; --badbg: #3a1f1d; --mid: #f0c060; --midbg: #3a2f14; color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -413,7 +413,7 @@ const THEMEN_BV = [
   { key: "fage", name: "Fachfrau/Fachmann Gesundheit EFZ", kurz: "Pflegen, betreuen, Hygiene und Vitalzeichen: 9 Stationen und die Lernwelt «Ein Tag auf der Station» mit allen Aufträgen und Karteikarten." }
 ];
 const FAECHER = [
-  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt, Biologie sowie Autos, Motorsport und Gaming. Lesen: 46 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen, neu auch MPA, Sprachen und Flaggen, Autos, Motorrad, Formel 1 und GTA 6. Jeweils mit Fragebogen. Sprache im Fokus: 15 Übungen zu Rechtschreibung und Grammatik, neu mit drei Übungen zum Präteritum.", kompetenzen: KOMPETENZEN },
+  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt, Biologie sowie Autos, Motorsport und Gaming. Lesen: 46 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen, neu auch MPA, Sprachen und Flaggen, Autos, Motorrad, Formel 1 und GTA 6. Jeweils mit Fragebogen. Sprache im Fokus: 19 Übungen zu Rechtschreibung, Grammatik und Wortschatz, neu mit Präteritum und Redewendungen.", kompetenzen: KOMPETENZEN },
   { key: "franz", name: "Französisch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: 10 einfache Videos zu Frankreich und zur Westschweiz. Lesen: 8 kurze Texte. Fragen auf Deutsch.", kompetenzen: KOMPETENZEN },
   { key: "mathe", name: "Mathematik", untertitel: "Zahl und Variable · Form und Raum · Grössen, Funktionen, Daten und Zufall", kurz: "Aufgaben für die 3. Sek nach den Bereichen von Lehrplan 21 und Stellwerk, Themen wie in «Mathematik 3». 19 Übungen mit über 700 Aufgaben, jede in drei Niveaus und als Arbeitsblatt zum Ausdrucken.", kompetenzen: KOMP_MATHE, ebene: "Bereich" },
   { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" },
@@ -448,6 +448,7 @@ const RUBRIKEN = [
   { key: "wmotor", name: "Klassenthemen: Autos, Motorrad, Formel 1 & GTA", fach: "deutsch", kompetenz: "lesen", kuerzel: "KM" },
   { key: "rrecht", name: "Rechtschreibung", fach: "deutsch", kompetenz: "sprache", kuerzel: "RS" },
   { key: "rgramm", name: "Grammatik", fach: "deutsch", kompetenz: "sprache", kuerzel: "GR" },
+  { key: "rwort", name: "Wortschatz: Redewendungen", fach: "deutsch", kompetenz: "sprache", kuerzel: "RW" },
   { key: "mzv", name: "Zahl und Variable", fach: "mathe", kompetenz: "zv", kuerzel: "ZV" },
   { key: "mfr", name: "Form und Raum", fach: "mathe", kompetenz: "fr", kuerzel: "FR" },
   { key: "mgf", name: "Grössen, Funktionen, Daten und Zufall", fach: "mathe", kompetenz: "gfdz", kuerzel: "GF" }

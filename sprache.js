@@ -8,6 +8,7 @@
     if (b.t === "zuordnen") return { s: x[0], k: x[1], x: x[2] };
     if (b.t === "umformen") return { s: x[0], h: x[1], k: [].concat(x[2]), x: x[3] };
     if (b.t === "paare") return { s: x[0], k: x[1], x: x[2] };
+    if (b.t === "offen") return { s: x[0], h: x[1], x: x[2], l: x[3] };
     if (b.t === "mehrfach") return { s: x[0], o: x[1], k: x[2], x: x[3] };
     if (b.t === "markieren") { const seg = []; let last = 0, m; const re = /\[([+-])([^\]]+)\]/g;
       while ((m = re.exec(x[1]))) { if (m.index > last) seg.push({ t: x[1].slice(last, m.index), m: null }); seg.push({ t: m[2], m: m[1] === "+" }); last = re.lastIndex; }
@@ -17,7 +18,7 @@
   }) }));
   function U(id, r, titel, kurz, L) {
     const lv = n => { const aufg = prep(L[n].aufg); return { regel: L[n].regel, bsp: L[n].bsp || [], aufg, mc: [], rf: [], offen: [], dauer: aufg.reduce((s, b) => s + b.i.length, 0) + " Aufgaben" }; };
-    units.push(Object.assign({ id, r, typ: "sprache", titel, kurz, kanal: r === "rrecht" ? "Rechtschreibung" : "Grammatik" }, lv(1)));
+    units.push(Object.assign({ id, r, typ: "sprache", titel, kurz, kanal: r === "rrecht" ? "Rechtschreibung" : r === "rwort" ? "Wortschatz" : "Grammatik" }, lv(1)));
     window.STUFEN = window.STUFEN || {};
     window.STUFEN[id] = { 2: lv(2), 3: lv(3) };
   }
@@ -1187,5 +1188,322 @@
     }
   });
 
+  // ======================================================= WORTSCHATZ: REDEWENDUNGEN
+  const RW_INFO = "Eine Redewendung ist eine feste Wortgruppe mit einer übertragenen (bildlichen) Bedeutung. Man darf sie nicht wörtlich verstehen: Wer «Tomaten auf den Augen hat», hat keine Tomaten im Gesicht, sondern sieht etwas Offensichtliches nicht.\n\nDie Wörter einer Redewendung kann man nicht einfach austauschen. Es heisst «die Daumen drücken», nicht «die Finger drücken».";
+
+  U("rw-koerper", "rwort", "Redewendungen mit Körperteilen", "Daumen drücken, Nase voll haben, Tomaten auf den Augen: Was meinen diese Redewendungen wirklich?", {
+    1: { regel: RW_INFO,
+      bsp: [["jemandem die Daumen drücken", "jemandem Glück wünschen"], ["die Nase voll haben", "genug von etwas haben"], ["Tomaten auf den Augen haben", "etwas Offensichtliches nicht sehen"]],
+      aufg: [
+        { t: "wahl", a: "Was bedeutet die Redewendung?", i: [
+          ["Ich drücke dir die Daumen für die Prüfung.", ["Ich wünsche dir Glück.", "Ich tue dir weh.", "Ich halte deine Hand."], 0],
+          ["Ich habe die Nase voll vom Regen.", ["Ich bin erkältet.", "Ich habe genug davon.", "Ich rieche den Regen."], 1],
+          ["Hast du Tomaten auf den Augen? Das Heft liegt doch vor dir!", ["Bist du müde?", "Siehst du das nicht?", "Hast du Hunger?"], 1],
+          ["Kannst du mir unter die Arme greifen?", ["Kannst du mich kitzeln?", "Kannst du mir helfen?", "Kannst du mich tragen?"], 1],
+          ["Heute bin ich mit dem linken Fuss aufgestanden.", ["Ich habe schlechte Laune.", "Ich bin früh aufgestanden.", "Mein Fuss tut weh."], 0],
+          ["Ich zerbreche mir den Kopf über diese Aufgabe.", ["Ich habe Kopfweh.", "Ich denke lange darüber nach.", "Ich gebe auf."], 1]
+        ] },
+        { t: "luecke", a: "Ergänze das fehlende Körperteil.", i: [
+          ["Ich drücke dir die {} für das Vorstellungsgespräch.", "Daumen"],
+          ["Jetzt habe ich aber die {} voll von deinen Ausreden!", "Nase"],
+          ["Schreib dir das hinter die {}: Pünktlichkeit ist wichtig!", "Ohren"],
+          ["Er nimmt die Prüfung auf die leichte {}.", "Schulter"],
+          ["Bei Ali drückt die Lehrerin heute ein {} zu, weil er krank war.", "Auge"]
+        ] },
+        { t: "paare", a: "Was bedeutet die Redewendung? Wähle die passende Erklärung.", o: ["etwas nicht ernst nehmen", "genau zuhören", "jemanden veräppeln", "etwas gut merken", "Angst bekommen und zögern"], i: [
+          ["etwas auf die leichte Schulter nehmen", 0],
+          ["die Ohren spitzen", 1],
+          ["jemanden auf den Arm nehmen", 2],
+          ["sich etwas hinter die Ohren schreiben", 3],
+          ["kalte Füsse bekommen", 4]
+        ] }
+      ] },
+    2: { regel: RW_INFO + "\n\nViele Redewendungen mit Körperteilen beschreiben Gefühle (die Nase voll haben, kalte Füsse bekommen) oder wie Menschen miteinander umgehen (jemandem unter die Arme greifen, jemandem die kalte Schulter zeigen).",
+      bsp: [["ein Auge zudrücken", "etwas nachsichtig durchgehen lassen"], ["Hand und Fuss haben", "gut durchdacht sein"], ["jemandem die kalte Schulter zeigen", "jemanden absichtlich nicht beachten"]],
+      aufg: [
+        { t: "wahl", a: "Welche Redewendung passt?", i: [
+          ["Dein Plan ist gut überlegt. Er hat …", ["Hand und Fuss.", "Kopf und Kragen.", "Haut und Haare."], 0],
+          ["Seit dem Streit beachtet mich Lena nicht mehr. Sie zeigt mir …", ["den Vogel.", "die kalte Schulter.", "die Zähne."], 1],
+          ["Vor dem Sprung vom Fünfmeterbrett bekam Jan …", ["kalte Füsse.", "lange Ohren.", "eine weisse Weste."], 0],
+          ["Sei vorsichtig mit dem Messer, sonst geht das …", ["ins Auge.", "ins Ohr.", "an die Nieren."], 0],
+          ["Die Chefin weiss nicht weiter und sagt: «Ich muss mir das noch durch den … gehen lassen.»", ["Kopf", "Bauch", "Hals"], 0]
+        ] },
+        { t: "fehler", a: "In jedem Satz ist ein Wort der Redewendung falsch. Tippe es an.", i: [
+          ["Hast du *Kartoffeln* auf den Augen? Da steht es doch!", "Tomaten"],
+          ["Ich drücke dir alle *Finger* für morgen.", "Daumen"],
+          ["Mein Kollege hat mir unter die *Beine* gegriffen.", "Arme"],
+          ["Ich habe die *Ohren* voll von diesem Lärm.", "Nase"],
+          ["Für die Präsentation hat er sich den *Bauch* zerbrochen.", "Kopf"]
+        ] },
+        { t: "zuordnen", a: "Ist die Redewendung eher positiv oder eher negativ gemeint?", o: ["eher positiv", "eher negativ"], i: [
+          ["jemandem unter die Arme greifen", 0],
+          ["die Nase voll haben", 1],
+          ["Hand und Fuss haben", 0],
+          ["jemandem die kalte Schulter zeigen", 1],
+          ["jemandem die Daumen drücken", 0],
+          ["mit dem linken Fuss aufstehen", 1]
+        ] },
+        { t: "offen", a: "Schreibe selbst.", i: [
+          ["Schreibe einen eigenen Satz mit «jemandem die Daumen drücken».", "Denke an eine Prüfung, ein Spiel oder eine Bewerbung.", "", "Z. B.: Ich drücke meiner Schwester die Daumen für ihre Lehrabschlussprüfung."]
+        ] }
+      ] },
+    3: { regel: RW_INFO + "\n\nManche Redewendungen sind umgangssprachlich und passen nicht in jeden Text. In einem Bewerbungsschreiben schreibt man nicht «Ich habe die Nase voll von der Schule», sondern zum Beispiel «Ich freue mich auf eine neue Herausforderung».",
+      bsp: [["Haare auf den Zähnen haben", "streitlustig, schlagfertig sein"], ["das Herz auf der Zunge tragen", "offen sagen, was man fühlt"], ["etwas übers Knie brechen", "etwas überstürzt entscheiden"]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["streitlustig und schlagfertig sein", "offen sagen, was man fühlt", "etwas überstürzt entscheiden", "viel Geld ausgeben, aufwendig leben", "sich überwinden, etwas Ungewohntes tun"], i: [
+          ["Haare auf den Zähnen haben", 0],
+          ["das Herz auf der Zunge tragen", 1],
+          ["etwas übers Knie brechen", 2],
+          ["auf grossem Fuss leben", 3],
+          ["über den eigenen Schatten springen", 4]
+        ] },
+        { t: "markieren", a: "Tippe die Wörter an, die zu einer Redewendung gehören.", i: [
+          ["Der erste Lehrtag", "Am ersten Tag hatte Elif [+kalte] [+Füsse]. Ihre Berufsbildnerin hat sie aber [+unter] [+die] [+Arme] [+gegriffen]. Am Abend [-war] Elif müde, aber zufrieden."],
+          ["Streit in der Garderobe", "Als Tim schon wieder zu spät kam, hatte Noah [+die] [+Nase] [+voll]. Er sagte ihm offen die Meinung, denn er [+trägt] [+das] [+Herz] [+auf] [+der] [+Zunge]. Danach [-gingen] beide ins Training."]
+        ] },
+        { t: "wahl", a: "Passt die Redewendung in diesen Text?", i: [
+          ["Bewerbungsschreiben: «Von der Schule habe ich die Nase voll.»", ["passt gut", "passt nicht, zu umgangssprachlich"], 1],
+          ["Nachricht an eine Freundin: «Ich drücke dir morgen die Daumen!»", ["passt gut", "passt nicht, zu umgangssprachlich"], 0],
+          ["Sachtext im Biologiebuch: «Die Zelle hat Hand und Fuss.»", ["passt gut", "passt nicht, zu umgangssprachlich"], 1]
+        ] },
+        { t: "offen", a: "Schreibe und vergleiche.", i: [
+          ["Erkläre einer Person, die erst seit kurzem Deutsch lernt, was «Tomaten auf den Augen haben» bedeutet. Schreibe zwei bis drei Sätze.", "Erkläre die wörtliche und die übertragene Bedeutung.", "", "Wörtlich hätte man Tomaten auf den Augen und könnte nichts sehen. Gemeint ist: Man sieht etwas nicht, obwohl es direkt vor einem liegt."],
+          ["Gibt es in deiner Erstsprache (oder einer anderen Sprache, die du kennst) eine Redewendung mit einem Körperteil? Schreibe sie auf, übersetze sie wörtlich und erkläre die Bedeutung.", "", "", "Eigene Antwort mit Redewendung, wörtlicher Übersetzung und Bedeutung."]
+        ] }
+      ] }
+  });
+
+  U("rw-tiere", "rwort", "Redewendungen mit Tieren und Essen", "Schwein haben, seinen Senf dazugeben, in den sauren Apfel beissen: Tiere und Essen in festen Wendungen.", {
+    1: { regel: RW_INFO + "\n\nViele Redewendungen enthalten Tiere oder Essen. Sie sind sehr alt, und ihre Herkunft ist oft nicht mehr bekannt.",
+      bsp: [["Schwein haben", "Glück haben"], ["Das ist mir Wurst.", "Das ist mir egal."], ["Schmetterlinge im Bauch haben", "verliebt sein"]],
+      aufg: [
+        { t: "wahl", a: "Was bedeutet die Redewendung?", i: [
+          ["Da hast du aber Schwein gehabt!", ["Du hattest Glück.", "Du warst schmutzig.", "Du hast viel gegessen."], 0],
+          ["Das ist mir Wurst.", ["Das schmeckt mir.", "Das ist mir egal.", "Das ist mir zu teuer."], 1],
+          ["Seit Ben neben ihr sitzt, hat Sara Schmetterlinge im Bauch.", ["Sie ist krank.", "Sie ist verliebt.", "Sie hat Hunger."], 1],
+          ["Ich habe einen Frosch im Hals.", ["Ich bin heiser.", "Ich habe Angst.", "Ich habe Durst."], 0],
+          ["Jetzt geht es um die Wurst!", ["Jetzt gibt es Essen.", "Jetzt wird es entscheidend.", "Jetzt ist es vorbei."], 1],
+          ["Alles in Butter!", ["Alles ist fettig.", "Alles ist in Ordnung.", "Alles ist kaputt."], 1]
+        ] },
+        { t: "luecke", a: "Ergänze das fehlende Tier oder Essen.", i: [
+          ["Ich habe den Bus noch erwischt. Da habe ich {} gehabt!", "Schwein"],
+          ["Ob wir ins Kino oder ins Hallenbad gehen, ist mir {}.", ["Wurst", "wurst", "wurscht"]],
+          ["Immer muss Luca seinen {} dazugeben, auch wenn ihn niemand fragt.", "Senf"],
+          ["Ich muss in den sauren {} beissen und die Prüfung wiederholen.", "Apfel"],
+          ["Im Final gegen Basel geht es um die {}.", "Wurst"]
+        ] },
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["ungefragt seine Meinung sagen", "etwas Unangenehmes tun müssen", "Dinge vergleichen, die man nicht vergleichen kann", "das Beste für sich nehmen"], i: [
+          ["seinen Senf dazugeben", 0],
+          ["in den sauren Apfel beissen", 1],
+          ["Äpfel mit Birnen vergleichen", 2],
+          ["die Rosinen herauspicken", 3]
+        ] }
+      ] },
+    2: { regel: RW_INFO + "\n\nAchte auf die genaue Form: Man «kauft die Katze im Sack», man «redet um den heissen Brei herum», man «riecht den Braten».",
+      bsp: [["die Katze im Sack kaufen", "etwas kaufen, ohne es zu prüfen"], ["um den heissen Brei herumreden", "nicht direkt sagen, worum es geht"], ["den Braten riechen", "ahnen, dass etwas nicht stimmt"]],
+      aufg: [
+        { t: "wahl", a: "Welche Redewendung passt?", i: [
+          ["Mia kauft ein Handy im Internet, ohne Fotos oder Bewertungen anzuschauen. Sie kauft …", ["die Katze im Sack.", "den Hund an der Leine.", "den Fisch im Wasser."], 0],
+          ["Sag doch endlich, was los ist! Rede nicht um den heissen …", ["Brei herum.", "Tee herum.", "Kaffee herum."], 0],
+          ["Nach dem Streit sah er aus wie ein begossener …", ["Pudel.", "Hund.", "Hase."], 0],
+          ["Die Lehrerin ahnte, dass die Klasse etwas plante. Sie roch …", ["den Braten.", "die Suppe.", "den Käse."], 0],
+          ["Das Essen in der Kantine ist okay, aber nicht gerade das Gelbe vom …", ["Ei.", "Brot.", "Käse."], 0]
+        ] },
+        { t: "fehler", a: "In jedem Satz ist ein Wort der Redewendung falsch. Tippe es an.", i: [
+          ["Pia hat beim Wettbewerb gewonnen. Da hat sie *Kuh* gehabt!", "Schwein"],
+          ["Ich habe noch ein Hühnchen mit dir zu *braten*.", "rupfen"],
+          ["Wer ein Velo ohne Probefahrt kauft, kauft die *Maus* im Sack.", "Katze"],
+          ["Er redet immer um den heissen *Tee* herum.", "Brei"],
+          ["Sie hat mir Honig ums *Gesicht* geschmiert.", "Maul"]
+        ] },
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["mit jemandem einen Streit klären", "jemandem schmeicheln", "eine ungeeignete Person für eine Aufgabe wählen", "etwas Überflüssiges tun", "beschämt und kleinlaut aussehen"], i: [
+          ["mit jemandem ein Hühnchen rupfen", 0],
+          ["jemandem Honig ums Maul schmieren", 1],
+          ["den Bock zum Gärtner machen", 2],
+          ["Eulen nach Athen tragen", 3],
+          ["wie ein begossener Pudel dastehen", 4]
+        ] }
+      ] },
+    3: { regel: RW_INFO + "\n\nOft kann man die Bedeutung aus dem Bild erschliessen: Ein Bock (Ziegenbock) als Gärtner frisst die Pflanzen, statt sie zu pflegen. Darum bedeutet «den Bock zum Gärtner machen»: eine ungeeignete Person für eine Aufgabe einsetzen.",
+      bsp: [["Da liegt der Hund begraben.", "Das ist der eigentliche Grund des Problems."], ["Perlen vor die Säue werfen", "etwas Wertvolles jemandem geben, der es nicht schätzt"]],
+      aufg: [
+        { t: "wahl", a: "Was bedeutet die Redewendung im Satz?", i: [
+          ["Das Team verliert immer in der zweiten Halbzeit. Da liegt der Hund begraben: Die Spieler sind nicht fit.", ["Der Hund ist gestorben.", "Das ist der Grund des Problems.", "Das ist ein Geheimnis."], 1],
+          ["Ausgerechnet Ben, der immer nascht, soll den Süssigkeiten-Vorrat der Klasse verwalten. Das heisst, den Bock zum Gärtner zu machen.", ["Er ist sehr geeignet.", "Er ist ganz ungeeignet für diese Aufgabe.", "Er arbeitet gern im Garten."], 1],
+          ["Dem Fussballprofi Tipps zum Dribbeln zu geben, heisst Eulen nach Athen tragen.", ["Das ist überflüssig.", "Das ist gefährlich.", "Das ist teuer."], 0],
+          ["Der neue Lernende pickt sich immer die Rosinen heraus.", ["Er isst gern Kuchen.", "Er macht nur die angenehmen Arbeiten.", "Er arbeitet sehr genau."], 1]
+        ] },
+        { t: "markieren", a: "Tippe die Wörter an, die zu einer Redewendung gehören.", i: [
+          ["Im Lager", "Am Montag hatte Kevin [+Schwein]: Der Stapler war gerade frei. Sein Kollege [+gab] [+seinen] [+Senf] [+dazu], wie man richtig fährt. Kevin [-lachte] nur. Am Ende lief [+alles] [+in] [+Butter]."]
+        ] },
+        { t: "mehrfach", a: "Welche Redewendungen bedeuten «Glück haben» oder «alles ist gut»?", i: [
+          ["Kreuze alle an.", ["Schwein haben", "alles in Butter", "in den sauren Apfel beissen", "die Katze im Sack kaufen"], [0, 1]]
+        ] },
+        { t: "offen", a: "Schreibe.", i: [
+          ["Erkläre, warum «Äpfel mit Birnen vergleichen» bedeutet, dass man zwei Dinge unfair vergleicht. Nenne ein eigenes Beispiel.", "", "", "Äpfel und Birnen sind verschiedene Früchte, man kann nicht sagen, welche «besser» ist. Beispiel: den Lohn einer Lernenden mit dem Lohn einer Ärztin vergleichen."],
+          ["Schreibe eine kurze Geschichte (3 bis 5 Sätze), in der mindestens zwei Redewendungen aus dieser Übung vorkommen.", "", "", "Eigene Geschichte mit mindestens zwei korrekt verwendeten Redewendungen."]
+        ] }
+      ] }
+  });
+
+  U("rw-alltag", "rwort", "Redewendungen in Schule und Beruf", "Ins kalte Wasser springen, etwas auf die lange Bank schieben, ins Fettnäpfchen treten: Redewendungen, die du in der Lehre oft hörst.", {
+    1: { regel: RW_INFO + "\n\nIn der Lehre und im Betrieb hört man viele Redewendungen. Wer sie versteht, versteht auch die Anweisungen und Rückmeldungen besser.",
+      bsp: [["ins kalte Wasser springen", "etwas Neues ohne Vorbereitung beginnen"], ["etwas auf die lange Bank schieben", "etwas immer wieder aufschieben"], ["sich ins Zeug legen", "sich sehr anstrengen"]],
+      aufg: [
+        { t: "wahl", a: "Was bedeutet die Redewendung?", i: [
+          ["Am ersten Lehrtag musste ich gleich ins kalte Wasser springen.", ["Ich musste sofort mitarbeiten, ohne Vorbereitung.", "Ich musste schwimmen gehen.", "Ich hatte frei."], 0],
+          ["Du schiebst die Bewerbung schon seit Wochen auf die lange Bank.", ["Du schreibst sie sehr gut.", "Du schiebst sie immer wieder auf.", "Du hast sie verloren."], 1],
+          ["Für die Prüfung hat sich Aylin richtig ins Zeug gelegt.", ["Sie hat sich sehr angestrengt.", "Sie hat neue Kleider gekauft.", "Sie hat geschwänzt."], 0],
+          ["Mit deiner Antwort hast du den Nagel auf den Kopf getroffen.", ["Du hast dich verletzt.", "Du hast genau das Richtige gesagt.", "Du hast etwas repariert."], 1],
+          ["Können wir das unter vier Augen besprechen?", ["zu zweit, ohne andere", "mit der ganzen Klasse", "mit Brille"], 0],
+          ["Bei der Präsentation habe ich den Faden verloren.", ["Ich wusste nicht mehr weiter.", "Ich habe genäht.", "Ich war zu schnell."], 0]
+        ] },
+        { t: "luecke", a: "Ergänze das fehlende Wort.", i: [
+          ["Am ersten Arbeitstag musste ich gleich ins kalte {} springen.", "Wasser"],
+          ["Schieb die Hausaufgaben nicht auf die lange {}!", "Bank"],
+          ["Mit deiner Antwort hast du den {} auf den Kopf getroffen.", "Nagel"],
+          ["Die Chefin möchte das mit dir unter vier {} besprechen.", "Augen"],
+          ["Vor lauter Nervosität habe ich den {} verloren.", "Faden"]
+        ] },
+        { t: "zuordnen", a: "Ist das ein Lob oder eine Kritik?", o: ["Lob", "Kritik"], i: [
+          ["Du hast dich richtig ins Zeug gelegt.", 0],
+          ["Du schiebst alles auf die lange Bank.", 1],
+          ["Du hast den Nagel auf den Kopf getroffen.", 0],
+          ["Du bist mit deinen Gedanken auf dem Holzweg.", 1],
+          ["Du bist heute richtig auf Zack!", 0]
+        ] }
+      ] },
+    2: { regel: RW_INFO + "\n\nEinige Redewendungen beschreiben Fehler und unangenehme Situationen: ins Fettnäpfchen treten (etwas Peinliches sagen oder tun), auf dem Holzweg sein (sich irren), Öl ins Feuer giessen (einen Streit schlimmer machen).",
+      bsp: [["ins Fettnäpfchen treten", "etwas Peinliches sagen oder tun"], ["auf dem Holzweg sein", "sich irren"], ["Öl ins Feuer giessen", "einen Streit noch schlimmer machen"]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["etwas Peinliches sagen oder tun", "sich irren", "einen Streit noch schlimmer machen", "ein Geheimnis verraten", "sehr überrascht sein", "heimlich zusammenarbeiten"], i: [
+          ["ins Fettnäpfchen treten", 0],
+          ["auf dem Holzweg sein", 1],
+          ["Öl ins Feuer giessen", 2],
+          ["die Katze aus dem Sack lassen", 3],
+          ["aus allen Wolken fallen", 4],
+          ["unter einer Decke stecken", 5]
+        ] },
+        { t: "wahl", a: "Welche Redewendung passt in die Situation?", i: [
+          ["Leon erzählt einen Witz über Lehrpersonen. Die Lehrerin steht direkt hinter ihm. Leon ist …", ["ins Fettnäpfchen getreten.", "auf Zack.", "unter die Räder gekommen."], 0],
+          ["Zwei streiten. Sara ruft: «Er hat dich gestern auch noch ausgelacht!» Sie giesst …", ["Öl ins Feuer.", "Wasser in den Wein.", "Salz in die Suppe."], 0],
+          ["Als Ali hörte, dass er die Lehrstelle bekommt, fiel er aus allen …", ["Wolken.", "Wänden.", "Fenstern."], 0],
+          ["Der Lernende glaubte, er müsse die Ware wegwerfen. Doch er war auf dem …", ["Holzweg.", "Heimweg.", "Fussweg."], 0]
+        ] },
+        { t: "fehler", a: "Ein Wort der Redewendung ist falsch. Tippe es an.", i: [
+          ["Ich bin gestern voll ins *Fettglas* getreten.", "Fettnäpfchen"],
+          ["Du bist leider auf dem *Steinweg*, so geht die Rechnung nicht.", "Holzweg"],
+          ["Endlich hat er die *Maus* aus dem Sack gelassen: Er wechselt die Stelle.", "Katze"],
+          ["Die beiden stecken unter einem *Teppich* und halten zusammen.", "Decke"]
+        ] },
+        { t: "offen", a: "Schreibe.", i: [
+          ["Beschreibe eine Situation, in der jemand «ins Fettnäpfchen getreten» ist. Das kann erfunden sein.", "", "", "Eigene Situation, in der jemand etwas Peinliches sagt oder tut."]
+        ] }
+      ] },
+    3: { regel: RW_INFO + "\n\nIn Rückmeldungen im Betrieb werden Redewendungen oft benutzt, um Kritik freundlicher zu verpacken: «Da bist du noch etwas auf dem Holzweg» klingt weicher als «Das ist falsch». Es lohnt sich, genau hinzuhören.",
+      bsp: [["von der Pike auf lernen", "einen Beruf von Grund auf lernen"], ["etwas aus dem Ärmel schütteln", "etwas mühelos und schnell können"], ["mit offenen Karten spielen", "ehrlich sein, nichts verheimlichen"]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["einen Beruf von Grund auf lernen", "etwas mühelos und schnell können", "ehrlich sein, nichts verheimlichen", "jemandem die Wahrheit sagen", "Probleme nicht sehen wollen", "alles riskieren"], i: [
+          ["von der Pike auf lernen", 0],
+          ["etwas aus dem Ärmel schütteln", 1],
+          ["mit offenen Karten spielen", 2],
+          ["jemandem reinen Wein einschenken", 3],
+          ["den Kopf in den Sand stecken", 4],
+          ["alles auf eine Karte setzen", 5]
+        ] },
+        { t: "wahl", a: "Was will die Berufsbildnerin mit ihrer Rückmeldung sagen?", i: [
+          ["«Du kannst die Lieferscheine noch nicht aus dem Ärmel schütteln, aber das kommt.»", ["Du brauchst noch Übung.", "Du machst alles perfekt.", "Du sollst andere Kleider tragen."], 0],
+          ["«Ich schenke dir reinen Wein ein: So reicht es nicht für ein gutes Zeugnis.»", ["Ich lade dich ein.", "Ich sage dir ehrlich, dass du dich verbessern musst.", "Ich bin zufrieden."], 1],
+          ["«Wenn du Probleme hast, steck nicht den Kopf in den Sand.»", ["Rede darüber und such eine Lösung.", "Geh an den Strand.", "Hör auf zu arbeiten."], 0]
+        ] },
+        { t: "markieren", a: "Tippe die Wörter an, die zu einer Redewendung gehören.", i: [
+          ["Rückmeldung nach dem ersten Monat", "Du hast dich [+ins] [+Zeug] [+gelegt] und lernst den Beruf [+von] [+der] [+Pike] [+auf]. Manchmal schiebst du Aufträge [+auf] [+die] [+lange] [+Bank]. Bitte [-melde] dich früher, wenn etwas unklar ist."]
+        ] },
+        { t: "offen", a: "Schreibe.", i: [
+          ["Schreibe eine kurze Rückmeldung an einen Mitlernenden (3 bis 4 Sätze). Verwende mindestens eine lobende und eine kritische Redewendung aus dieser Übung.", "", "", "Eigene Rückmeldung mit mindestens zwei passenden Redewendungen, freundlich formuliert."],
+          ["Warum kann es für Menschen, die Deutsch als Zweitsprache lernen, schwierig sein, Redewendungen am Arbeitsplatz zu verstehen? Was hilft?", "", "", "Die Bedeutung ist bildlich und nicht wörtlich, man kann sie nicht aus den einzelnen Wörtern erschliessen. Hilfe: nachfragen, sammeln, im Wörterbuch nachschlagen, mit eigener Sprache vergleichen."]
+        ] }
+      ] }
+  });
+
+  U("rw-sprichwort", "rwort", "Sprichwörter", "Übung macht den Meister, Lügen haben kurze Beine: Sprichwörter sind kurze Lebensweisheiten. Was bedeuten sie?", {
+    1: { regel: "Ein Sprichwort ist ein ganzer Satz mit einer Lebensweisheit oder einem Rat. Es ist meistens alt und allgemein bekannt.\n\nUnterschied: Eine Redewendung ist ein Teil eines Satzes (jemandem die Daumen drücken). Ein Sprichwort ist ein ganzer Satz (Übung macht den Meister).",
+      bsp: [["Übung macht den Meister.", "Wer viel übt, wird gut."], ["Lügen haben kurze Beine.", "Lügen kommen schnell heraus."], ["Aller Anfang ist schwer.", "Neues ist am Anfang immer schwierig."]],
+      aufg: [
+        { t: "luecke", a: "Ergänze das Sprichwort.", i: [
+          ["Übung macht den {}.", "Meister"],
+          ["Lügen haben kurze {}.", "Beine"],
+          ["Aller {} ist schwer.", "Anfang"],
+          ["Ohne Fleiss kein {}.", "Preis"],
+          ["Ende gut, alles {}.", "gut"],
+          ["Morgenstund hat {} im Mund.", "Gold"]
+        ] },
+        { t: "wahl", a: "Was bedeutet das Sprichwort?", i: [
+          ["Übung macht den Meister.", ["Wer viel übt, wird gut.", "Nur Meister dürfen üben.", "Üben ist langweilig."], 0],
+          ["Lügen haben kurze Beine.", ["Lügner sind klein.", "Lügen kommen schnell heraus.", "Lügen sind lustig."], 1],
+          ["Aller Anfang ist schwer.", ["Neues ist am Anfang schwierig.", "Man soll nie anfangen.", "Am Anfang ist alles leicht."], 0],
+          ["Ohne Fleiss kein Preis.", ["Ohne Anstrengung erreicht man nichts.", "Alles kostet Geld.", "Preise sind unfair."], 0]
+        ] },
+        { t: "zuordnen", a: "Redewendung oder Sprichwort?", o: ["Redewendung (Teil eines Satzes)", "Sprichwort (ganzer Satz)"], i: [
+          ["jemandem die Daumen drücken", 0],
+          ["Übung macht den Meister.", 1],
+          ["die Nase voll haben", 0],
+          ["Lügen haben kurze Beine.", 1],
+          ["Aller Anfang ist schwer.", 1],
+          ["Schwein haben", 0]
+        ] }
+      ] },
+    2: { regel: "Sprichwörter geben oft einen Rat (Eile mit Weile) oder beschreiben eine Erfahrung (Viele Köche verderben den Brei).\n\nManche Sprichwörter widersprechen sich sogar: «Wer nicht wagt, der nicht gewinnt» und «Eile mit Weile».",
+      bsp: [["Eile mit Weile.", "Lieber langsam und sorgfältig als schnell und mit Fehlern."], ["Viele Köche verderben den Brei.", "Wenn zu viele mitbestimmen, wird das Ergebnis schlecht."]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["Lieber langsam und sorgfältig arbeiten.", "Wenn zu viele mitbestimmen, wird das Ergebnis schlecht.", "Wer etwas Mutiges probiert, kann Erfolg haben.", "Kinder sind oft ähnlich wie ihre Eltern.", "Wer etwas beginnt, muss es auch zu Ende führen.", "Wie man etwas sagt, ist ebenso wichtig wie was man sagt."], i: [
+          ["Eile mit Weile.", 0],
+          ["Viele Köche verderben den Brei.", 1],
+          ["Wer nicht wagt, der nicht gewinnt.", 2],
+          ["Der Apfel fällt nicht weit vom Stamm.", 3],
+          ["Wer A sagt, muss auch B sagen.", 4],
+          ["Der Ton macht die Musik.", 5]
+        ] },
+        { t: "wahl", a: "Welches Sprichwort passt zur Situation?", i: [
+          ["Fünf Leute wollen gleichzeitig das Plakat gestalten. Am Schluss ist es ein Durcheinander.", ["Viele Köche verderben den Brei.", "Morgenstund hat Gold im Mund.", "Ende gut, alles gut."], 0],
+          ["Jana bewirbt sich für eine Lehrstelle, obwohl sie denkt, sie habe keine Chance. Sie bekommt sie!", ["Lügen haben kurze Beine.", "Wer nicht wagt, der nicht gewinnt.", "Eile mit Weile."], 1],
+          ["Tim antwortet seinem Chef frech. Der Chef ist verärgert, obwohl Tim inhaltlich recht hatte.", ["Der Ton macht die Musik.", "Aller Anfang ist schwer.", "Ohne Fleiss kein Preis."], 0],
+          ["Lina hat sich für den Lauf angemeldet. Jetzt hat sie keine Lust mehr, aber ihr Team zählt auf sie.", ["Wer A sagt, muss auch B sagen.", "Kleider machen Leute.", "Reden ist Silber, Schweigen ist Gold."], 0]
+        ] },
+        { t: "luecke", a: "Ergänze.", i: [
+          ["Eile mit {}.", "Weile"],
+          ["Wer A sagt, muss auch {} sagen.", "B"],
+          ["Der {} macht die Musik.", "Ton"],
+          ["Der Apfel fällt nicht weit vom {}.", "Stamm"]
+        ] }
+      ] },
+    3: { regel: "Sprichwörter sind kurz und einprägsam, oft mit Reim (Ohne Fleiss kein Preis) oder Gegensatz (Reden ist Silber, Schweigen ist Gold).\n\nSie gelten nicht immer: Ein Sprichwort ist eine Erfahrung, keine Regel. Man kann sie auch kritisch hinterfragen.",
+      bsp: [["Reden ist Silber, Schweigen ist Gold.", "Manchmal ist es klüger, nichts zu sagen."], ["Kleider machen Leute.", "Das Aussehen beeinflusst, wie andere einen sehen."], ["Einem geschenkten Gaul schaut man nicht ins Maul.", "Ein Geschenk kritisiert man nicht."]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["Manchmal ist es klüger, nichts zu sagen.", "Das Aussehen beeinflusst, wie andere einen sehen.", "Ein Geschenk kritisiert man nicht.", "Wenn man etwas wirklich will, findet man eine Lösung.", "Erledige Aufgaben sofort und schiebe sie nicht auf."], i: [
+          ["Reden ist Silber, Schweigen ist Gold.", 0],
+          ["Kleider machen Leute.", 1],
+          ["Einem geschenkten Gaul schaut man nicht ins Maul.", 2],
+          ["Wo ein Wille ist, ist auch ein Weg.", 3],
+          ["Was du heute kannst besorgen, das verschiebe nicht auf morgen.", 4]
+        ] },
+        { t: "mehrfach", a: "Welche Sprichwörter passen zum Thema «Lehre und Arbeit»? Es gibt mehrere richtige Antworten.", i: [
+          ["Kreuze alle passenden an.", ["Übung macht den Meister.", "Ohne Fleiss kein Preis.", "Aller Anfang ist schwer.", "Einem geschenkten Gaul schaut man nicht ins Maul."], [0, 1, 2]]
+        ] },
+        { t: "wahl", a: "Welches Sprichwort widerspricht «Wer nicht wagt, der nicht gewinnt» am ehesten?", i: [
+          ["Wähle.", ["Eile mit Weile.", "Übung macht den Meister.", "Ende gut, alles gut."], 0, "Das eine rät zu Mut, das andere zu Vorsicht."]
+        ] },
+        { t: "offen", a: "Nimm Stellung.", i: [
+          ["«Kleider machen Leute.» Stimmt das deiner Meinung nach, zum Beispiel beim Vorstellungsgespräch? Begründe in 3 bis 4 Sätzen.", "", "", "Eigene, begründete Stellungnahme, z. B. der erste Eindruck zählt, gepflegte Kleidung zeigt Respekt; aber Können und Verhalten sind wichtiger."],
+          ["Kennst du ein Sprichwort aus deiner Erstsprache oder einer anderen Sprache? Schreibe es auf, übersetze es und erkläre, ob es ein deutsches Sprichwort mit ähnlicher Bedeutung gibt.", "", "", "Eigenes Sprichwort mit Übersetzung, Bedeutung und, wenn möglich, deutscher Entsprechung."]
+        ] }
+      ] }
+  });
+
+  // Antwortpositionen bei den Redewendungen mischen (feste, wiederholbare Reihenfolge)
+  units.filter(u => u.r === "rwort").forEach(u => [u, window.STUFEN[u.id][2], window.STUFEN[u.id][3]].forEach(L => {
+    let z = 0;
+    L.aufg.forEach(b => { if (b.t !== "wahl") return; b.i.forEach(it => { const n = it.o.length; if (n < 3) return; const rot = (z++ * 2 + 1) % n; const o = it.o.map((_, j) => it.o[(j + rot) % n]); it.k = o.indexOf(it.o[it.k]); it.o = o; }); });
+  }));
   window.SPRACHE_UNITS = units;
 })();
