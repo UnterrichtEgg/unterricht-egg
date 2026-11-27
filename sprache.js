@@ -1503,7 +1503,7 @@
   const BI = n => "bilder/rw/" + n + ".png";
   U("rw-bilder", "rwort", "Redewendungen in Bildern", "Die Bilder zeigen Redewendungen wörtlich, also so, wie sie gar nicht gemeint sind. Erkennst du die Redewendung und weisst du, was sie wirklich bedeutet?", {
     1: { regel: RW_INFO + "\n\nDie Bilder in dieser Übung nehmen die Redewendungen wörtlich. Das ist lustig, weil niemand wirklich Tomaten auf den Augen hat. Überlege bei jedem Bild: Welche Redewendung ist gemeint?",
-      bsp: [["Bild: Tomaten auf den Augen", "Tomaten auf den Augen haben"], ["Bedeutung", "etwas Offensichtliches nicht sehen"]],
+      bsp: [["Bild: Fuss in einem Topf mit Fett", "ins Fettnäpfchen treten"], ["Bedeutung", "etwas Peinliches sagen oder tun"]],
       aufg: [
         { t: "wahl", a: "Welche Redewendung zeigt das Bild?", i: [
           ["Bild 1", ["Tomaten auf den Augen haben", "rot sehen", "einen Frosch im Hals haben"], 0, "", BI("tomaten")],
