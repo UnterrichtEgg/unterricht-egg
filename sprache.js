@@ -2,13 +2,13 @@
 (function () {
   const units = [];
   const prep = aufg => aufg.map(b => ({ t: b.t, a: b.a, o: b.o, i: b.i.map(x => {
-    if (b.t === "wahl") return { s: x[0], o: x[1], k: x[2], x: x[3] };
-    if (b.t === "luecke") return { s: x[0], k: [].concat(x[1]), x: x[2] };
+    if (b.t === "wahl") return { s: x[0], o: x[1], k: x[2], x: x[3], bild: x[4] };
+    if (b.t === "luecke") return { s: x[0], k: [].concat(x[1]), x: x[2], bild: x[3] };
     if (b.t === "fehler") { const t = x[0].split(/\s+/); return { s: x[0].replace(/\*/g, ""), f: t.findIndex(w => w.includes("*")), r: x[1], x: x[2] }; }
     if (b.t === "zuordnen") return { s: x[0], k: x[1], x: x[2] };
     if (b.t === "umformen") return { s: x[0], h: x[1], k: [].concat(x[2]), x: x[3] };
     if (b.t === "paare") return { s: x[0], k: x[1], x: x[2] };
-    if (b.t === "offen") return { s: x[0], h: x[1], x: x[2], l: x[3] };
+    if (b.t === "offen") return { s: x[0], h: x[1], x: x[2], l: x[3], bild: x[4] };
     if (b.t === "mehrfach") return { s: x[0], o: x[1], k: x[2], x: x[3] };
     if (b.t === "markieren") { const seg = []; let last = 0, m; const re = /\[([+-])([^\]]+)\]/g;
       while ((m = re.exec(x[1]))) { if (m.index > last) seg.push({ t: x[1].slice(last, m.index), m: null }); seg.push({ t: m[2], m: m[1] === "+" }); last = re.lastIndex; }
@@ -1499,6 +1499,144 @@
         ] }
       ] }
   });
+
+  const BI = n => "bilder/rw/" + n + ".png";
+  U("rw-bilder", "rwort", "Redewendungen in Bildern", "Die Bilder zeigen Redewendungen wörtlich, also so, wie sie gar nicht gemeint sind. Erkennst du die Redewendung und weisst du, was sie wirklich bedeutet?", {
+    1: { regel: RW_INFO + "\n\nDie Bilder in dieser Übung nehmen die Redewendungen wörtlich. Das ist lustig, weil niemand wirklich Tomaten auf den Augen hat. Überlege bei jedem Bild: Welche Redewendung ist gemeint?",
+      bsp: [["Bild: Tomaten auf den Augen", "Tomaten auf den Augen haben"], ["Bedeutung", "etwas Offensichtliches nicht sehen"]],
+      aufg: [
+        { t: "wahl", a: "Welche Redewendung zeigt das Bild?", i: [
+          ["Bild 1", ["Tomaten auf den Augen haben", "rot sehen", "einen Frosch im Hals haben"], 0, "", BI("tomaten")],
+          ["Bild 2", ["jemandem die Daumen drücken", "jemandem unter die Arme greifen", "die Ohren spitzen"], 0, "", BI("daumen")],
+          ["Bild 3", ["Schwein haben", "den Bock zum Gärtner machen", "die Katze im Sack kaufen"], 0, "", BI("schwein")],
+          ["Bild 4", ["seinen Senf dazugeben", "in den sauren Apfel beissen", "Honig ums Maul schmieren"], 0, "", BI("senf")],
+          ["Bild 5", ["die Katze im Sack kaufen", "die Katze aus dem Sack lassen", "Eulen nach Athen tragen"], 0, "Der Preis zeigt: Jemand kauft den Sack, ohne hineinzuschauen.", BI("katze")],
+          ["Bild 6", ["ins kalte Wasser springen", "aus allen Wolken fallen", "Öl ins Feuer giessen"], 0, "", BI("kaltwasser")],
+          ["Bild 7", ["etwas auf die lange Bank schieben", "unter einer Decke stecken", "den Faden verlieren"], 0, "", BI("bank")],
+          ["Bild 8", ["den Nagel auf den Kopf treffen", "sich den Kopf zerbrechen", "jemandem den Kopf waschen"], 0, "", BI("nagel")],
+          ["Bild 9", ["einen Frosch im Hals haben", "Schmetterlinge im Bauch haben", "Haare auf den Zähnen haben"], 0, "", BI("frosch")],
+          ["Bild 10", ["Schmetterlinge im Bauch haben", "die Nase voll haben", "kalte Füsse bekommen"], 0, "", BI("schmetterlinge")]
+        ] }
+      ] },
+    2: { regel: RW_INFO + "\n\nAchtung: Das Bild zeigt die wörtliche Bedeutung. Gefragt ist aber oft die übertragene Bedeutung, also was die Redewendung im Alltag wirklich heisst.",
+      bsp: [["Bild: Tomaten im Gesicht", "Tomaten auf den Augen haben"], ["Bedeutung", "etwas Offensichtliches nicht sehen"]],
+      aufg: [
+        { t: "luecke", a: "Ergänze die Redewendung zum Bild.", i: [
+          ["ins {} treten", "Fettnäpfchen", "", BI("fettnaepfchen")],
+          ["aus allen {} fallen", "Wolken", "", BI("wolken")],
+          ["den Kopf in den {} stecken", "Sand", "", BI("sand")],
+          ["{} mit Birnen vergleichen", "Äpfel", "", BI("apfelbirne")],
+          ["{} nach Athen tragen", "Eulen", "", BI("eulen")],
+          ["{} ins Feuer giessen", ["Öl", "Oel"], "", BI("oel")],
+          ["sich etwas hinter die {} schreiben", "Ohren", "", BI("ohren")],
+          ["Haare auf den {} haben", "Zähnen", "", BI("zaehne")]
+        ] },
+        { t: "wahl", a: "Was bedeutet die Redewendung auf dem Bild wirklich?", i: [
+          ["Bild: ins Fettnäpfchen treten", ["etwas Peinliches sagen oder tun", "schmutzige Schuhe haben", "beim Kochen helfen"], 0, "", BI("fettnaepfchen")],
+          ["Bild: aus allen Wolken fallen", ["sehr überrascht sein", "Angst vor dem Fliegen haben", "schlechtes Wetter haben"], 0, "", BI("wolken")],
+          ["Bild: den Kopf in den Sand stecken", ["Probleme nicht sehen wollen", "am Strand spielen", "müde sein"], 0, "", BI("sand")],
+          ["Bild: Öl ins Feuer giessen", ["einen Streit noch schlimmer machen", "ein Feuer löschen", "grillieren"], 0, "", BI("oel")],
+          ["Bild: Haare auf den Zähnen haben", ["streitlustig und schlagfertig sein", "die Zähne nicht putzen", "beim Zahnarzt sein"], 0, "", BI("zaehne")],
+          ["Bild: Eulen nach Athen tragen", ["etwas Überflüssiges tun", "in die Ferien reisen", "Tiere retten"], 0, "In Athen gab es früher sehr viele Eulen, sie waren das Wappentier der Stadt.", BI("eulen")]
+        ] }
+      ] },
+    3: { regel: RW_INFO + "\n\nWer Redewendungen sicher beherrscht, kann sie im richtigen Moment einsetzen. Überlege bei jedem Bild: Welche Redewendung? Was bedeutet sie? In welcher Situation passt sie?",
+      bsp: [["Bild: Mensch umarmt ein Schwein", "Schwein haben"], ["Bedeutung", "Glück haben"], ["Situation", "Der Bus fährt gerade ab, als du ankommst, aber er hält noch einmal an."]],
+      aufg: [
+        { t: "offen", a: "Schreibe zu jedem Bild: 1. die Redewendung, 2. ihre Bedeutung, 3. einen eigenen Satz.", i: [
+          ["Bild 1", "Hammer, Nagel, Kopf …", "", "den Nagel auf den Kopf treffen: genau das Richtige sagen. Z. B.: Mit deiner Frage hast du den Nagel auf den Kopf getroffen.", BI("nagel")],
+          ["Bild 2", "Eine Bank und Papiere …", "", "etwas auf die lange Bank schieben: etwas immer wieder aufschieben. Z. B.: Schieb deine Bewerbung nicht auf die lange Bank.", BI("bank")],
+          ["Bild 3", "Eine Waage mit Früchten …", "", "Äpfel mit Birnen vergleichen: Dinge vergleichen, die man nicht vergleichen kann. Z. B.: Ein Velo und ein Auto zu vergleichen heisst Äpfel mit Birnen vergleichen.", BI("apfelbirne")],
+          ["Bild 4", "Ein Sack mit Preisschild …", "", "die Katze im Sack kaufen: etwas kaufen, ohne es zu prüfen. Z. B.: Kauf das Handy nicht ungesehen, sonst kaufst du die Katze im Sack.", BI("katze")]
+        ] },
+        { t: "wahl", a: "Zu welcher Situation passt die Redewendung auf dem Bild?", i: [
+          ["Bild: ins kalte Wasser springen", ["Am ersten Lehrtag muss Ardit sofort an der Kasse arbeiten.", "Ardit geht im Winter schwimmen.", "Ardit trinkt kaltes Wasser."], 0, "", BI("kaltwasser")],
+          ["Bild: sich etwas hinter die Ohren schreiben", ["Der Chef sagt: «Das darf nicht wieder passieren!»", "Lea schreibt eine Notiz in ihr Heft.", "Tim hat Ohrenschmerzen."], 0, "", BI("ohren")],
+          ["Bild: Schmetterlinge im Bauch haben", ["Sara ist frisch verliebt.", "Sara hat Bauchweh.", "Sara geht in den Zoo."], 0, "", BI("schmetterlinge")],
+          ["Bild: den Kopf in den Sand stecken", ["Nico öffnet seine Rechnungen nicht mehr, weil er Angst davor hat.", "Nico baut am Strand eine Sandburg.", "Nico sucht seinen Schlüssel."], 0, "", BI("sand")]
+        ] },
+        { t: "offen", a: "Werde selbst kreativ.", i: [
+          ["Wähle eine Redewendung, die in dieser Übung nicht abgebildet ist (z. B. «die Nase voll haben» oder «auf dem Holzweg sein»). Beschreibe genau, wie man sie wörtlich zeichnen könnte. Auf dem Arbeitsblatt darfst du sie auch zeichnen.", "", "", "Eigene Beschreibung oder Zeichnung, die die Redewendung wörtlich darstellt."]
+        ] }
+      ] }
+  });
+
+  U("rw-farben", "rwort", "Redewendungen mit Farben und Zahlen", "Blau machen, schwarzsehen, auf Wolke sieben schweben, fünf gerade sein lassen: Farben und Zahlen in festen Wendungen.", {
+    1: { regel: RW_INFO + "\n\nFarben haben in Redewendungen oft eine feste Bedeutung: Schwarz steht oft für etwas Negatives (schwarzsehen), Grün für etwas Unreifes oder Gutes (grün hinter den Ohren, im grünen Bereich), Rot für Wut (rotsehen).",
+      bsp: [["blau machen", "nicht zur Arbeit oder Schule gehen, ohne krank zu sein"], ["schwarzsehen", "pessimistisch sein, das Schlimmste erwarten"], ["auf Wolke sieben schweben", "sehr glücklich und verliebt sein"]],
+      aufg: [
+        { t: "wahl", a: "Was bedeutet die Redewendung?", i: [
+          ["Am Montag hat Jonas einfach blau gemacht.", ["Er hat ohne Grund gefehlt.", "Er hat sein Zimmer blau gestrichen.", "Er war traurig."], 0],
+          ["Für die Prüfung sehe ich schwarz.", ["Ich erwarte, dass sie schlecht ausgeht.", "Ich sehe nichts.", "Ich trage schwarze Kleider."], 0],
+          ["Der neue Lernende ist noch grün hinter den Ohren.", ["Er ist noch unerfahren.", "Er ist krank.", "Er wäscht sich nicht."], 0],
+          ["Seit sie zusammen sind, schweben die beiden auf Wolke sieben.", ["Sie sind sehr glücklich und verliebt.", "Sie fliegen in die Ferien.", "Sie wohnen im 7. Stock."], 0],
+          ["Keine Sorge, die Temperatur ist im grünen Bereich.", ["Alles ist in Ordnung.", "Es ist zu heiss.", "Es ist im Garten."], 0],
+          ["Als Ali beleidigt wurde, hat er rotgesehen.", ["Er wurde sehr wütend.", "Er wurde rot vor Scham.", "Er hat eine Ampel gesehen."], 0]
+        ] },
+        { t: "luecke", a: "Ergänze die Farbe oder die Zahl.", i: [
+          ["Wer ohne Grund nicht zur Arbeit geht, macht {}.", "blau"],
+          ["Ich habe es {} auf weiss: Der Vertrag ist unterschrieben.", "schwarz"],
+          ["Sie ist frisch verliebt und schwebt auf Wolke {}.", ["sieben", "7"]],
+          ["Er ist noch {} hinter den Ohren.", "grün"],
+          ["Mit deiner Antwort hast du ins {} getroffen.", "Schwarze"],
+          ["Mit dem Velo zur Schule und gleichzeitig trainieren: So schlage ich zwei Fliegen mit einer {}.", "Klappe"]
+        ] }
+      ] },
+    2: { regel: RW_INFO + "\n\nAuch Zahlen kommen in vielen Redewendungen vor: zwei Fliegen mit einer Klappe schlagen, das fünfte Rad am Wagen sein, unter vier Augen, seine sieben Sachen packen.",
+      bsp: [["zwei Fliegen mit einer Klappe schlagen", "mit einer Handlung zwei Ziele erreichen"], ["das fünfte Rad am Wagen sein", "überflüssig sein, nicht gebraucht werden"], ["fünf gerade sein lassen", "nicht so streng sein"]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["mit einer Handlung zwei Ziele erreichen", "überflüssig sein, sich nicht dazugehörig fühlen", "nicht so streng sein", "alle seine Sachen zusammenpacken", "kein Risiko eingehen", "sich zwischen zwei Seiten nicht entscheiden können"], i: [
+          ["zwei Fliegen mit einer Klappe schlagen", 0],
+          ["das fünfte Rad am Wagen sein", 1],
+          ["fünf gerade sein lassen", 2],
+          ["seine sieben Sachen packen", 3],
+          ["auf Nummer sicher gehen", 4],
+          ["zwischen zwei Stühlen sitzen", 5]
+        ] },
+        { t: "fehler", a: "Ein Wort der Redewendung ist falsch. Tippe es an.", i: [
+          ["Heute mache ich *grün* und gehe nicht zur Schule.", "blau"],
+          ["Sie schwebt auf Wolke *neun*, seit sie verliebt ist.", "sieben"],
+          ["Damit schlägst du zwei *Mücken* mit einer Klappe.", "Fliegen"],
+          ["Ich habe den Vertrag schwarz auf *rot*.", "weiss"]
+        ] },
+        { t: "wahl", a: "Welche Redewendung passt zur Situation?", i: [
+          ["Zwei Kolleginnen planen ein Fest und reden nur miteinander. Mia steht daneben und fühlt sich überflüssig.", ["Sie ist das fünfte Rad am Wagen.", "Sie ist im grünen Bereich.", "Sie macht blau."], 0],
+          ["Der Lehrer korrigiert einen kleinen Fehler nicht, weil der Schüler sonst alles richtig hat.", ["Er lässt fünf gerade sein.", "Er sieht schwarz.", "Er sieht rot."], 0],
+          ["Lena nimmt einen Schirm mit, obwohl die Sonne scheint.", ["Sie geht auf Nummer sicher.", "Sie trifft ins Schwarze.", "Sie ist grün hinter den Ohren."], 0],
+          ["Ardit soll im Streit zwischen zwei Freunden Partei ergreifen.", ["Er sitzt zwischen zwei Stühlen.", "Er schwebt auf Wolke sieben.", "Er packt seine sieben Sachen."], 0]
+        ] }
+      ] },
+    3: { regel: RW_INFO + "\n\nManche Farb-Redewendungen haben mit Recht und Regeln zu tun: schwarzfahren (ohne Ticket fahren), Schwarzarbeit (Arbeit ohne Anmeldung und Steuern), eine weisse Weste haben (nichts Verbotenes getan haben).",
+      bsp: [["schwarzfahren", "ohne gültiges Billett fahren"], ["eine weisse Weste haben", "nichts Unrechtes getan haben"], ["mit einem blauen Auge davonkommen", "eine schwierige Lage mit wenig Schaden überstehen"]],
+      aufg: [
+        { t: "paare", a: "Ordne die Bedeutung zu.", o: ["ohne gültiges Billett fahren", "nichts Unrechtes getan haben", "mit wenig Schaden davonkommen", "Unmögliches versprechen", "alles zu positiv sehen", "sich sehr ärgern"], i: [
+          ["schwarzfahren", 0],
+          ["eine weisse Weste haben", 1],
+          ["mit einem blauen Auge davonkommen", 2],
+          ["das Blaue vom Himmel versprechen", 3],
+          ["die Welt durch eine rosarote Brille sehen", 4],
+          ["sich grün und blau ärgern", 5]
+        ] },
+        { t: "markieren", a: "Tippe die Wörter an, die zu einer Redewendung gehören.", i: [
+          ["Die Abschlussreise", "Die Klasse war [+aus] [+dem] [+Häuschen], als die Reise nach Berlin feststand. Die Reiseleiterin hat ihnen aber nicht [+das] [+Blaue] [+vom] [+Himmel] [+versprochen]. Im Zug wurde ein Jugendlicher beim [+Schwarzfahren] erwischt. Am Ende kam die Klasse trotz Gewitter [+mit] [+einem] [+blauen] [+Auge] [+davon] und [-fuhr] glücklich nach Hause."]
+        ] },
+        { t: "wahl", a: "Welche Aussage stimmt?", i: [
+          ["Wer schwarzfährt …", ["fährt ohne gültiges Billett.", "fährt in der Nacht.", "fährt ein schwarzes Auto."], 0, "Schwarzfahren ist in der Schweiz strafbar und kostet einen Zuschlag."],
+          ["Wer die Welt durch eine rosarote Brille sieht …", ["sieht alles zu positiv.", "braucht eine neue Brille.", "ist farbenblind."], 0]
+        ] },
+        { t: "offen", a: "Schreibe.", i: [
+          ["Schreibe eine kurze Nachricht an eine Freundin oder einen Freund (3 bis 4 Sätze) über deine Woche. Verwende mindestens zwei Redewendungen mit Farben oder Zahlen.", "", "", "Eigene Nachricht mit mindestens zwei passend verwendeten Redewendungen."],
+          ["In vielen Sprachen haben Farben andere Bedeutungen. Welche Farbe steht in deiner Erstsprache oder Kultur für Glück, Trauer oder Wut? Vergleiche mit dem Deutschen.", "", "", "Eigener Vergleich, z. B. Weiss als Trauerfarbe in manchen Ländern, Rot als Glücksfarbe in China."]
+        ] }
+      ] }
+  });
+
+  // Bilder auch in den einfachen Niveaus der anderen Redewendungs-Übungen zeigen
+  const BILD_ZU = [["Tomaten auf den Augen", "tomaten"], ["Daumen", "daumen"], ["Schwein gehabt", "schwein"], ["Schwein haben", "schwein"], ["Senf", "senf"], ["Katze im Sack", "katze"], ["kalte Wasser", "kaltwasser"], ["lange Bank", "bank"], ["Nagel auf den Kopf", "nagel"], ["Frosch im Hals", "frosch"], ["Schmetterlinge", "schmetterlinge"], ["hinter die Ohren", "ohren"], ["Fettnäpfchen", "fettnaepfchen"], ["Öl ins Feuer", "oel"], ["Kopf in den Sand", "sand"], ["aus allen Wolken", "wolken"], ["Äpfel mit Birnen", "apfelbirne"], ["Eulen nach Athen", "eulen"], ["Haare auf den Zähnen", "zaehne"]];
+  units.filter(u => u.r === "rwort" && u.id !== "rw-bilder").forEach(u => u.aufg.forEach(b => {
+    if (b.t !== "wahl" && b.t !== "luecke") return;
+    b.i.forEach(it => { if (it.bild) return; const t = it.s + " " + (b.t === "luecke" ? it.k[0] : ""); const f = BILD_ZU.find(([w]) => t.replace("{}", it.k && b.t === "luecke" ? it.k[0] : "").includes(w)); if (f) it.bild = BI(f[1]); });
+  }));
 
   // Antwortpositionen bei den Redewendungen mischen (feste, wiederholbare Reihenfolge)
   units.filter(u => u.r === "rwort").forEach(u => [u, window.STUFEN[u.id][2], window.STUFEN[u.id][3]].forEach(L => {

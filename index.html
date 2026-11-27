@@ -319,6 +319,7 @@ code { background: var(--bg); padding: 1px 5px; border-radius: 4px; }
 .kpi.warn { border-color: var(--bad); }
 .kv.good { color: var(--ok); } .kv.mid { color: var(--mid); } .kv.low { color: var(--bad); }
 .rbars { display: grid; gap: 10px; }
+.spbild { display: block; width: 100%; max-width: 330px; height: auto; border-radius: 12px; border: 1px solid var(--line); margin: 8px 0 10px; }
 .vchart { display: flex; align-items: stretch; gap: 4px; height: 220px; overflow-x: auto; padding-bottom: 4px; }
 .vbar { flex: 1 0 26px; display: grid; grid-template-rows: 18px 1fr 34px; text-align: center; font-size: .74rem; }
 .vval { color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -413,7 +414,7 @@ const THEMEN_BV = [
   { key: "fage", name: "Fachfrau/Fachmann Gesundheit EFZ", kurz: "Pflegen, betreuen, Hygiene und Vitalzeichen: 9 Stationen und die Lernwelt «Ein Tag auf der Station» mit allen Aufträgen und Karteikarten." }
 ];
 const FAECHER = [
-  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt, Biologie sowie Autos, Motorsport und Gaming. Lesen: 46 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen, neu auch MPA, Sprachen und Flaggen, Autos, Motorrad, Formel 1 und GTA 6. Jeweils mit Fragebogen. Sprache im Fokus: 19 Übungen zu Rechtschreibung, Grammatik und Wortschatz, neu mit Präteritum und Redewendungen.", kompetenzen: KOMPETENZEN },
+  { key: "deutsch", name: "Deutsch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: Videos zu Sport, Lehrstelle, Gesellschaft, Geschichte, Wunder der Welt, Biologie sowie Autos, Motorsport und Gaming. Lesen: 46 Texte zu Sport, Lehrstelle, Gesellschaft, Natur und euren Wunschthemen, neu auch MPA, Sprachen und Flaggen, Autos, Motorrad, Formel 1 und GTA 6. Jeweils mit Fragebogen. Sprache im Fokus: 21 Übungen zu Rechtschreibung, Grammatik und Wortschatz, neu mit Präteritum und Redewendungen (auch mit Bildern).", kompetenzen: KOMPETENZEN },
   { key: "franz", name: "Französisch", untertitel: "Hören · Lesen · Schreiben · Sprache im Fokus", kurz: "Hören: 10 einfache Videos zu Frankreich und zur Westschweiz. Lesen: 8 kurze Texte. Fragen auf Deutsch.", kompetenzen: KOMPETENZEN },
   { key: "mathe", name: "Mathematik", untertitel: "Zahl und Variable · Form und Raum · Grössen, Funktionen, Daten und Zufall", kurz: "Aufgaben für die 3. Sek nach den Bereichen von Lehrplan 21 und Stellwerk, Themen wie in «Mathematik 3». 19 Übungen mit über 700 Aufgaben, jede in drei Niveaus und als Arbeitsblatt zum Ausdrucken.", kompetenzen: KOMP_MATHE, ebene: "Bereich" },
   { key: "rzg", name: "RZG", untertitel: "Räume, Zeiten, Gesellschaften", kurz: "Europäische Expansion: 10 Kapitel zum Themenheft «Zeit•» mit Seekarte, Spiel und Karteikarten. Politische Bildung: zwei Spiele und Karteikarten zum Heft «So regiert sich die Schweiz».", kompetenzen: THEMEN_RZG, ebene: "Thema" },
@@ -2789,6 +2790,15 @@ function spGegeben(b, it, v) {
   return "";
 }
 function spItemHtml(u, b, bi, it, ii, n) {
+  const h = spItemHtml0(u, b, bi, it, ii, n);
+  if (!it.bild) return h;
+  setTimeout(() => pdfBildLaden(it.bild), 0);
+  const img = `<img class="spbild" src="${esc(it.bild)}" alt="Bild zur Aufgabe ${n}" loading="lazy" width="300" height="200">`;
+  const i = h.indexOf("</legend>");
+  if (i >= 0) return h.slice(0, i + 9) + img + h.slice(i + 9);
+  const j = h.indexOf(">"); return h.slice(0, j + 1) + img + h.slice(j + 1);
+}
+function spItemHtml0(u, b, bi, it, ii, n) {
   const key = `${bi}-${ii}`, id = `${u.id}-sp${bi}-${ii}`;
   const fb = `<span class="feedback" aria-live="polite"></span>`;
   if (b.t === "wahl" || b.t === "zuordnen") {
@@ -2994,7 +3004,16 @@ const pdfSafe = s => String(s ?? "")
   .replace(/[₀-₉]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x2080 + 48))
   .replace(/√/g, "Wurzel ").replace(/π/g, "pi").replace(/−/g, "-").replace(/≤/g, "<=").replace(/≥/g, ">=").replace(/≈/g, "~").replace(/≠/g, "ungleich")
   .replace(/→/g, "->").replace(/✓/g, "(ok)").replace(/★/g, "*").replace(/[‘’]/g, "'").replace(/[“”„]/g, '"').replace(/…/g, "...").replace(/[–—]/g, "-");
+const PDF_BILDER = {};
+function pdfBildLaden(src) {
+  if (PDF_BILDER[src]) return PDF_BILDER[src].p || Promise.resolve();
+  const e = PDF_BILDER[src] = {};
+  e.p = new Promise(res => { const im = new Image(); im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext("2d").drawImage(im, 0, 0); e.data = c.toDataURL("image/png"); e.w = im.naturalWidth; e.h = im.naturalHeight; res(); }; im.onerror = () => { e.fehlt = true; res(); }; im.src = src; });
+  return e.p;
+}
 function spPdf(u, filled, loes) {
+  const offen = [...new Set(u.aufg.flatMap(b => b.i.map(it => it.bild)).filter(x => x && !(PDF_BILDER[x] && (PDF_BILDER[x].data || PDF_BILDER[x].fehlt))))];
+  if (offen.length) { Promise.all(offen.map(pdfBildLaden)).then(() => spPdf(u, filled, loes)); return; }
   if (!window.jspdf) { document.getElementById("score").textContent = "Der PDF-Export konnte nicht geladen werden. Bitte Seite neu laden."; return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -3024,6 +3043,8 @@ function spPdf(u, filled, loes) {
     b.i.forEach((it, ii) => {
       const v = filled ? sp[bi][ii] : null;
       text(`${++n}. ${spFrage(b, it)}`, 11);
+      const pb = it.bild && PDF_BILDER[it.bild];
+      if (pb && pb.data) { const w = 54, hh = w * pb.h / pb.w; need(hh + 2); doc.addImage(pb.data, "PNG", M + 5, y - 2, w, hh); y += hh + 1; }
       if (loes) text("Lösung: " + spRichtig(b, it), 10, "bold", 5);
       else if (filled) text("Antwort: " + (spLeer(b, v) ? "–" : spGegeben(b, it, v)), 10, "normal", 5);
       else if (b.t === "umformen" || b.t === "fehler" || b.t === "rechnen") linie();
